@@ -1,6 +1,7 @@
 package com.example.sendymapdemo
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -33,6 +34,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 // such that the marker is centered and for the marker's info window to open,
                 // if it has one).
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(selectedMarker, 15.0f))
+                Log.e("d","d")
                 return true
             }
 
