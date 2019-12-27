@@ -1,5 +1,4 @@
-package com.example.googlemapdemo
-
+package com.example.sendymapdemo
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 
