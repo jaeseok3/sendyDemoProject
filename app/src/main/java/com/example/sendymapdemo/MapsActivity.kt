@@ -25,25 +25,26 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
     }
 
-    private val markerClickListener = object : GoogleMap.OnMarkerClickListener {
-        override fun onMarkerClick(marker: Marker?): Boolean {
-            if (marker == selectedMarker) {
-                selectedMarker = null
-                // Return true to indicate we have consumed the event and that we do not
-                // want the the default behavior to occur (which is for the camera to move
-                // such that the marker is centered and for the marker's info window to open,
-                // if it has one).
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(selectedMarker, 15.0f))
-                Log.e("d","d")
-                return true
-            }
-
-            selectedMarker = marker
-            // Return false to indicate that we have not consumed the event and that
-            // we wish for the default behavior to occur.
-            return false
-        }
-    }
+//    private val markerClickListener = object : GoogleMap.OnMarkerClickListener {
+//        override fun onMarkerClick(marker: Marker?): Boolean {
+//            if (marker == selectedMarker) {
+//                selectedMarker = null
+//                // Return true to indicate we have consumed the event and that we do not
+//                // want the the default behavior to occur (which is for the camera to move
+//                // such that the marker is centered and for the marker's info window to open,
+//                // if it has one).
+//                mMap.moveCamera(CameraUpdateFactory.newLatLng(selectedMarker))
+//                mMap.moveCamera(CameraUpdateFactory.zoomTo(15f))
+//                Log.e("e","d")
+//                return true
+//            }
+//
+//            selectedMarker = marker
+//            // Return false to indicate that we have not consumed the event and that
+//            // we wish for the default behavior to occur.
+//            return false
+//        }
+//    }
 
     /**
      * Manipulates the map once available.
@@ -57,22 +58,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
-        // Add a marker in Sydney and move the camera
+        val cityHallBus = LatLng(35.179792, 129.074997)
+
         val BuskDong = LatLng(35.205411, 129.077885)
         val BuskHae = LatLng(35.158713, 129.160248)
         val BuskPnu = LatLng(35.231028, 129.082287)
         val BuskGwang = LatLng(35.153028, 129.118666)
+
         mMap.addMarker(MarkerOptions().position(BuskDong).title("Marker in 동래"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(BuskDong))
         mMap.addMarker(MarkerOptions().position(BuskHae).title("Marker in 해운대"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(BuskHae))
         mMap.addMarker(MarkerOptions().position(BuskPnu).title("Marker in 부산대"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(BuskPnu))
         mMap.addMarker(MarkerOptions().position(BuskGwang).title("Marker in 광안리"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(BuskGwang))
 
-        mMap.setOnMapClickListener { markerClickListener }
-
-
+        /* Move Camera initially in Busan City Hall */
+        /* must change to user's current position */
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cityHallBus, 11.0f))
     }
 }
