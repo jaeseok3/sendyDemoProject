@@ -1,34 +1,77 @@
 package com.example.sendymapdemo
 
+import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast.LENGTH_SHORT
 import android.widget.Toast.makeText
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-
+import com.google.android.material.snackbar.Snackbar
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
-    private var selectedMarker:Marker? = null
     internal lateinit var db:LocationDB
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var lastLocation: Location
+
+    companion object{
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 1
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
         db= LocationDB(this)
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+    }
+
+    private fun placeMarkerOnMap(location: LatLng){
+        val markerOptions = MarkerOptions().position(location).title("currentLocation")
+        mMap.addMarker(markerOptions)
+    }
+
+    private fun setUpMap(){
+        val fab: View = findViewById(R.id.fab)
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+            return
+        }
+        mMap.isMyLocationEnabled = true
+        fusedLocationClient.lastLocation.addOnSuccessListener(this){ location ->
+            if (location != null){
+                lastLocation = location
+                val currentLatLng = LatLng(location.latitude, location.longitude)
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 11.0f))
+            }
+        }
+
+        fab.setOnClickListener { view->
+            Snackbar.make(view, "Add Marker Complete", Snackbar.LENGTH_SHORT)
+                .setAction("Action", null)
+                .show()
+            val latLng = LatLng(lastLocation.latitude, lastLocation.longitude)
+            placeMarkerOnMap(latLng)
+            db.AddMarker(latLng, "current Location")
+        }
     }
 
     private val markerClickListener =
@@ -51,30 +94,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             mMap.addMarker(MarkerOptions().position(a).title("hi"))
         }
 
-
-
-
-
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
-        val cityHallBus = LatLng(35.179792, 129.074997)
+        mMap.uiSettings.isZoomControlsEnabled
 
-        val BuskDong = LatLng(35.205411, 129.077885)
-        val BuskHae = LatLng(35.158713, 129.160248)
-        val BuskPnu = LatLng(35.231028, 129.082287)
-        val BuskGwang = LatLng(35.153028, 129.118666)
-
-        mMap.addMarker(MarkerOptions().position(BuskDong).title("동래"))
-        mMap.addMarker(MarkerOptions().position(BuskHae).title("해운대"))
-        mMap.addMarker(MarkerOptions().position(BuskPnu).title("부산대"))
-        mMap.addMarker(MarkerOptions().position(BuskGwang).title("광안리"))
-        /* Move Camera initially in Busan City Hall */
-        /* must change to user's current position */
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cityHallBus, 11.0f))
         mMap.setOnMarkerClickListener(markerClickListener)
+
+        setUpMap()
         mMap.setOnMapClickListener(mapClickListener)
         db.listMarker(mMap)
     }
-
 }
