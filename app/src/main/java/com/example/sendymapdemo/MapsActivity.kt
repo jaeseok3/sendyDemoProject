@@ -2,6 +2,9 @@ package com.example.sendymapdemo
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
+import android.widget.Toast.LENGTH_SHORT
+import android.widget.Toast.makeText
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -25,49 +28,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
     }
 
-//    private val markerClickListener = object : GoogleMap.OnMarkerClickListener {
-//        override fun onMarkerClick(marker: Marker?): Boolean {
-//            if (marker == selectedMarker) {
-//                selectedMarker = null
-//                // Return true to indicate we have consumed the event and that we do not
-//                // want the the default behavior to occur (which is for the camera to move
-//                // such that the marker is centered and for the marker's info window to open,
-//                // if it has one).
-//                mMap.moveCamera(CameraUpdateFactory.newLatLng(selectedMarker))
-//                mMap.moveCamera(CameraUpdateFactory.zoomTo(15f))
-//                Log.e("e","d")
-//                return true
-//            }
-//
-//            selectedMarker = marker
-//            // Return false to indicate that we have not consumed the event and that
-//            // we wish for the default behavior to occur.
-//            return false
-//        }
-//    }
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-    private val markerClickListener= object : GoogleMap.OnMarkerClickListener{
-        override fun onMarkerClick(marker: Marker?): Boolean {
-            if(marker==selectedMarker){
-
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(selectedMarker?.getPosition()))
-                mMap.moveCamera(CameraUpdateFactory.zoomTo(15f))
-                Log.e("e","d")
-                return true
-            }
-            return false
+    private val markerClickListener =
+        GoogleMap.OnMarkerClickListener { marker ->
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(marker?.position))
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(15f))
+            makeText(App.instance.Context(), marker?.title, LENGTH_SHORT).show()
+            true
         }
-    }
-
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
@@ -87,14 +54,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         /* Move Camera initially in Busan City Hall */
         /* must change to user's current position */
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cityHallBus, 11.0f))
-        mMap.setOnMarkerClickListener(object : GoogleMap.OnMarkerClickListener{
-            override fun onMarkerClick(marker: Marker?): Boolean {
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(marker!!.getPosition()))
-                    mMap.moveCamera(CameraUpdateFactory.zoomTo(15f))
-                    Log.e("e","d")
-                    return true
-                }
-        })
-
+        mMap.setOnMarkerClickListener(markerClickListener)
     }
 }
