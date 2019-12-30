@@ -55,6 +55,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
+    private val markerClickListener= object : GoogleMap.OnMarkerClickListener{
+        override fun onMarkerClick(marker: Marker?): Boolean {
+            if(marker==selectedMarker){
+
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(selectedMarker?.getPosition()))
+                mMap.moveCamera(CameraUpdateFactory.zoomTo(15f))
+                Log.e("e","d")
+                return true
+            }
+            return false
+        }
+    }
+
+
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
@@ -73,5 +87,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         /* Move Camera initially in Busan City Hall */
         /* must change to user's current position */
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cityHallBus, 11.0f))
+        mMap.setOnMarkerClickListener(object : GoogleMap.OnMarkerClickListener{
+            override fun onMarkerClick(marker: Marker?): Boolean {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(marker!!.getPosition()))
+                    mMap.moveCamera(CameraUpdateFactory.zoomTo(15f))
+                    Log.e("e","d")
+                    return true
+                }
+        })
+
     }
 }
