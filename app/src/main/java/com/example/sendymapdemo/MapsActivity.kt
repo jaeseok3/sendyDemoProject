@@ -6,8 +6,15 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast.LENGTH_SHORT
 import android.widget.Toast.makeText
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.core.content.res.ResourcesCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.RecyclerView
 import androidx.core.app.ActivityCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -15,15 +22,28 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.navigation.NavigationView
+import kotlinx.android.synthetic.main.activity_main.*
+
 import com.google.android.material.snackbar.Snackbar
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
+    private var selectedMarker: Marker? = null
+    lateinit var toolbar: Toolbar
+    lateinit var drawerLayout: DrawerLayout
+    lateinit var navView: NavigationView
+    lateinit var recyclerView : RecyclerView
     internal lateinit var db:LocationDB
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var lastLocation: Location
+    lateinit var adapter:NavAdapter
+    lateinit var layoutManager: LinearLayoutManager
+    //마커리스트 생성
+    val Markerlist = ArrayList<markerData>()
 
     companion object{
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
@@ -31,13 +51,36 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_maps)
-        db= LocationDB(this)
+        setContentView(R.layout.activity_main)
+        db = LocationDB(this)
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+        toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
+        drawerLayout = findViewById(R.id.drawer_layout)
+        navView = findViewById(R.id.nav_view)
+        recyclerView = findViewById(R.id.list)
+        layoutManager = LinearLayoutManager(this)
+
+        val toggle = ActionBarDrawerToggle(
+            this, drawerLayout, toolbar, 0, 0
+        )
+        drawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
+        //navView.setNavigationItemSelectedListener(this.)
+        //drawer 생성
+
+
+        //어댑터 생성
+        adapter = NavAdapter(Markerlist)
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = layoutManager
+        //recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
+
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     }
@@ -71,6 +114,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             val latLng = LatLng(lastLocation.latitude, lastLocation.longitude)
             placeMarkerOnMap(latLng)
             db.AddMarker(latLng, "current Location")
+
+            val newMarkerData = markerData(lastLocation.latitude, lastLocation.longitude, "NAME")
+            Markerlist.add(newMarkerData)
+            adapter.notifyDataSetChanged()
+
         }
     }
 
