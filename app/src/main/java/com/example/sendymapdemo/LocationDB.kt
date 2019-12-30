@@ -24,18 +24,27 @@ class LocationDB (context : Context): SQLiteOpenHelper(context, DATABASE_NAME,nu
         private val Column_Name="Name"
     }
     override fun onUpgrade(db: SQLiteDatabase?, p1: Int, p2: Int) {
-
+        db!!.execSQL("Drop table $TableName")
     }
 
     override fun onCreate(db: SQLiteDatabase?) {
         db!!.execSQL("Create table IF NOT EXISTS $TableName ($Column_Lati double,$Column_Longi double,$Column_Name varchar(20))")
+        val selectQueryHandler = "Select * from $TableName"
+        val cursor = db.rawQuery(selectQueryHandler,null)
+        if(cursor.count==0){
+            db!!.execSQL("INSERT INTO $TableName values (35.205411, 129.077885,'동래')")
+            db!!.execSQL("INSERT INTO $TableName values (35.158713, 129.160248,'해운대')")
+            db!!.execSQL("INSERT INTO $TableName values (35.231028, 129.082287,'부산대')")
+            db!!.execSQL("INSERT INTO $TableName values (35.153028, 129.118666,'광안리')")
+        }
+
 
     }
     fun listMarker(mMap:GoogleMap){
-
         val selectQueryHandler = "Select * from $TableName"
         val db=this.writableDatabase
         val cursor = db.rawQuery(selectQueryHandler,null)
+        println("columnCount = "+cursor.count)
         if(cursor.moveToFirst())
         {
             do{

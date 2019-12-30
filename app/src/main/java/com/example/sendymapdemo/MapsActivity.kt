@@ -87,11 +87,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private val mapClickListener =
         GoogleMap.OnMapClickListener { map ->
-            var a = LatLng(map.latitude,map.longitude)
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(a))
+            var latLng = LatLng(map.latitude,map.longitude)
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng))
             mMap.animateCamera(CameraUpdateFactory.zoomTo(15f))
-            db.AddMarker(a,"hi")
-            mMap.addMarker(MarkerOptions().position(a).title("hi"))
+            db.AddMarker(latLng,"hi")
+            mMap.addMarker(MarkerOptions().position(latLng).title("hi"))
         }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -100,7 +100,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.uiSettings.isZoomControlsEnabled
 
         mMap.setOnMarkerClickListener(markerClickListener)
+        val cityHallBus = LatLng(35.179792, 129.074997)
 
+        /* Move Camera initially in Busan City Hall */
+        /* must change to user's current position */
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cityHallBus, 11.0f))
         setUpMap()
         mMap.setOnMapClickListener(mapClickListener)
         db.listMarker(mMap)
