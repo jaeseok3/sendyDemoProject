@@ -76,7 +76,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private val markerClickListener =
         GoogleMap.OnMarkerClickListener { marker ->
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(marker?.position))
+
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(marker?.position!!.latitude+0.005,marker?.position!!.longitude)))
             mMap.animateCamera(CameraUpdateFactory.zoomTo(15f))
             makeText(App.instance.Context(), "Marker in "+marker?.title, LENGTH_SHORT).show()
             val adapter = CustomInfoWindowAdapter(this)
@@ -88,7 +89,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private val mapClickListener =
         GoogleMap.OnMapClickListener { map ->
             var latLng = LatLng(map.latitude,map.longitude)
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng))
+
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(map.latitude,map.longitude)))
             mMap.animateCamera(CameraUpdateFactory.zoomTo(15f))
             db.AddMarker(latLng,"hi")
             mMap.addMarker(MarkerOptions().position(latLng).title("hi"))

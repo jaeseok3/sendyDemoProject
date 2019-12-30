@@ -38,6 +38,8 @@ class CustomInfoWindowAdapter(private val context: Activity) : AppCompatActivity
         }
         val tvName = v.findViewById<View>(R.id.infocontent_tv_name) as TextView
         tvName.text = marker.title
+        val tvDesc = v.findViewById<View>(R.id.infocontent_tv_desc) as TextView
+        tvDesc.text="설명하는 란"
         //val img = v.findViewById<View>(R.id.dongraeImg)
         // Returning the view containing InfoWindow contents
         return v
