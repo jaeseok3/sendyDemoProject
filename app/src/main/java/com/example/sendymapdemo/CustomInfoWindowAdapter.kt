@@ -30,9 +30,14 @@ class CustomInfoWindowAdapter(private val context: Activity) : AppCompatActivity
         //tvLng.text = "Longitude:" + latLng.longitude
 
         val tvImage = v.findViewById<View>(R.id.info_image) as ImageView
-        tvImage.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.dongrae, null))
+        when(marker.title){
+            "동래" -> tvImage.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.dongrae, null))
+            "부산대" -> tvImage.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.pnu, null))
+            "광안리" -> tvImage.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.gwanganli, null))
+            "해운대" -> tvImage.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.haewondae, null))
+        }
         val tvName = v.findViewById<View>(R.id.infocontent_tv_name) as TextView
-        tvName.text = "동래"
+        tvName.text = marker.title
         //val img = v.findViewById<View>(R.id.dongraeImg)
         // Returning the view containing InfoWindow contents
         return v

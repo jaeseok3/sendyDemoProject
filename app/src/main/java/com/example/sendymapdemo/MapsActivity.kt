@@ -36,12 +36,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         GoogleMap.OnMarkerClickListener { marker ->
             mMap.moveCamera(CameraUpdateFactory.newLatLng(marker?.position))
             mMap.animateCamera(CameraUpdateFactory.zoomTo(15f))
-            makeText(App.instance.Context(), marker?.title, LENGTH_SHORT).show()
+            makeText(App.instance.Context(), "Marker in "+marker?.title, LENGTH_SHORT).show()
             val adapter = CustomInfoWindowAdapter(this)
             mMap.setInfoWindowAdapter(adapter)
             marker.showInfoWindow()
             true
         }
+
 
 
 
@@ -55,10 +56,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val BuskPnu = LatLng(35.231028, 129.082287)
         val BuskGwang = LatLng(35.153028, 129.118666)
 
-        mMap.addMarker(MarkerOptions().position(BuskDong).title("Marker in 동래"))
-        mMap.addMarker(MarkerOptions().position(BuskHae).title("Marker in 해운대"))
-        mMap.addMarker(MarkerOptions().position(BuskPnu).title("Marker in 부산대"))
-        mMap.addMarker(MarkerOptions().position(BuskGwang).title("Marker in 광안리"))
+        mMap.addMarker(MarkerOptions().position(BuskDong).title("동래"))
+        mMap.addMarker(MarkerOptions().position(BuskHae).title("해운대"))
+        mMap.addMarker(MarkerOptions().position(BuskPnu).title("부산대"))
+        mMap.addMarker(MarkerOptions().position(BuskGwang).title("광안리"))
 
         /* Move Camera initially in Busan City Hall */
         /* must change to user's current position */
