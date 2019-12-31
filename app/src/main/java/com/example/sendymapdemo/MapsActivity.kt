@@ -1,18 +1,27 @@
 package com.example.sendymapdemo
 
+import android.app.Dialog
+import android.content.Context
 import android.app.Activity
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.Toast.LENGTH_SHORT
 import android.widget.Toast.makeText
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.res.ResourcesCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,25 +35,29 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.navigation.NavigationView
+import kotlinx.android.synthetic.main.activity_main.*
 
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.activity_main.view.*
 import kotlinx.android.synthetic.main.activity_maps.*
+import kotlinx.android.synthetic.main.nav_header.*
+import kotlinx.android.synthetic.main.nav_header.view.*
+
+import kotlinx.android.synthetic.main.activity_maps.*
+lateinit var adapter:NavAdapter
+lateinit var layoutManager: LinearLayoutManager
+lateinit var recyclerView : RecyclerView
+
+//마커리스트 생성
+val Markerlist = ArrayList<markerData>()
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
-    private var selectedMarker: Marker? = null
-    lateinit var toolbar: Toolbar
-    lateinit var drawerLayout: DrawerLayout
-    lateinit var navView: NavigationView
-    lateinit var recyclerView : RecyclerView
-    internal lateinit var db:LocationDB
+    internal lateinit var db: LocationDB
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var lastLocation: Location
-    lateinit var adapter:NavAdapter
-    lateinit var layoutManager: LinearLayoutManager
-    //마커리스트 생성
-    val Markerlist = ArrayList<markerData>()
+
 
 
 
@@ -77,36 +90,39 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         db = LocationDB(this)
-
+        recyclerView = findViewById(R.id.recyclerList)
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
-        toolbar = findViewById(R.id.toolbar)
+
+
+        //navigation drawer 구현
         setSupportActionBar(toolbar)
 
-        drawerLayout = findViewById(R.id.drawer_layout)
-        navView = findViewById(R.id.nav_view)
-        recyclerView = findViewById(R.id.list)
+        //navView = findViewById(R.id.nav_view)
         layoutManager = LinearLayoutManager(this)
 
         val toggle = ActionBarDrawerToggle(
-            this, drawerLayout, toolbar, 0, 0
+            this, drawer_layout, toolbar, 0, 0
         )
-        drawerLayout.addDrawerListener(toggle)
+        drawer_layout.addDrawerListener(toggle)
+
+        //삭제버튼 구현
+        deleteButton.setOnClickListener{
+            Log.e("온클릭리스너","작동")
+            db.deleteMarker()}
         toggle.syncState()
         //navView.setNavigationItemSelectedListener(this.)
-        //drawer 생성
-
 
         //어댑터 생성
         adapter = NavAdapter(Markerlist)
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = layoutManager
+        recyclerList.adapter = adapter
+        recyclerList.layoutManager = layoutManager
         //recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
 
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
     }
 
     private fun placeMarkerOnMap(location: LatLng){
@@ -160,9 +176,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private val markerClickListener =
         GoogleMap.OnMarkerClickListener { marker ->
 
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(marker?.position!!.latitude+0.005,marker?.position!!.longitude)))
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(marker?.position!!.latitude,marker.position!!.longitude)))
             mMap.animateCamera(CameraUpdateFactory.zoomTo(15f))
-            makeText(App.instance.Context(), "Marker in "+marker?.title, LENGTH_SHORT).show()
+            makeText(App.instance.Context(), "Marker in "+marker.title, LENGTH_SHORT).show()
             val adapter = CustomInfoWindowAdapter(this)
             mMap.setInfoWindowAdapter(adapter)
             marker.showInfoWindow()
@@ -177,6 +193,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             mMap.animateCamera(CameraUpdateFactory.zoomTo(15f))
             db.AddMarker(latLng,"hi")
             mMap.addMarker(MarkerOptions().position(latLng).title("hi"))
+            val newMarkerData = markerData(latLng.latitude,latLng.longitude,"hi")
+            Markerlist.add(newMarkerData)
+            adapter.notifyDataSetChanged()
         }
 
     override fun onMapReady(googleMap: GoogleMap) {

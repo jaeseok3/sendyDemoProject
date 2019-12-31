@@ -4,9 +4,14 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.util.Log
+import android.widget.Button
+import androidx.core.content.contentValuesOf
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+
 
 class LocationDB (context : Context): SQLiteOpenHelper(context, DATABASE_NAME,null,DATABASE_VER){
 
@@ -33,7 +38,10 @@ class LocationDB (context : Context): SQLiteOpenHelper(context, DATABASE_NAME,nu
             db!!.execSQL("INSERT INTO $TableName values (35.231028, 129.082287,'부산대')")
             db!!.execSQL("INSERT INTO $TableName values (35.153028, 129.118666,'광안리')")
         }
-
+        //어댑터 생성
+        adapter = NavAdapter(Markerlist)
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = layoutManager
 
     }
     fun listMarker(mMap:GoogleMap){
@@ -49,6 +57,11 @@ class LocationDB (context : Context): SQLiteOpenHelper(context, DATABASE_NAME,nu
                 lat.lati=cursor.getDouble(cursor.getColumnIndex(Column_Lati))
                 lat.longi=cursor.getDouble(cursor.getColumnIndex(Column_Longi))
                 mMap.addMarker(MarkerOptions().position(LatLng(lat.lati,lat.longi)).title(lat.nameBy))
+
+
+                val newMarkerData = markerData(lat.lati,lat.longi, lat.nameBy.toString())
+                Markerlist.add(newMarkerData)
+                adapter.notifyDataSetChanged()
 
             } while (cursor.moveToNext())
         }
@@ -66,6 +79,19 @@ class LocationDB (context : Context): SQLiteOpenHelper(context, DATABASE_NAME,nu
         db.close()
     }
 
+    fun deleteMarker(){
+        Log.e("삭제버튼","클릭")
+        val db=this.writableDatabase
+        db.execSQL("Drop table $TableName")
+        onCreate(db)
+        var index = 4
+        while(index < adapter.itemCount){
+            Markerlist.removeAt(index)
+            adapter.notifyItemRemoved(index)
+            adapter.notifyItemRangeChanged(index, Markerlist.size)
+        }
+        adapter.notifyDataSetChanged()
+    }
 
 
 
