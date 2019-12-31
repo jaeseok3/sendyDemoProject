@@ -1,17 +1,18 @@
 package com.example.sendymapdemo
 
+import android.app.Activity
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.view.View
+import android.widget.Switch
 import android.widget.Toast.LENGTH_SHORT
 import android.widget.Toast.makeText
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.res.ResourcesCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,9 +26,9 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.navigation.NavigationView
-import kotlinx.android.synthetic.main.activity_main.*
 
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.activity_maps.*
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -45,10 +46,33 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     //마커리스트 생성
     val Markerlist = ArrayList<markerData>()
 
+
+
     companion object{
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
     }
+    ////스위치 상태 저장///
+    override fun onResume() {
+        super.onResume()
+        restoreState()
+    }
+    override fun onPause() {
+        super.onPause()
+        saveState()
+    }
 
+    private fun restoreState(){ //onCreate, onResume에서 동작
+        var pref : SharedPreferences = getSharedPreferences("pref", Activity.MODE_PRIVATE)
+        fab2.isChecked = pref.getBoolean("pref_bool",true)
+    }
+
+    private fun saveState(){ //onPause, onDestory에서 동작
+        var pref : SharedPreferences = getSharedPreferences("pref", Activity.MODE_PRIVATE)
+        var editor : SharedPreferences.Editor = pref.edit()
+            editor.putBoolean("pref_bool",fab2.isChecked)
+        editor.commit()
+    }
+    ////////
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -92,6 +116,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun setUpMap(){
         val fab: View = findViewById(R.id.fab)
+        val fab2: Switch = findViewById(R.id.fab2)
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
         {
@@ -104,7 +129,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 lastLocation = location
                 val currentLatLng = LatLng(location.latitude, location.longitude)
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 11.0f))
-            }
+        }
         }
 
         fab.setOnClickListener { view->
@@ -118,8 +143,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             val newMarkerData = markerData(lastLocation.latitude, lastLocation.longitude, "NAME")
             Markerlist.add(newMarkerData)
             adapter.notifyDataSetChanged()
-
         }
+
+        fab2.setOnCheckedChangeListener { switch, isChanged -> //지도 좌측 아래에 있는 Switch
+            if(isChanged){ //켜졌을때 동작시키면 됨
+                makeText(App.instance.Context(),"Switch is on", LENGTH_SHORT).show()
+            }else{ //꺼졌을때 동작시키면 됨
+                makeText(App.instance.Context(),"Switch is off", LENGTH_SHORT).show()
+            }
+        }
+
+
+
     }
 
     private val markerClickListener =
