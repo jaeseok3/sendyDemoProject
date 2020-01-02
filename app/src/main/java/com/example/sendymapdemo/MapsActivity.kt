@@ -43,7 +43,7 @@ val Markerlist = ArrayList<markerData>()
 lateinit var mMap: GoogleMap
 lateinit var drawerLayout: DrawerLayout
 //라인 객체 선언
-lateinit var markerLine : Polyline
+var markerLine : Polyline? = null
 //마커의 위치를 담을 리스트 선언 -> 라인을 그리는데에 사용
 lateinit var LineList : MutableList<LatLng>
 
@@ -122,6 +122,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(R.layout.activity_main)
         //리스트 초기화
         LineList = mutableListOf()
+        markerLine
         while (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
         {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
@@ -162,7 +163,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         //삭제버튼 구현
         deleteButton.setOnClickListener{
             Log.e("온클릭리스너","작동")
-            markerLine.remove()
+            markerLine?.remove()
             LineList.clear()
             db.deleteMarker()}
         toggle.syncState()
@@ -211,7 +212,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             adapter.notifyDataSetChanged()
 
             //라인 그리기
-            DrawPolyLine(latLng)
+            drawPolyLine(latLng)
 
             isSelect = false
         }
@@ -303,13 +304,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 //        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 13.0f))
   
     //라인 그리는 함수
-    fun DrawPolyLine(latlng: LatLng){
+    private fun drawPolyLine(latlng: LatLng){
         //라인 그리기 구현
         LineList.add(latlng)
         val lineOption = PolylineOptions().clickable(true)
         //마커를 리스트에 추가
         for(i in 0..LineList.size-1){
-            val point = LineList.get(i)
+            val point = LineList[i]
             Log.e("포인트_lat",point.latitude.toString())
             Log.e("포인트_lng",point.longitude.toString())
             lineOption.add(point)
