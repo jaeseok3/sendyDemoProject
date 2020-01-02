@@ -16,6 +16,8 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -27,6 +29,8 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.model.PolylineOptions
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_maps.*
 
@@ -34,9 +38,14 @@ lateinit var adapter:NavAdapter
 lateinit var layoutManager: LinearLayoutManager
 lateinit var recyclerView : RecyclerView
 val Markerlist = ArrayList<markerData>()
+lateinit var mMap: GoogleMap
+lateinit var drawerLayout: DrawerLayout
+//라인 객체 선언
+lateinit var markerLine : Polyline
+//마커의 위치를 담을 리스트 선언 -> 라인을 그리는데에 사용
+lateinit var LineList : MutableList<LatLng>
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
-    private lateinit var mMap: GoogleMap
 
     lateinit var toolbar: Toolbar
 
@@ -91,7 +100,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+        //리스트 초기화
+        LineList = mutableListOf()
         while (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
         {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
@@ -110,6 +120,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         fab_close = AnimationUtils.loadAnimation(App.instance.Context(), R.anim.fab_close)
 
         recyclerView = findViewById(R.id.recyclerList)
+        drawerLayout = findViewById(R.id.drawer_layout)
+
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
@@ -121,15 +133,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         //navView = findViewById(R.id.nav_view)
         layoutManager = LinearLayoutManager(this)
-
         val toggle = ActionBarDrawerToggle(
             this, drawer_layout, toolbar, 0, 0
         )
+
         drawer_layout.addDrawerListener(toggle)
 
         //삭제버튼 구현
         deleteButton.setOnClickListener{
             Log.e("온클릭리스너","작동")
+            markerLine.remove()
+            LineList.clear()
             db.deleteMarker()}
         toggle.syncState()
         //navView.setNavigationItemSelectedListener(this.)
@@ -138,7 +152,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         adapter = NavAdapter(Markerlist)
         recyclerList.adapter = adapter
         recyclerList.layoutManager = layoutManager
-        //recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
+        recyclerList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     }
@@ -170,11 +184,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             if(!isSelect) return@OnMapClickListener
 
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f))
-//            db.AddMarker(latLng, "hi")
+            db.AddMarker(latLng, "hi")
             mMap.addMarker(MarkerOptions().position(latLng).title("hi"))
             val newMarkerData = markerData(map.latitude, map.longitude, "NAME")
             Markerlist.add(newMarkerData)
             adapter.notifyDataSetChanged()
+
+            //라인 그리기
+            DrawPolyLine(latLng)
+
             isSelect = false
         }
 
@@ -233,10 +251,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             val currentLocation = LatLng(lastLocation.latitude, lastLocation.longitude)
             val markerOptions = MarkerOptions().position(currentLocation).title("currentLocation")
             mMap.addMarker(markerOptions)
-//            db.AddMarker(currentLocation, "currentLocation")
+            db.AddMarker(currentLocation, "currentLocation")
             val newMarkerData = markerData(lastLocation.latitude, lastLocation.longitude, "NAME")
             Markerlist.add(newMarkerData)
             adapter.notifyDataSetChanged()
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15.0f))
             animation()
         }
         selectLocation.setOnClickListener {
@@ -254,6 +273,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 makeText(App.instance.Context(),"Switch is off", LENGTH_SHORT).show()
             }
         }
+    }
+
+    //라인 그리는 함수
+    fun DrawPolyLine(latlng: LatLng){
+        //라인 그리기 구현
+        LineList.add(latlng)
+        val lineOption = PolylineOptions().clickable(true)
+        //마커를 리스트에 추가
+        for(i in 0..LineList.size-1){
+            val point = LineList.get(i)
+            Log.e("포인트_lat",point.latitude.toString())
+            Log.e("포인트_lng",point.longitude.toString())
+            lineOption.add(point)
+        }
+        markerLine = mMap.addPolyline(lineOption)
     }
 
 //    private fun startLocationUpdates() {

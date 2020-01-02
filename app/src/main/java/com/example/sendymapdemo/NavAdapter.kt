@@ -6,6 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.LatLng
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.navigation_recyclerview_item.view.*
 
 class NavAdapter(private val items: ArrayList<markerData>) : RecyclerView.Adapter<NavAdapter.ViewHolder>() {
@@ -16,6 +19,10 @@ class NavAdapter(private val items: ArrayList<markerData>) : RecyclerView.Adapte
         val item = items[position]
         val listener = View.OnClickListener {it ->
             Toast.makeText(it.context, "${item.nameBy}입니다!", Toast.LENGTH_SHORT).show()
+            val latLng = LatLng(item.lati, item.longi)
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f))
+            drawerLayout.closeDrawers()
+
         }
         holder.apply {
             bind(listener, item)
