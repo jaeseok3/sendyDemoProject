@@ -13,6 +13,7 @@ import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.widget.EditText
 import android.widget.Switch
 import android.widget.Toast.LENGTH_SHORT
 import android.widget.Toast.makeText
@@ -65,6 +66,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private var isSelect: Boolean = false
     private var isFabOpen: Boolean = false
+
+    private lateinit var infoString: String
 
     private val locationCallback: LocationCallback = object: LocationCallback(){
         override fun onLocationResult(locationResult: LocationResult?) {
@@ -203,15 +206,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
             if(!isSelect) return@OnMapClickListener
 
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f))
-            db.AddMarker(latLng, "hi")
-            mMap.addMarker(MarkerOptions().position(latLng).title("hi"))
-            val newMarkerData = markerData(map.latitude, map.longitude, "NAME")
-            Markerlist.add(newMarkerData)
-            adapter.notifyDataSetChanged()
+            makeDialog(latLng)
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng))
 
-            //라인 그리기
-            DrawPolyLine(latLng)
+            drawPolyLine(latLng)
 
             isSelect = false
         }
@@ -261,20 +259,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         currentLocation.setOnClickListener {
             val currentLocation = LatLng(mCurrentLocation.latitude, mCurrentLocation.longitude)
-            val markerOptions = MarkerOptions().position(currentLocation).title("currentLocation")
-            mMap.addMarker(markerOptions)
-            db.AddMarker(currentLocation, "currentLocation")
 
-            val newMarkerData = markerData(mCurrentLocation.latitude, mCurrentLocation.longitude, "NAME")
-            Markerlist.add(newMarkerData)
-            adapter.notifyDataSetChanged()
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15.0f))
+            makeDialog(currentLocation)
+
             animation()
         }
         selectLocation.setOnClickListener {
             isSelect = true
-            makeDialog()
-//            makeText(App.instance.Context(), "위치 선택", LENGTH_SHORT).show()
+            makeText(App.instance.Context(), "위치를 선택해 주세요", LENGTH_SHORT).show()
 
             if(isSelect){
                 mMap.setOnMapClickListener(mapClickListener)
@@ -290,6 +282,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
     }
+
     private fun startLocationUpdates() {
         val locationManager: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
@@ -301,9 +294,34 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 //        val currentLatLng = LatLng(location.latitude, location.longitude)
 //
 //        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 13.0f))
-  
+
+    private fun makeDialog(latLng: LatLng){
+        val builder = AlertDialog.Builder(this)
+        val inflater = layoutInflater
+        val dialogLayout = inflater.inflate(R.layout.dialog_edit_text, null)
+        val editText = dialogLayout.findViewById<EditText>(R.id.dialog_text)
+
+        builder.setTitle("위치에 대한 정보를 입력해주세요.")
+        builder.setView(dialogLayout)
+
+        builder.setPositiveButton("Save"){ dialog, which ->
+            makeText(App.instance.Context(), "저장되었습니다.", LENGTH_SHORT).show()
+            infoString = editText.text.toString()
+            mMap.addMarker(MarkerOptions().position(latLng).title(infoString))
+            db.AddMarker(latLng, infoString)
+            val newMarkerData = markerData(latLng.latitude, latLng.longitude, infoString)
+            Markerlist.add(newMarkerData)
+            adapter.notifyDataSetChanged()
+        }
+        builder.setNegativeButton("Cancel"){ dialog, which ->
+            makeText(App.instance.Context(), "취소되었습니다.", LENGTH_SHORT).show()
+        }
+
+        builder.create().show()
+    }
+
     //라인 그리는 함수
-    fun DrawPolyLine(latlng: LatLng){
+    private fun drawPolyLine(latlng: LatLng){
         //라인 그리기 구현
         LineList.add(latlng)
         val lineOption = PolylineOptions().clickable(true)
@@ -315,25 +333,5 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             lineOption.add(point)
         }
         markerLine = mMap.addPolyline(lineOption)
-    }
-
-//    private fun startLocationUpdates() {
-//        val locationManager: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-//        if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
-//            mFusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper())
-//        }
-//    }
-
-    private fun makeDialog(){
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("선택한 위치에 대한 정보를 입력해주세요.")
-        builder.setPositiveButton("Save"){ dialog, which ->
-            makeText(App.instance.Context(), "위치를 선택해주세요.", LENGTH_SHORT).show()
-        }
-        builder.setNegativeButton("Cancel"){ dialog, which ->
-            makeText(App.instance.Context(), "취소되었습니다.", LENGTH_SHORT).show()
-        }
-
-        builder.create().show()
     }
 }
