@@ -1,10 +1,14 @@
 package com.example.sendymapdemo
 
 import android.app.Activity
+import android.app.AlertDialog
+import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.Location
+import android.location.LocationManager
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.view.animation.Animation
@@ -20,9 +24,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -51,9 +53,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var db:LocationDB
 
-    private lateinit var mFusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
     private lateinit var lastLocation: Location
     private lateinit var location: Location
     private lateinit var mCurrentLocation: Location
@@ -64,17 +66,35 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var isSelect: Boolean = false
     private var isFabOpen: Boolean = false
 
-//    private val locationCallback: LocationCallback = object: LocationCallback(){
-//        override fun onLocationResult(locationResult: LocationResult?) {
-//            super.onLocationResult(locationResult)
-//            val locationList: List<Location> = locationResult!!.locations
-//
-//            if(locationList.isNotEmpty()){
-//                location = locationList[locationList.size - 1]
-//                mCurrentLocation = location
-//            }
-//        }
-//    }
+    private val locationCallback: LocationCallback = object: LocationCallback(){
+        override fun onLocationResult(locationResult: LocationResult?) {
+            super.onLocationResult(locationResult)
+
+            val locationList: List<Location> = locationResult!!.locations
+
+            if(locationList.isNotEmpty()){
+                location = locationList[locationList.size - 1]
+//                setCurrentLocation(location)
+                mCurrentLocation = location
+            }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if((ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+            && (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)){
+                mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
+            }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if(mFusedLocationClient != null){
+            mFusedLocationClient.removeLocationUpdates(locationCallback)
+        }
+    }
+
     /* 스위치 상태 저장 */
     override fun onResume() {
         super.onResume()
@@ -112,7 +132,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             .setInterval(1000)
             .setFastestInterval(500)
 
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         db = LocationDB(this)
 
@@ -154,7 +174,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         recyclerList.layoutManager = layoutManager
         recyclerList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     }
 
     private fun animation(){
@@ -213,9 +233,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         mMap = googleMap
 
-//        if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
-//            startLocationUpdates()
-//        }
+        if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            startLocationUpdates()
+        }
 
         mMap.uiSettings.isZoomControlsEnabled
 
@@ -226,20 +246,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.isMyLocationEnabled = true
         mMap.uiSettings.isMyLocationButtonEnabled = true
 
-        fusedLocationClient.lastLocation.addOnSuccessListener(this){ location ->
+        mFusedLocationClient.lastLocation.addOnSuccessListener(this){ location ->
             if (location != null){
                 lastLocation = location
                 val currentLatLng = LatLng(lastLocation.latitude, lastLocation.longitude)
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 13.0f))
                 Log.e("현재위치", "${lastLocation.latitude}, ${lastLocation.longitude}")
-            }
-            else{
-                //Busan City Hall
-                lastLocation.latitude = 35.179792
-                lastLocation.longitude = 129.074997
-
-                val firstLatLng = LatLng(lastLocation.latitude, lastLocation.longitude)
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(firstLatLng, 11.0f))
             }
         }
 
@@ -248,11 +260,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             animation()
         }
         currentLocation.setOnClickListener {
-            val currentLocation = LatLng(lastLocation.latitude, lastLocation.longitude)
+            val currentLocation = LatLng(mCurrentLocation.latitude, mCurrentLocation.longitude)
             val markerOptions = MarkerOptions().position(currentLocation).title("currentLocation")
             mMap.addMarker(markerOptions)
             db.AddMarker(currentLocation, "currentLocation")
-            val newMarkerData = markerData(lastLocation.latitude, lastLocation.longitude, "NAME")
+
+            val newMarkerData = markerData(mCurrentLocation.latitude, mCurrentLocation.longitude, "NAME")
             Markerlist.add(newMarkerData)
             adapter.notifyDataSetChanged()
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15.0f))
@@ -260,10 +273,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         selectLocation.setOnClickListener {
             isSelect = true
-            makeText(App.instance.Context(), "위치 선택", LENGTH_SHORT).show()
+            makeDialog()
+//            makeText(App.instance.Context(), "위치 선택", LENGTH_SHORT).show()
+
             if(isSelect){
                 mMap.setOnMapClickListener(mapClickListener)
             }
+
             animation()
         }
         findPath.setOnCheckedChangeListener { switch, isChanged -> //지도 좌측 아래에 있는 Switch
@@ -274,7 +290,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
     }
+    private fun startLocationUpdates() {
+        val locationManager: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
+            mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper())
+        }
+    }
 
+//    private fun setCurrentLocation(location: Location){
+//        val currentLatLng = LatLng(location.latitude, location.longitude)
+//
+//        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 13.0f))
+  
     //라인 그리는 함수
     fun DrawPolyLine(latlng: LatLng){
         //라인 그리기 구현
@@ -296,4 +323,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 //            mFusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper())
 //        }
 //    }
+
+    private fun makeDialog(){
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("선택한 위치에 대한 정보를 입력해주세요.")
+        builder.setPositiveButton("Save"){ dialog, which ->
+            makeText(App.instance.Context(), "위치를 선택해주세요.", LENGTH_SHORT).show()
+        }
+        builder.setNegativeButton("Cancel"){ dialog, which ->
+            makeText(App.instance.Context(), "취소되었습니다.", LENGTH_SHORT).show()
+        }
+
+        builder.create().show()
+    }
 }
