@@ -204,11 +204,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private val mapClickListener =
         GoogleMap.OnMapClickListener { map ->
             val latLng = LatLng(map.latitude, map.longitude)
-
             if(!isSelect) return@OnMapClickListener
-
-            makeDialog(latLng)
             mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng))
+            makeDialog(latLng)
 
             //라인 그리기
             drawPolyLine(latLng)
@@ -303,9 +301,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val dialogLayout = inflater.inflate(R.layout.dialog_edit_text, null)
         val editText = dialogLayout.findViewById<EditText>(R.id.dialog_text)
 
-        builder.setTitle("위치에 대한 정보를 입력해주세요.")
+        //builder.setTitle("위치에 대한 정보를 입력해주세요.")
         builder.setView(dialogLayout)
-
         builder.setPositiveButton("Save"){ dialog, which ->
             makeText(App.instance.Context(), "저장되었습니다.", LENGTH_SHORT).show()
             infoString = editText.text.toString()
@@ -318,7 +315,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         builder.setNegativeButton("Cancel"){ dialog, which ->
             makeText(App.instance.Context(), "취소되었습니다.", LENGTH_SHORT).show()
         }
-
         builder.create().show()
     }
 

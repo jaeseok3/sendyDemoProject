@@ -42,7 +42,6 @@ class LocationDB (context : Context): SQLiteOpenHelper(context, DATABASE_NAME,nu
         adapter = NavAdapter(Markerlist)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = layoutManager
-
     }
     fun listMarker(mMap:GoogleMap){
         val selectQueryHandler = "Select * from $TableName"
@@ -94,8 +93,4 @@ class LocationDB (context : Context): SQLiteOpenHelper(context, DATABASE_NAME,nu
         mMap.clear()
         listMarker(mMap)
     }
-
-
-
-
 }
