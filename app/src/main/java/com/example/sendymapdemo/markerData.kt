@@ -5,7 +5,7 @@ class markerData{
     var longi:Double=1.0
     var nameBy:String?=null
 
-    constructor(){}
+    constructor()
 
     constructor(lati:Double,longi:Double,nameBy:String){
         this.lati=lati
