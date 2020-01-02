@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.location.Location
 import android.util.Log
 import android.widget.Button
 import androidx.core.content.contentValuesOf
@@ -12,7 +13,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 
-
+private var location:Location = mCurrentLocation
 class LocationDB (context : Context): SQLiteOpenHelper(context, DATABASE_NAME,null,DATABASE_VER){
 
     companion object{
@@ -23,22 +24,30 @@ class LocationDB (context : Context): SQLiteOpenHelper(context, DATABASE_NAME,nu
         private val Column_Lati="latitude"
         private val Column_Longi="longitude"
         private val Column_Name="Name"
+
+        private val TableName2="HowMuchMoved"
     }
     override fun onUpgrade(db: SQLiteDatabase?, p1: Int, p2: Int) {
         db!!.execSQL("Drop table $TableName")
     }
 
-    override fun onCreate(db: SQLiteDatabase?) {
+    override fun onCreate(db: SQLiteDatabase?) { //시작할때 Database 생성 여부.
         db!!.execSQL("Create table IF NOT EXISTS $TableName ($Column_Lati double,$Column_Longi double,$Column_Name varchar(20))")
         val selectQueryHandler = "Select * from $TableName"
-        val cursor = db.rawQuery(selectQueryHandler,null)
-        if(cursor.count==0){
-            db.execSQL("INSERT INTO $TableName values (35.205411, 129.077885,'동래')")
-            db.execSQL("INSERT INTO $TableName values (35.158713, 129.160248,'해운대')")
-            db.execSQL("INSERT INTO $TableName values (35.231028, 129.082287,'부산대')")
-            db.execSQL("INSERT INTO $TableName values (35.153028, 129.118666,'광안리')")
-        }
+        var cursor = db.rawQuery(selectQueryHandler,null)
+        println("columnCount = "+cursor.count)
+
+//        if(cursor.count==0){
+//            db.execSQL("INSERT INTO $TableName values (35.205411, 129.077885,'동래')")
+//        db.execSQL("INSERT INTO $TableName values (35.158713, 129.160248,'해운대')")
+//        db.execSQL("INSERT INTO $TableName values (35.231028, 129.082287,'부산대')")
+//        db.execSQL("INSERT INTO $TableName values (35.153028, 129.118666,'광안리')")
+//    }
+        cursor = db.rawQuery(selectQueryHandler,null)
+        println("columnCount = "+cursor.count)
         //어댑터 생성
+        db!!.execSQL("Create table IF NOT EXISTS $TableName2 ($Column_Lati double,$Column_Longi double)")
+
         adapter = NavAdapter(Markerlist)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = layoutManager
@@ -48,7 +57,6 @@ class LocationDB (context : Context): SQLiteOpenHelper(context, DATABASE_NAME,nu
         val selectQueryHandler = "Select * from $TableName"
         val db=this.writableDatabase
         val cursor = db.rawQuery(selectQueryHandler,null)
-        println("columnCount = "+cursor.count)
         if(cursor.moveToFirst())
         {
             do{
@@ -76,7 +84,8 @@ class LocationDB (context : Context): SQLiteOpenHelper(context, DATABASE_NAME,nu
 
         db.insert(TableName,null,values)
         println("Latitude : "+map.latitude+"  Longitude : "+map.longitude)
-        db.close()
+        println("DB에서 보는 위치"+ location.latitude + " , " + location.longitude)
+//        db.close()
     }
 
     fun deleteMarker(){
@@ -93,6 +102,28 @@ class LocationDB (context : Context): SQLiteOpenHelper(context, DATABASE_NAME,nu
         adapter.notifyDataSetChanged()
         mMap.clear()
         listMarker(mMap)
+    }
+
+    fun InsertLocation(location: Location){ //DB에 Table2번에 현재 로케이션을 지속적으로 넣는 함수
+        val db=this.writableDatabase
+        val values = ContentValues()
+        values.put(Column_Lati, location.latitude)
+        values.put(Column_Longi, location.longitude)
+        db.insert(TableName2,null,values)
+        println("insert되고 있는 location "+ location.latitude+ " , " +location.longitude)
+//        val selectQueryHandler = "Select * from $TableName2"
+//        var cursor = db.rawQuery(selectQueryHandler,null)
+//        println("현재 마커 수 = "+cursor.count)
+
+//        db.close()
+    }
+    fun DeleteLocation(){
+        val db=this.writableDatabase
+        db.delete(TableName2, null,null)
+//        val selectQueryHandler = "Select * from $TableName2"
+//        var cursor = db.rawQuery(selectQueryHandler,null)
+//        println("남은 마커 수 = "+cursor.count)
+//        db.close()
     }
 
 
