@@ -47,6 +47,7 @@ lateinit var drawerLayout: DrawerLayout
 var markerLine : Polyline? = null
 //마커의 위치를 담을 리스트 선언 -> 라인을 그리는데에 사용
 lateinit var LineList : MutableList<LatLng>
+lateinit var mCurrentLocation: Location
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -59,26 +60,35 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var lastLocation: Location
     private lateinit var location: Location
-    private lateinit var mCurrentLocation: Location
+
 
     private lateinit var fab_open: Animation
     private lateinit var fab_close: Animation
 
     private var isSelect: Boolean = false
     private var isFabOpen: Boolean = false
-
     private lateinit var infoString: String
-
-    private val locationCallback: LocationCallback = object: LocationCallback(){
+    private val locationCallback: LocationCallback = object: LocationCallback(){ //Location Request를 통해 나온 Location Callback
         override fun onLocationResult(locationResult: LocationResult?) {
             super.onLocationResult(locationResult)
-
+//            LineList = mutableListOf()
             val locationList: List<Location> = locationResult!!.locations
-
             if(locationList.isNotEmpty()){
                 location = locationList[locationList.size - 1]
 //                setCurrentLocation(location)
-                mCurrentLocation = location
+                mCurrentLocation = location //현재 위도, 경도를 반환한다.
+
+            }
+            if(locationList.isNotEmpty() && findPath.isChecked){ //스위치 켜졌을 때
+                db.InsertLocation(mCurrentLocation)
+                drawPolyLine(LatLng(mCurrentLocation.latitude, mCurrentLocation.longitude))
+            }
+            else if(!findPath.isChecked){ //스위치 껏을 때
+//                markerLine?.remove()
+//                LineList.clear()
+//                mMap.clear()
+//                db.listMarker(mMap)
+//                db.DeleteLocation()
             }
         }
     }
@@ -109,13 +119,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun restoreState(){ //onCreate, onResume에서 동작
-        var pref : SharedPreferences = getSharedPreferences("pref", Activity.MODE_PRIVATE)
+        val pref : SharedPreferences = getSharedPreferences("pref", Activity.MODE_PRIVATE)
         findPath.isChecked = pref.getBoolean("pref_bool",true)
     }
 
     private fun saveState(){ //onPause, onDestory에서 동작
-        var pref : SharedPreferences = getSharedPreferences("pref", Activity.MODE_PRIVATE)
-        var editor : SharedPreferences.Editor = pref.edit()
+        val pref : SharedPreferences = getSharedPreferences("pref", Activity.MODE_PRIVATE)
+        val editor : SharedPreferences.Editor = pref.edit()
             editor.putBoolean("pref_bool",findPath.isChecked)
         editor.commit()
     }
@@ -125,7 +135,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(R.layout.activity_main)
         //리스트 초기화
         LineList = mutableListOf()
-        markerLine
         while (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
         {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
@@ -166,8 +175,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         //삭제버튼 구현
         deleteButton.setOnClickListener{
             Log.e("온클릭리스너","작동")
-            markerLine?.remove()
-            LineList.clear()
+//            markerLine?.remove()
+//            LineList.clear()
             db.deleteMarker()}
         toggle.syncState()
         //navView.setNavigationItemSelectedListener(this.)
@@ -182,8 +191,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun animation(){
-        val currentLocation: View = findViewById(R.id.fab1)
-        val selectLocation: View = findViewById(R.id.fab2)
+        val currentLocation: View = findViewById(R.id.fab1) //지도상 원하는 위치 마커 찍기
+        val selectLocation: View = findViewById(R.id.fab2) //현재 위치 마커 찍기
 
         if(isFabOpen){
             currentLocation.startAnimation(fab_close)
@@ -209,7 +218,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             makeDialog(latLng)
 
             //라인 그리기
-            drawPolyLine(latLng)
+//            drawPolyLine(latLng)
 
             isSelect = false
         }
@@ -256,14 +265,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         fab.setOnClickListener {
             animation()
         }
-        currentLocation.setOnClickListener {
+        currentLocation.setOnClickListener { //두번째 버튼 눌렀을때 동작
             val currentLocation = LatLng(mCurrentLocation.latitude, mCurrentLocation.longitude)
 
             makeDialog(currentLocation)
 
             animation()
         }
-        selectLocation.setOnClickListener {
+        selectLocation.setOnClickListener {  //첫번째 버튼 클릭했을때
             isSelect = true
             makeText(App.instance.Context(), "위치를 선택해 주세요", LENGTH_SHORT).show()
 
@@ -276,8 +285,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         findPath.setOnCheckedChangeListener { switch, isChanged -> //지도 좌측 아래에 있는 Switch
             if(isChanged){ //켜졌을때 동작시키면 됨
                 makeText(App.instance.Context(),"Switch is on", LENGTH_SHORT).show()
+                mMap.clear()
+                db.listMarker(mMap)
             }else{ //꺼졌을때 동작시키면 됨
                 makeText(App.instance.Context(),"Switch is off", LENGTH_SHORT).show()
+                markerLine?.remove()
+                LineList.clear()
+                db.DeleteLocation()
             }
         }
     }
@@ -293,6 +307,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 //        val currentLatLng = LatLng(location.latitude, location.longitude)
 //
 //        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 13.0f))
+
 
     private fun makeDialog(latLng: LatLng){
         val builder = AlertDialog.Builder(this)
