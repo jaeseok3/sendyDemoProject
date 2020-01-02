@@ -1,6 +1,7 @@
 package com.example.sendymapdemo
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -252,10 +253,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         selectLocation.setOnClickListener {
             isSelect = true
-            makeText(App.instance.Context(), "위치 선택", LENGTH_SHORT).show()
+            makeDialog()
+//            makeText(App.instance.Context(), "위치 선택", LENGTH_SHORT).show()
+
             if(isSelect){
                 mMap.setOnMapClickListener(mapClickListener)
             }
+
             animation()
         }
         findPath.setOnCheckedChangeListener { switch, isChanged -> //지도 좌측 아래에 있는 Switch
@@ -279,4 +283,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 //
 //        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 13.0f))
 //    }
+
+    private fun makeDialog(){
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("선택한 위치에 대한 정보를 입력해주세요.")
+        builder.setPositiveButton("Save"){ dialog, which ->
+            makeText(App.instance.Context(), "위치를 선택해주세요.", LENGTH_SHORT).show()
+        }
+        builder.setNegativeButton("Cancel"){ dialog, which ->
+            makeText(App.instance.Context(), "취소되었습니다.", LENGTH_SHORT).show()
+        }
+
+        builder.create().show()
+    }
 }
