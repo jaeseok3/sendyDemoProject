@@ -133,7 +133,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         locationRequest = LocationRequest()
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-            .setInterval(1000)
+            .setInterval(5000)
             .setFastestInterval(500)
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -254,7 +254,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         fab.setOnClickListener {
-            Log.e("FAB", "FAB CLICKED")
             animation()
         }
         currentLocation.setOnClickListener {
@@ -303,6 +302,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         //builder.setTitle("위치에 대한 정보를 입력해주세요.")
         builder.setView(dialogLayout)
+        builder.setCancelable(false)
+
         builder.setPositiveButton("Save"){ dialog, which ->
             makeText(App.instance.Context(), "저장되었습니다.", LENGTH_SHORT).show()
             infoString = editText.text.toString()
@@ -313,7 +314,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             adapter.notifyDataSetChanged()
         }
         builder.setNegativeButton("Cancel"){ dialog, which ->
+            val latLng = LatLng(mCurrentLocation.latitude, mCurrentLocation.longitude)
             makeText(App.instance.Context(), "취소되었습니다.", LENGTH_SHORT).show()
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng))
         }
         builder.create().show()
     }
