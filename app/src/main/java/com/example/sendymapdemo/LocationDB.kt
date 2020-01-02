@@ -33,10 +33,10 @@ class LocationDB (context : Context): SQLiteOpenHelper(context, DATABASE_NAME,nu
         val selectQueryHandler = "Select * from $TableName"
         val cursor = db.rawQuery(selectQueryHandler,null)
         if(cursor.count==0){
-            db!!.execSQL("INSERT INTO $TableName values (35.205411, 129.077885,'동래')")
-            db!!.execSQL("INSERT INTO $TableName values (35.158713, 129.160248,'해운대')")
-            db!!.execSQL("INSERT INTO $TableName values (35.231028, 129.082287,'부산대')")
-            db!!.execSQL("INSERT INTO $TableName values (35.153028, 129.118666,'광안리')")
+            db.execSQL("INSERT INTO $TableName values (35.205411, 129.077885,'동래')")
+            db.execSQL("INSERT INTO $TableName values (35.158713, 129.160248,'해운대')")
+            db.execSQL("INSERT INTO $TableName values (35.231028, 129.082287,'부산대')")
+            db.execSQL("INSERT INTO $TableName values (35.153028, 129.118666,'광안리')")
         }
         //어댑터 생성
         adapter = NavAdapter(Markerlist)
@@ -84,13 +84,15 @@ class LocationDB (context : Context): SQLiteOpenHelper(context, DATABASE_NAME,nu
         val db=this.writableDatabase
         db.execSQL("Drop table $TableName")
         onCreate(db)
-        var index = 4
+        var index = 0
         while(index < adapter.itemCount){
             Markerlist.removeAt(index)
             adapter.notifyItemRemoved(index)
             adapter.notifyItemRangeChanged(index, Markerlist.size)
         }
         adapter.notifyDataSetChanged()
+        mMap.clear()
+        listMarker(mMap)
     }
 
 
