@@ -1,5 +1,3 @@
-package com.example.sendymapdemo
-
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
