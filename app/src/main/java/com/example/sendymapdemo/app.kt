@@ -6,7 +6,7 @@ import android.content.Context
 class App : Application(){
     companion object{
         lateinit var instance: App
-        private set
+            private set
     }
 
     override fun onCreate() {
