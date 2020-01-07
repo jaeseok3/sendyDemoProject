@@ -44,7 +44,7 @@ var httpArray = ArrayList<ArrayList<String>>() //http 커넥션으로 받은 JSO
 
 fun login(test1:String){ //Login 후 사용자의 정보를 들고오는 함수
     var UserInfo = ArrayList<String>()
-    val test = "http://15.164.103.195/login.php?user=$test1"
+    val test = "http://15.164.103.195/login.php?user$test1"
     var task = URLConnector(test)
     task.start()
     try {
