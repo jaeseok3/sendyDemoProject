@@ -52,8 +52,8 @@
         app:navermap_longitude="129.0750222"
         app:navermap_zoom="13"
         tools:context=".MapsActivity">
-
     </fragment>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
@@ -104,16 +104,6 @@
         app:behavior_peekHeight="58dp"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-<!--        <TextView-->
-<!--            android:id="@+id/textBottom"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="250dp"-->
-<!--            android:background="@drawable/bg_dialog_radius"-->
-<!--            android:gravity="center"-->
-<!--            android:text="Slide Up"-->
-<!--            android:textColor="@color/colorAccent"-->
-<!--            android:textSize="22sp"-->
-<!--            android:textStyle="bold" />-->
     </RelativeLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
