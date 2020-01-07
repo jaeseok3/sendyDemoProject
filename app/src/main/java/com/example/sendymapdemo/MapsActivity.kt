@@ -155,8 +155,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
         }
 
-//        val intent = Intent(applicationContext,LoginActivity::class.java)
-//        startActivity(intent)
+        val intent = Intent(applicationContext,LoginActivity::class.java)
+        startActivity(intent)
 
 
         httpConnect()
