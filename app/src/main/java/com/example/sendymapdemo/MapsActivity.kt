@@ -15,7 +15,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import com.naver.maps.map.*
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.NaverMap
@@ -24,7 +23,8 @@ import com.naver.maps.map.util.FusedLocationSource
 import org.json.JSONArray
 import org.json.JSONObject
 import android.content.Intent
-import android.widget.Toast
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_maps.*
 
@@ -33,7 +33,9 @@ lateinit var drawerLayout: DrawerLayout
 //리더보드 어댑터
 lateinit var boardAdapter:leaderBoardAdapter
 //유저들의 정보를 담은 리스트
-val userList = ArrayList<userInfo>()
+var userList = ArrayList<userInfo>()
+//리더보드 레이아웃 매니저
+lateinit var layoutManager: LinearLayoutManager
 
 
 var userID:String?=null
@@ -61,7 +63,7 @@ fun login(test1:String){ //Login 후 사용자의 정보를 들고오는 함수
         UserInfo.add(jo.getString("Property"))
         UserInfo.add(jo.getString("Car"))
     }
-
+    UserInfo.get(0)
     println(UserInfo.get(0) + "  " + UserInfo.get(1) + "  " + UserInfo.get(2) + "  " + UserInfo.get(3) )
 }
 fun httpConnect(){ //Login 후에 Http connection을 통해 리더보드에 들어갈 데이터 호출
@@ -86,14 +88,18 @@ fun httpConnect(){ //Login 후에 Http connection을 통해 리더보드에 들�
         httpUser?.add(jo.getString("Property"))
         httpUser?.add(jo.getString("Car"))
         httpArray?.add(httpUser)
+        val newUser = userInfo(httpArray[i][0],Integer.parseInt(httpArray[i][2]),Integer.parseInt(httpArray[i][1]))
+        userList.add(newUser)
+
 //            println("first ID : "+ (httpArray?.get(i)))
     }
-
+    boardAdapter.notifyDataSetChanged()
     println("first ID : " + httpArray[0][0] + " First Property " + httpArray[0][2])
     println("second ID : " + httpArray[1][0] + " Second Property " + httpArray[1][2])
     println("third ID : " + httpArray[2][0] + " Third Property " + httpArray[2][2])
 
     var a:Int=Integer.parseInt(httpArray[0][1])
+
 }
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -128,6 +134,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         //리더보드 어댑터 초기화
         boardAdapter = leaderBoardAdapter(userList)
+        //리더보드 레이아웃 매니저
+        layoutManager = LinearLayoutManager(this)
+        //어댑터 생성
+        boardAdapter = leaderBoardAdapter(userList)
+
+//        val newUser = userList(123123,123,123)
+//        userList.add(newUser)
+//        boardAdapter.notifyDataSetChanged()
+        recyclerList.adapter = boardAdapter
+        recyclerList.layoutManager = layoutManager
+        recyclerList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
+
+
+
         
 
         while (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
@@ -135,11 +155,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
         }
 
-        val intent = Intent(applicationContext,LoginActivity::class.java)
-        startActivity(intent)
+//        val intent = Intent(applicationContext,LoginActivity::class.java)
+//        startActivity(intent)
 
 
-
+        httpConnect()
 
         locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
 
