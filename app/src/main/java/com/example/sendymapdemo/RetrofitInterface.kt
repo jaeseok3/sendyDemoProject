@@ -10,7 +10,6 @@ interface RetrofitInterface {
     fun requestPath(
             @Query("start") startPosition: String,
             @Query("goal") goalPosition: String,
-            @Query("waypoints") wayPoints: String,
             @Query("option") option: String
     ): Call<PathData>
 }
