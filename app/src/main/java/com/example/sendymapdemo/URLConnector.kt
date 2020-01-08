@@ -8,7 +8,7 @@ import java.net.HttpURLConnection.HTTP_OK
 import java.net.URL
 
 
-internal class URLConnector(url: String) : Thread() {
+class URLConnector(url: String) : Thread() {
 
     private var result: String? = null
     private var URL1: String=url
