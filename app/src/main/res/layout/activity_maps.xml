@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -49,6 +50,13 @@
         app:navermap_longitude="129.0750222"
         app:navermap_zoom="13"
         tools:context=".MapsActivity">
+        <com.naver.maps.map.widget.LocationButtonView
+            android:id="@+id/locationBtn"
+            android:layout_width = "wrap_content"
+            android:layout_height = "wrap_content"
+            android:layout_gravity = "right|top"
+            android:layout_marginTop = "60dp"
+            android:layout_marginRight = "10dp"/>
     </fragment>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
