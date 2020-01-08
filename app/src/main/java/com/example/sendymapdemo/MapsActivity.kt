@@ -1,9 +1,10 @@
 package com.example.sendymapdemo
 
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -13,7 +14,6 @@ import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.PathOverlay
-import com.naver.maps.map.util.FusedLocationSource
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -24,10 +24,19 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
+import org.json.JSONArray
+import org.json.JSONObject
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.Path
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import android.widget.Toast
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.naver.maps.map.util.FusedLocationSource
+import com.naver.maps.map.widget.LocationButtonView
+import com.naver.maps.map.widget.ZoomControlView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_maps.*
 
@@ -40,10 +49,86 @@ var userList = ArrayList<userInfo>()
 //리더보드 레이아웃 매니저
 lateinit var layoutManager: LinearLayoutManager
 
+var pathOverlayStart = PathOverlay()
+var pathOverlayGoal = PathOverlay()
+var markerStartPoint = Marker()
+var markerWayPoint = Marker()
+var markerGoalPoint = Marker()
+
+var userID:String?=null
+
+var httpArray = ArrayList<ArrayList<String>>() //http 커넥션으로 받은 JSON 데이터를 모은 ArrayList
+
+fun login(test1:String){ //Login 후 사용자의 정보를 들고오는 함수
+    var UserInfo = ArrayList<String>()
+    val test = "http://15.164.103.195/login.php?user$test1"
+    var task = URLConnector(test)
+    task.start()
+    try {
+        task.join()
+    } catch (e: InterruptedException) {
+        e.printStackTrace()
+    }
+
+    var result: String? = task.getResult()
+    var JO = JSONObject(result)
+    var JA: JSONArray = JO.getJSONArray("result")
+    for(i in 0 until JA.length()){
+        val jo = JA.getJSONObject(i)
+        UserInfo.add(jo.getString("ID"))
+        UserInfo.add(jo.getString("Credit"))
+        UserInfo.add(jo.getString("Property"))
+        UserInfo.add(jo.getString("Car"))
+    }
+    UserInfo.get(0)
+    println(UserInfo.get(0) + "  " + UserInfo.get(1) + "  " + UserInfo.get(2) + "  " + UserInfo.get(3) )
+}
+fun httpConnect(){ //Login 후에 Http connection을 통해 리더보드에 들어갈 데이터 호출
+    val test = "http://15.164.103.195/httpConnection.php"
+    var task = URLConnector(test)
+    task.start()
+    try {
+        task.join()
+    } catch (e: InterruptedException) {
+        e.printStackTrace()
+    }
+
+    var result: String? = task.getResult()
+    var JO: JSONObject = JSONObject(result)
+    var JA: JSONArray = JO.getJSONArray("result")
+    println(JA.getJSONObject(0))
+    for (i in 0 until JA.length()) {
+        val jo = JA.getJSONObject(i)
+        var httpUser = ArrayList<String>()
+        httpUser?.add(jo.getString("ID"))
+        httpUser?.add(jo.getString("Credit"))
+        httpUser?.add(jo.getString("Property"))
+        httpUser?.add(jo.getString("Car"))
+        httpArray?.add(httpUser)
+        val newUser = userInfo(httpArray[i][0],Integer.parseInt(httpArray[i][2]),Integer.parseInt(httpArray[i][1]))
+        userList.add(newUser)
+
+//            println("first ID : "+ (httpArray?.get(i)))
+    }
+    boardAdapter.notifyDataSetChanged()
+//    println("first ID : " + httpArray[0][0] + " First Property " + httpArray[0][2])
+//    println("second ID : " + httpArray[1][0] + " Second Property " + httpArray[1][2])
+//    println("third ID : " + httpArray[2][0] + " Third Property " + httpArray[2][2])
+//
+//    var a:Int=Integer.parseInt(httpArray[0][1])
+
+}
+
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
+
+    private var requestResultStart: PathData ?= null
+    private var requestResultGoal: PathData ?= null
+
+    private var resultGoalLatLng: LatLng ?= null
+    private var resultWayLatLng: LatLng ?= null
 
     private lateinit var result1: LatLng
     private lateinit var result2: LatLng
@@ -52,13 +137,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var markerGoalPoint = Marker()
     private var pathOverlayStart = PathOverlay()
     private var pathOverlayGoal = PathOverlay()
+
     private lateinit var locationSource: FusedLocationSource
     private lateinit var currentLocation: Location
-    private lateinit var naverMap: NaverMap
 
     private var isFabOpen: Boolean = false
-    private var isFinishFind1: Boolean = false
-    private var isFinishFind2: Boolean = false
     private var arriveCheck: Boolean = false
 
     private lateinit var fabOpen: Animation
@@ -71,7 +154,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var nMap: NaverMap
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -99,6 +181,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         recyclerList.layoutManager = layoutManager
         recyclerList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
 
+
+        val intent = Intent(applicationContext,LoginActivity::class.java)
+        startActivity(intent)
+
 //        while (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
 //        {
 //            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
@@ -114,36 +200,35 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val fragmentManager = supportFragmentManager
         val mapFragment = fragmentManager.findFragmentById(R.id.map) as MapFragment?
-                ?: MapFragment.newInstance().also {
-                    fragmentManager.beginTransaction().add(R.id.map, it).commit()
-                }
 
+                ?: MapFragment.newInstance((NaverMapOptions().locationButtonEnabled(false))
+                        .also {
+                            fragmentManager.beginTransaction().add(R.id.map, map).commit()
+                        })
         mapFragment.getMapAsync(this)
-    }
-
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if(locationSource.onRequestPermissionsResult(requestCode, permissions, grantResults)){
-            return
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+//     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+//         if(locationSource.onRequestPermissionsResult(requestCode, permissions, grantResults)){
+//             return
+//         }
+//         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun onMapReady(naverMap: NaverMap) {
         nMap = naverMap
-        val fab: View = findViewById(R.id.fab)
-        val fab1: View = findViewById(R.id.fab1)
-        val fab2: View = findViewById(R.id.fab2)
-        fab.bringToFront()
+        val locationButtonView = findViewById<LocationButtonView>(R.id.locationBtn)
+        locationButtonView.map = nMap
 
-        fab.setOnClickListener {
-            animation()
-        }
         fab2.setOnClickListener { //두번째 버튼 눌렀을때 동작
             animation()
         }
         fab1.setOnClickListener {  //첫번째 버튼 클릭했을때
             animation()
+
+            val setPathUIStart = SetPathUI(requestResultStart!!, nMap)
+            val setPathUIGoal = SetPathUI(requestResultGoal!!, nMap)
+            resultWayLatLng = setPathUIStart.setUIPathStart()
+            resultGoalLatLng = setPathUIGoal.setUIPathGoal()
+
             val getPosition1:ArrayList<String> = getLocationDB() //DB로부터 랜덤 2개를 불러옴
             goalPosition = "${129.082287},${35.231028}"
             wayPosition = "${129.118666},${35.153028}"
@@ -158,36 +243,41 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         nMap.locationSource = locationSource
         nMap.locationTrackingMode = LocationTrackingMode.Follow
         nMap.locationOverlay.isVisible = true
-        nMap.uiSettings.isLocationButtonEnabled = true
 
         nMap.addOnLocationChangeListener { location ->
             currentLocation = location
             startPosition = "${location.longitude},${location.latitude}"
-//            Log.e("현재위치", "${currentLocation.latitude},${currentLocation.longitude}")
+            Log.e("현재위치", "${currentLocation.latitude},${currentLocation.longitude}")
+            Log.e("경유지", "$resultWayLatLng")
+            Log.e("도착지", "$resultGoalLatLng")
 
-            if(isFinishFind1 && isFinishFind2){
+
+            if(resultWayLatLng != null && resultGoalLatLng != null){
+                Log.e("e", "${resultWayLatLng},${resultGoalLatLng},${arriveCheck}")
                 when {
-                    checkError(result1) && !arriveCheck -> {
-                        pathOverlayStart.map = null
+                    checkError(resultWayLatLng!!) && !arriveCheck -> {
                         makeText(this, "출발지에 도착하였습니다.", LENGTH_SHORT).show()
+                        pathOverlayStart.map = null
                         markerStartPoint.map = null
                         arriveCheck = true
                     }
-                    checkError(result2) && arriveCheck -> {
+                    checkError(resultGoalLatLng!!) && arriveCheck -> {
                         pathOverlayGoal.map = null
                         makeText(this, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
                         markerWayPoint.map = null
                         markerGoalPoint.map = null
                         arriveCheck = false
                     }
-                    checkError(result2) && !arriveCheck -> {
-                        makeText(this, "출발지부터 가야합니다.", LENGTH_SHORT).show()
-                    }
                 }
+            }
+            if(requestResultGoal != null && requestResultStart != null){
+                val startGuideList = requestResultStart?.route?.traoptimal!![0].guide
+                val goalGuideList = requestResultGoal?.route?.traoptimal!![0].guide
+
+                Log.e("인덱스", "${startGuideList[0].pointIndex}")
             }
         }
     }
-
     private fun animation(){
         val currentLocation: View = findViewById(R.id.fab1)
         val selectLocation: View = findViewById(R.id.fab2)
@@ -209,7 +299,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
     private fun findPath(startPoint:String, goalPoint:String, wayPoints:String){
         val restClient: RetrofitInterface = Http3RetrofitManager.getRetrofitService(RetrofitInterface::class.java)
-        val option = "trafast"
+        val option = "traoptimal"
         val requestPathStartToWay = restClient.requestPath(startPoint, wayPoints, option)
         val requestPathWayToGoal = restClient.requestPath(wayPoints, goalPoint, option)
 
@@ -219,7 +309,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
             override fun onResponse(call: Call<PathData>, response: Response<PathData>) {
                 if(response != null && response.isSuccessful) {
-                    setUIPathStart(response.body())
+                    requestResultStart = response.body()!!
                 }
             }
         })
@@ -228,68 +318,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 error(message = t.toString())
             }
             override fun onResponse(call: Call<PathData>, response: Response<PathData>) {
-                setUIPathGoal(response.body())
+                if(response != null && response.isSuccessful){
+                    requestResultGoal = response.body()!!
+                }
             }
         })
     }
-
-    private fun setUIPathGoal(data: PathData?){
-        val latlngListGoal = ArrayList<LatLng>()
-        val pathArr = data?.route?.trafast?.get(0)?.path
-        val goalLng = data?.route?.trafast?.get(0)?.summary?.goal?.location?.get(0)
-        val goalLat = data?.route?.trafast?.get(0)?.summary?.goal?.location?.get(1)
-        result2 = LatLng(goalLat!!, goalLng!!)
-        for(i in pathArr!!.indices){
-            val path = pathArr[i].toString()
-            val pathLatLng = parsingPath(path)
-            latlngListGoal.add(pathLatLng)
-        }
-
-        pathOverlayGoal.coords = latlngListGoal
-        pathOverlayGoal.outlineWidth = 5
-        pathOverlayGoal.color = Color.RED
-        markerGoalPoint.position = latlngListGoal[latlngListGoal.size - 1]
-        markerGoalPoint.iconTintColor = Color.RED
-        markerGoalPoint.map = nMap
-        pathOverlayGoal.map = nMap
-
-        isFinishFind2 = true
-    }
-
-    private fun setUIPathStart(data: PathData?){
-        val latlngListStart = ArrayList<LatLng>()
-        val pathArr = data?.route?.trafast?.get(0)?.path
-        val goalLng = data?.route?.trafast?.get(0)?.summary?.goal?.location?.get(0)
-        val goalLat = data?.route?.trafast?.get(0)?.summary?.goal?.location?.get(1)
-        result1 = LatLng(goalLat!!, goalLng!!)
-
-        for(i in pathArr!!.indices){
-            val path = pathArr[i].toString()
-            val pathLatLng = parsingPath(path)
-            latlngListStart.add(pathLatLng)
-        }
-
-        pathOverlayStart.coords = latlngListStart
-        pathOverlayStart.outlineWidth = 5
-        pathOverlayStart.color = Color.BLUE
-        markerStartPoint.position = latlngListStart[0]
-        markerWayPoint.position = latlngListStart[latlngListStart.size - 1]
-        markerStartPoint.map = nMap
-        markerStartPoint.iconTintColor = Color.BLUE
-        markerWayPoint.map = nMap
-        pathOverlayStart.map = nMap
-
-        isFinishFind1 = true
-    }
-
-    private fun parsingPath(rawPathData: String): LatLng{
-        val arr = rawPathData.split(",")
-        val lng: Double = arr[0].substring(1).toDouble()
-        val lat: Double = arr[1].substring(0, arr[1].indexOf("]")).toDouble()
-
-        return LatLng(lat, lng)
-    }
-
     private fun checkError(goalLatLng: LatLng): Boolean {
         val currentLat = currentLocation.latitude
         val currentLng = currentLocation.longitude

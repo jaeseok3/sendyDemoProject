@@ -11,9 +11,11 @@ import java.util.concurrent.TimeUnit
 
 object Http3RetrofitManager {
     private val ALL_TIMEOUT = 10L
+    private val AIR_OPENAPI_HOST = "http://openapi.airkorea.or.kr"
+    private val AIR_OPENAPI_KEY = "EECWWmjUunxzPTvSMYy5pg8ehUEUtZfEFYWAHsiA5TbH245IpCmf8JGBSprIXK9O3bruBdFlfNOm3boD%2FRkpaA%3D%3D"
     private val NAVER_HOST = "https://naveropenapi.apigw.ntruss.com"
-    private val API_CLIENT = "nx5wmexmtw"
-    private val API_SECRET = "CS9kPn8fkidEzaDL3dv4tmQ6ymHVkXf2cy2doDZl"
+    private val NAVER_API_CLIENT = "nx5wmexmtw"
+    private val NAVER_API_SECRET = "CS9kPn8fkidEzaDL3dv4tmQ6ymHVkXf2cy2doDZl"
 
     private var okHttpClient: OkHttpClient
     private var retrofit: Retrofit
@@ -42,8 +44,8 @@ object Http3RetrofitManager {
         override fun intercept(chain: Interceptor.Chain): Response {
             val chainRequest = chain.request()
             val request = chainRequest.newBuilder().apply {
-                addHeader("X-NCP-APIGW-API-KEY-ID", API_CLIENT)
-                addHeader("X-NCP-APIGW-API-KEY", API_SECRET)
+                addHeader("X-NCP-APIGW-API-KEY-ID", NAVER_API_CLIENT)
+                addHeader("X-NCP-APIGW-API-KEY", NAVER_API_SECRET)
             }.build()
             return chain.proceed(request)
         }
