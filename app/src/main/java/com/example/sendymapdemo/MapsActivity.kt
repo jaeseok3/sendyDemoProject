@@ -150,7 +150,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             try {
                 findPath(startPosition, getPosition1[0], getPosition1[1])
             } catch(e:Exception){
-                Toast.makeText(this,"위치 수신 동의해주세요!",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,"위치 수신을 동의해주세요!",Toast.LENGTH_SHORT).show()
 //                finish()
             }
         }
@@ -305,7 +305,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val originalScaleY = fab.scaleY
         var isExpanded = 0
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED)
+       bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         bottomSheetBehavior.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {

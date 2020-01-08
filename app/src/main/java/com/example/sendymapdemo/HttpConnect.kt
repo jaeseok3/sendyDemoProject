@@ -38,6 +38,8 @@ fun login(test1:String){ //Login 후 사용자의 정보를 들고오는 함수
 
     val result: String? = task.getResult()
     val JO = JSONObject(result)
+    val Jrank = JO.getInt("rank")
+    println(Jrank)
     val JA: JSONArray = JO.getJSONArray("result")
     for(i in 0 until JA.length()){
         val jo = JA.getJSONObject(i)
@@ -46,6 +48,8 @@ fun login(test1:String){ //Login 후 사용자의 정보를 들고오는 함수
         UserInfo.add(jo.getString("Property"))
         UserInfo.add(jo.getString("Car"))
     }
+    while(task.isAlive){}
+    httpConnect()
 //    UserInfo[0]
 //    println(UserInfo[0] + "  " + UserInfo[1] + "  " + UserInfo[2] + "  " + UserInfo[3])
 }

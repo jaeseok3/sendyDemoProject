@@ -29,7 +29,8 @@ class LoginActivity : AppCompatActivity() {
                 userID=mEditTextSearchKeyword.text.toString()
                 Toast.makeText(this,"$userID 님 환영합니다",Toast.LENGTH_SHORT).show()
                 login(userID!!)
-                httpConnect()
+
+//                httpConnect()
                 finish()
 
             }
