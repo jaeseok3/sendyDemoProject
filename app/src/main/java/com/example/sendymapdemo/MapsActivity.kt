@@ -1,6 +1,7 @@
 package com.example.sendymapdemo
 
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -30,6 +31,7 @@ import android.graphics.Color
 import android.graphics.Path
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import android.widget.Toast
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.naver.maps.map.util.FusedLocationSource
@@ -121,11 +123,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
+
     private var requestResultStart: PathData ?= null
     private var requestResultGoal: PathData ?= null
 
     private var resultGoalLatLng: LatLng ?= null
     private var resultWayLatLng: LatLng ?= null
+
+    private lateinit var result1: LatLng
+    private lateinit var result2: LatLng
+    private var markerStartPoint = Marker()
+    private var markerWayPoint = Marker()
+    private var markerGoalPoint = Marker()
+    private var pathOverlayStart = PathOverlay()
+    private var pathOverlayGoal = PathOverlay()
 
     private lateinit var locationSource: FusedLocationSource
     private lateinit var currentLocation: Location
@@ -150,7 +161,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         configureBottomNav()
 
-        var toolbar : Toolbar = findViewById(R.id.toolbar)
+        val toolbar : Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
         //사이드바 토글 생성
         val toggle = ActionBarDrawerToggle(
@@ -166,22 +177,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         //어댑터 생성
         boardAdapter = leaderBoardAdapter(userList)
 
-//        val newUser = userList(123123,123,123)
-//        userList.add(newUser)
-//        boardAdapter.notifyDataSetChanged()
         recyclerList.adapter = boardAdapter
         recyclerList.layoutManager = layoutManager
         recyclerList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
 
-        while (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-        {
-            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
-        }
 
         val intent = Intent(applicationContext,LoginActivity::class.java)
         startActivity(intent)
 
-        httpConnect()
+//        while (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+//        {
+//            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
+//        }
+
+        var intent = Intent(applicationContext,LoginActivity::class.java)
+        startActivity(intent)
 
         locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
 
@@ -190,16 +200,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val fragmentManager = supportFragmentManager
         val mapFragment = fragmentManager.findFragmentById(R.id.map) as MapFragment?
+
                 ?: MapFragment.newInstance((NaverMapOptions().locationButtonEnabled(false))
                         .also {
                             fragmentManager.beginTransaction().add(R.id.map, map).commit()
                         })
         mapFragment.getMapAsync(this)
+//     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+//         if(locationSource.onRequestPermissionsResult(requestCode, permissions, grantResults)){
+//             return
+//         }
+//         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun onMapReady(naverMap: NaverMap) {
         nMap = naverMap
-
         val locationButtonView = findViewById<LocationButtonView>(R.id.locationBtn)
         locationButtonView.map = nMap
 
@@ -208,19 +223,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         fab1.setOnClickListener {  //첫번째 버튼 클릭했을때
             animation()
-            goalPosition = "${129.082287},${35.231028}"
-            wayPosition = "${129.118666},${35.153028}"
-
-            try {
-                findPath(startPosition, goalPosition, wayPosition)
-            } catch(e:Exception){
-                ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
-            }
 
             val setPathUIStart = SetPathUI(requestResultStart!!, nMap)
             val setPathUIGoal = SetPathUI(requestResultGoal!!, nMap)
             resultWayLatLng = setPathUIStart.setUIPathStart()
             resultGoalLatLng = setPathUIGoal.setUIPathGoal()
+
+            val getPosition1:ArrayList<String> = getLocationDB() //DB로부터 랜덤 2개를 불러옴
+            goalPosition = "${129.082287},${35.231028}"
+            wayPosition = "${129.118666},${35.153028}"
+            try {
+                findPath(startPosition, getPosition1[0], getPosition1[1])
+            } catch(e:Exception){
+                Toast.makeText(this,"위치 수신을 동의해주세요!",Toast.LENGTH_SHORT).show()
+//                finish()
+            }
         }
 
         nMap.locationSource = locationSource
@@ -233,6 +250,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             Log.e("현재위치", "${currentLocation.latitude},${currentLocation.longitude}")
             Log.e("경유지", "$resultWayLatLng")
             Log.e("도착지", "$resultGoalLatLng")
+
 
             if(resultWayLatLng != null && resultGoalLatLng != null){
                 Log.e("e", "${resultWayLatLng},${resultGoalLatLng},${arriveCheck}")
@@ -321,7 +339,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val originalScaleY = fab.scaleY
         var isExpanded = 0
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED)
+       bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         bottomSheetBehavior.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {

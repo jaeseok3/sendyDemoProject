@@ -1,6 +1,5 @@
 package com.example.sendymapdemo
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -10,6 +9,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 
+var userID:String?=null
 class LoginActivity : AppCompatActivity() {
     override fun onBackPressed() {
         super.onBackPressed()
@@ -20,8 +20,8 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        var mEditTextSearchKeyword = findViewById<EditText>(R.id.usrusr)
-        var mButton:Button = findViewById(R.id.logiin)
+        val mEditTextSearchKeyword = findViewById<EditText>(R.id.usrusr)
+        val mButton:Button = findViewById(R.id.logiin)
 
         mButton.setOnClickListener {
 
@@ -30,6 +30,8 @@ class LoginActivity : AppCompatActivity() {
                 userID=mEditTextSearchKeyword.text.toString()
                 Toast.makeText(this,"$userID 님 환영합니다",Toast.LENGTH_SHORT).show()
                 login(userID!!)
+
+//                httpConnect()
                 finish()
 
             }
