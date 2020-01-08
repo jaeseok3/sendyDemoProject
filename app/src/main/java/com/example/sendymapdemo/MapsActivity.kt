@@ -27,7 +27,6 @@ import com.naver.maps.map.OnMapReadyCallback
 import org.json.JSONArray
 import org.json.JSONObject
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.Path
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -55,69 +54,6 @@ var markerStartPoint = Marker()
 var markerWayPoint = Marker()
 var markerGoalPoint = Marker()
 
-var userID:String?=null
-
-var httpArray = ArrayList<ArrayList<String>>() //http 커넥션으로 받은 JSON 데이터를 모은 ArrayList
-
-fun login(test1:String){ //Login 후 사용자의 정보를 들고오는 함수
-    var UserInfo = ArrayList<String>()
-    val test = "http://15.164.103.195/login.php?user$test1"
-    var task = URLConnector(test)
-    task.start()
-    try {
-        task.join()
-    } catch (e: InterruptedException) {
-        e.printStackTrace()
-    }
-
-    var result: String? = task.getResult()
-    var JO = JSONObject(result)
-    var JA: JSONArray = JO.getJSONArray("result")
-    for(i in 0 until JA.length()){
-        val jo = JA.getJSONObject(i)
-        UserInfo.add(jo.getString("ID"))
-        UserInfo.add(jo.getString("Credit"))
-        UserInfo.add(jo.getString("Property"))
-        UserInfo.add(jo.getString("Car"))
-    }
-    UserInfo.get(0)
-    println(UserInfo.get(0) + "  " + UserInfo.get(1) + "  " + UserInfo.get(2) + "  " + UserInfo.get(3) )
-}
-fun httpConnect(){ //Login 후에 Http connection을 통해 리더보드에 들어갈 데이터 호출
-    val test = "http://15.164.103.195/httpConnection.php"
-    var task = URLConnector(test)
-    task.start()
-    try {
-        task.join()
-    } catch (e: InterruptedException) {
-        e.printStackTrace()
-    }
-
-    var result: String? = task.getResult()
-    var JO: JSONObject = JSONObject(result)
-    var JA: JSONArray = JO.getJSONArray("result")
-    println(JA.getJSONObject(0))
-    for (i in 0 until JA.length()) {
-        val jo = JA.getJSONObject(i)
-        var httpUser = ArrayList<String>()
-        httpUser?.add(jo.getString("ID"))
-        httpUser?.add(jo.getString("Credit"))
-        httpUser?.add(jo.getString("Property"))
-        httpUser?.add(jo.getString("Car"))
-        httpArray?.add(httpUser)
-        val newUser = userInfo(httpArray[i][0],Integer.parseInt(httpArray[i][2]),Integer.parseInt(httpArray[i][1]))
-        userList.add(newUser)
-
-//            println("first ID : "+ (httpArray?.get(i)))
-    }
-    boardAdapter.notifyDataSetChanged()
-//    println("first ID : " + httpArray[0][0] + " First Property " + httpArray[0][2])
-//    println("second ID : " + httpArray[1][0] + " Second Property " + httpArray[1][2])
-//    println("third ID : " + httpArray[2][0] + " Third Property " + httpArray[2][2])
-//
-//    var a:Int=Integer.parseInt(httpArray[0][1])
-
-}
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     companion object {
@@ -181,10 +117,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         recyclerList.layoutManager = layoutManager
         recyclerList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
 
-
-        val intent = Intent(applicationContext,LoginActivity::class.java)
-        startActivity(intent)
-
 //        while (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
 //        {
 //            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
@@ -224,20 +156,28 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         fab1.setOnClickListener {  //첫번째 버튼 클릭했을때
             animation()
 
-            val setPathUIStart = SetPathUI(requestResultStart!!, nMap)
-            val setPathUIGoal = SetPathUI(requestResultGoal!!, nMap)
-            resultWayLatLng = setPathUIStart.setUIPathStart()
-            resultGoalLatLng = setPathUIGoal.setUIPathGoal()
 
             val getPosition1:ArrayList<String> = getLocationDB() //DB로부터 랜덤 2개를 불러옴
-            goalPosition = "${129.082287},${35.231028}"
-            wayPosition = "${129.118666},${35.153028}"
-            try {
-                findPath(startPosition, getPosition1[0], getPosition1[1])
-            } catch(e:Exception){
-                Toast.makeText(this,"위치 수신을 동의해주세요!",Toast.LENGTH_SHORT).show()
+            //goalPosition = "${129.082287},${35.231028}"
+            //wayPosition = "${129.118666},${35.153028}"
+
+            Log.e("Locationfind",getPosition1[0])
+
+                try {
+                    findPath(startPosition, getPosition1[0], getPosition1[1])
+
+                } catch (e: Exception) {
+                    Toast.makeText(this, "위치 수신을 동의해주세요!", Toast.LENGTH_SHORT).show()
 //                finish()
-            }
+                }
+
+//            finally {
+
+
+
+//            }
+
+
         }
 
         nMap.locationSource = locationSource
@@ -250,8 +190,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             Log.e("현재위치", "${currentLocation.latitude},${currentLocation.longitude}")
             Log.e("경유지", "$resultWayLatLng")
             Log.e("도착지", "$resultGoalLatLng")
-
-
+            val setPathUIStart = requestResultStart?.let { it1 -> SetPathUI(it1, nMap) }
+            val setPathUIGoal = requestResultGoal?.let { it1 -> SetPathUI(it1, nMap) }
+            resultWayLatLng = setPathUIStart?.setUIPathStart()
+            resultGoalLatLng = setPathUIGoal?.setUIPathGoal()
             if(resultWayLatLng != null && resultGoalLatLng != null){
                 Log.e("e", "${resultWayLatLng},${resultGoalLatLng},${arriveCheck}")
                 when {
