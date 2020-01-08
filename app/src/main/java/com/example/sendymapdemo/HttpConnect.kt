@@ -4,9 +4,28 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 var httpArray = ArrayList<ArrayList<String>>() //http 커넥션으로 받은 JSON 데이터를 모은 ArrayList
+fun getLocationDB():ArrayList<String>{
+    var Location2=ArrayList<String>()
+    val test = "http://15.164.103.195/httpLocation.php"
+    val task = URLConnector(test)
+    task.start()
+    try{
+        task.join()
+    } catch (e : InterruptedException){
+        e.printStackTrace()
+    }
 
+    val result: String? = task.getResult()
+    val JO = JSONObject(result)
+    val JA: JSONArray = JO.getJSONArray("result")
+    for(i in 0 until JA.length()){
+        val jo = JA.getJSONObject(i)
+        Location2.add(jo.getString("Location"))
+    }
+    return Location2
+}
 fun login(test1:String){ //Login 후 사용자의 정보를 들고오는 함수
-    println("login 함수")
+//    println("login 함수")
     val UserInfo = ArrayList<String>()
     val test = "http://15.164.103.195/login.php?user=$test1"
     val task = URLConnector(test)

@@ -144,11 +144,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         fab1.setOnClickListener {  //첫번째 버튼 클릭했을때
             animation()
-
+            val getPosition1:ArrayList<String> = getLocationDB() //DB로부터 랜덤 2개를 불러옴
             goalPosition = "${129.082287},${35.231028}"
             wayPosition = "${129.118666},${35.153028}"
             try {
-                findPath(startPosition, goalPosition, wayPosition)
+                findPath(startPosition, getPosition1[0], getPosition1[1])
             } catch(e:Exception){
                 Toast.makeText(this,"위치 수신 동의해주세요!",Toast.LENGTH_SHORT).show()
 //                finish()
