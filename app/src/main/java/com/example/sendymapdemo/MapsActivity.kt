@@ -1,7 +1,5 @@
 package com.example.sendymapdemo
 
-import android.content.DialogInterface
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
@@ -22,32 +20,26 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.app.ActivityCompat
-import com.naver.maps.map.*
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
-import org.json.JSONArray
-import org.json.JSONObject
 import android.content.Intent
-import android.graphics.Path
 import android.graphics.drawable.ColorDrawable
 import android.widget.Toast
-import android.media.Image
 import android.view.LayoutInflater
-import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
 import android.widget.*
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.widget.LocationButtonView
-import com.naver.maps.map.widget.ZoomControlView
 import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_maps.*
+import kotlinx.android.synthetic.main.activity_maps.requestDst
+import kotlinx.android.synthetic.main.activity_maps.requestSrc
 
 //leaderBoardAdapter에서 드로워를 닫을 때 필요해서 전역으로 선언
 lateinit var drawerLayout: DrawerLayout
@@ -75,12 +67,12 @@ var markerGoalPoint = Marker()
 
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
-    private lateinit var requestImg: ImageView
-    private lateinit var requestSrc: TextView
-    private lateinit var requestDst: TextView
-    private lateinit var requestTime: TextView
-    private lateinit var requestDuration: TextView
-    private lateinit var requestReward: TextView
+//    private lateinit var requestImg: ImageView
+////    private lateinit var requestSrc: TextView
+////    private lateinit var requestDst: TextView
+////    private lateinit var requestTime: TextView
+////    private lateinit var requestDuration: TextView
+////    private lateinit var requestReward: TextView
     //private lateinit var requestInfoContaner: requestInfo
 
     companion object {
@@ -135,9 +127,26 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val toolbar : Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
         //사이드바 토글 생성
-        val toggle = ActionBarDrawerToggle(
-            this, drawer_layout, toolbar, 0, 0
-        )
+//        val toggle = ActionBarDrawerToggle(
+//            this, drawer_layout, toolbar, 0, 0
+//        )
+        val toggle:ActionBarDrawerToggle = object : ActionBarDrawerToggle(
+            this,
+            drawer_layout,
+            toolbar,
+            0,
+            0
+        ){
+            override fun onDrawerClosed(view:View){
+                super.onDrawerClosed(view)
+                Log.e("닫힘","드로워")
+            }
+
+            override fun onDrawerOpened(drawerView: View){
+                super.onDrawerOpened(drawerView)
+                Log.e("열림","드로워")
+            }
+        }
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
 
@@ -305,8 +314,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val originalScaleX = fab.scaleX
         val originalScaleY = fab.scaleY
         var isExpanded = 0
-        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
-       bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+       var bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+       bottomSheet.visibility = View.GONE
+       bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetBehavior.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {
@@ -346,12 +356,47 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         resources.getColor(R.color.colorPrimaryDark),
                         Color.argb(255, 223, 221, 255))
                 )
-                textDust.setTextColor(
+                requestSrc.setTextColor(
                     interpolateColor(slideOffset,
                         resources.getColor(R.color.colorPrimaryDark),
                         Color.argb(255, 223, 221, 255))
                 )
-                textAccident.setTextColor(
+                requestDst.setTextColor(
+                    interpolateColor(slideOffset,
+                        resources.getColor(R.color.colorPrimaryDark),
+                        Color.argb(255, 223, 221, 255))
+                )
+                remainDurationText.setTextColor(
+                    interpolateColor(slideOffset,
+                        resources.getColor(R.color.colorPrimaryDark),
+                        Color.argb(255, 223, 221, 255))
+                )
+                remainDuration.setTextColor(
+                    interpolateColor(slideOffset,
+                        resources.getColor(R.color.colorPrimaryDark),
+                        Color.argb(255, 223, 221, 255))
+                )
+                dustInfoText.setTextColor(
+                    interpolateColor(slideOffset,
+                        resources.getColor(R.color.colorPrimaryDark),
+                        Color.argb(255, 223, 221, 255))
+                )
+                dustInfo.setTextColor(
+                    interpolateColor(slideOffset,
+                        resources.getColor(R.color.colorPrimaryDark),
+                        Color.argb(255, 223, 221, 255))
+                )
+                dangerInfoText.setTextColor(
+                    interpolateColor(slideOffset,
+                        resources.getColor(R.color.colorPrimaryDark),
+                        Color.argb(255, 223, 221, 255))
+                )
+                dangerInfo.setTextColor(
+                    interpolateColor(slideOffset,
+                        resources.getColor(R.color.colorPrimaryDark),
+                        Color.argb(255, 223, 221, 255))
+                )
+                arrow.setTextColor(
                     interpolateColor(slideOffset,
                         resources.getColor(R.color.colorPrimaryDark),
                         Color.argb(255, 223, 221, 255))
@@ -425,8 +470,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         makeText(this, "위치 수신을 동의해주세요!", Toast.LENGTH_SHORT).show()
 //                finish()
                     }
-
+                    requestSrc.text = adapter.getItem(position).source
+                    requestDst.text = adapter.getItem(position).destination
+                    remainDuration.text = adapter.getItem(position).duration.toString()
                     dialog.dismiss()
+
+                    var bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+                    val animation = AlphaAnimation(0.0f,1.0f)
+                    animation.duration = 1000
+                    bottomSheet.animation = animation
+                    bottomSheet.visibility = View.VISIBLE
+
                     requestList.clear()
                     positions.clear()
                 }
