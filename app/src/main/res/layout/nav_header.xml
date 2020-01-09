@@ -29,6 +29,7 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/userID"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Steven"
@@ -36,7 +37,6 @@
                 android:textSize="24sp" />
 
             <TextView
-                android:id="@+id/userID"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="your description is :"
@@ -69,6 +69,7 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/userRank"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="2"
@@ -92,6 +93,7 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/userCredit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="396"
@@ -114,6 +116,7 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/userAccum"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="485"

@@ -3,15 +3,14 @@ package com.example.sendymapdemo
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.BaseAdapter
+import android.widget.ListView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.navigation_recyclerview_item.view.*
 
 class leaderBoardAdapter(private val items: ArrayList<userInfo>) : RecyclerView.Adapter<leaderBoardAdapter.ViewHolder>() {
-
-
     override fun getItemCount() = items.size
-
     override fun onBindViewHolder(holder: leaderBoardAdapter.ViewHolder, position: Int) {
         val item = items[position]
         val listener = View.OnClickListener {it ->

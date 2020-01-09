@@ -15,6 +15,6 @@ class userInfo{
         this.description = "HELLO, I AM USER"
         this.accumulatedCredit = accumulatedCredit
         this.credit = credit
-        this.rank = 1
+        this.rank = rank
     }
 }

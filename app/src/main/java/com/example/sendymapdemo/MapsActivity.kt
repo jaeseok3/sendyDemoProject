@@ -1,5 +1,6 @@
 package com.example.sendymapdemo
 
+import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
@@ -18,7 +19,11 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
+import com.naver.maps.map.*
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.naver.maps.map.LocationTrackingMode
@@ -28,14 +33,19 @@ import org.json.JSONArray
 import org.json.JSONObject
 import android.content.Intent
 import android.graphics.Path
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
+import android.graphics.drawable.ColorDrawable
 import android.widget.Toast
+import android.media.Image
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import android.widget.*
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.widget.LocationButtonView
 import com.naver.maps.map.widget.ZoomControlView
+import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_maps.*
 
@@ -45,8 +55,17 @@ lateinit var drawerLayout: DrawerLayout
 lateinit var boardAdapter:leaderBoardAdapter
 //유저들의 정보를 담은 리스트
 var userList = ArrayList<userInfo>()
+//의뢰정보를 담은 리스트
+var requestList = ArrayList<requestInfo>()
+var positions=ArrayList<String>()
+
 //리더보드 레이아웃 매니저
 lateinit var layoutManager: LinearLayoutManager
+lateinit var headerName: TextView
+lateinit var headerDesc: TextView
+lateinit var headerRank: TextView
+lateinit var headerCredit: TextView
+lateinit var headerAccum: TextView
 
 var pathOverlayStart = PathOverlay()
 var pathOverlayGoal = PathOverlay()
@@ -56,6 +75,14 @@ var markerGoalPoint = Marker()
 
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+    private lateinit var requestImg: ImageView
+    private lateinit var requestSrc: TextView
+    private lateinit var requestDst: TextView
+    private lateinit var requestTime: TextView
+    private lateinit var requestDuration: TextView
+    private lateinit var requestReward: TextView
+    //private lateinit var requestInfoContaner: requestInfo
+
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
@@ -93,7 +120,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+//        requestImg
+//        requestSrc
+//        requestDst
+//        requestTime
+//        requestDuration
+//        requestReward
+//        requestInfoContaner
+
+        //네이게이션 뷰의 헤더에 접근하기 위한 코드
+        val navigationHeader = findViewById<NavigationView>(R.id.nav_view)
+        val headerView = navigationHeader.getHeaderView(0)
         drawerLayout = findViewById(R.id.drawer_layout)
+        headerName = headerView.findViewById(R.id.userID)
+        headerDesc = headerView.findViewById(R.id.userDescription)
+        headerRank = headerView.findViewById(R.id.userRank)
+        headerCredit = headerView.findViewById(R.id.userCredit)
+        headerAccum = headerView.findViewById(R.id.userAccum)
 
         configureBottomNav()
 
@@ -110,8 +153,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         boardAdapter = leaderBoardAdapter(userList)
         //리더보드 레이아웃 매니저
         layoutManager = LinearLayoutManager(this)
-        //어댑터 생성
-        boardAdapter = leaderBoardAdapter(userList)
 
         recyclerList.adapter = boardAdapter
         recyclerList.layoutManager = layoutManager
@@ -146,38 +187,30 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     override fun onMapReady(naverMap: NaverMap) {
+        val startDelivery: View = findViewById(R.id.fab1)
+        val market: View = findViewById(R.id.fab2)
         nMap = naverMap
         val locationButtonView = findViewById<LocationButtonView>(R.id.locationBtn)
         locationButtonView.map = nMap
-
-        fab2.setOnClickListener { //두번째 버튼 눌렀을때 동작
+        market.setOnClickListener { //두번째 버튼 눌렀을때 동작
             animation()
         }
-        fab1.setOnClickListener {  //첫번째 버튼 클릭했을때
+        startDelivery.setOnClickListener {  //첫번째 버튼 클릭했을때
             animation()
-
 
             val getPosition1:ArrayList<String> = getLocationDB() //DB로부터 랜덤 2개를 불러옴
             //goalPosition = "${129.082287},${35.231028}"
             //wayPosition = "${129.118666},${35.153028}"
+            for(i in 0..5){
+                var newGeoInfo = geoInfo(getLocationDB())
+                positions.add(newGeoInfo.src)
+                Log.e("출발지", newGeoInfo.src)
+                positions.add(newGeoInfo.dst)
+                Log.e("도착지",newGeoInfo.dst)
+            }
 
             Log.e("Locationfind",getPosition1[0])
-
-                try {
-                    findPath(startPosition, getPosition1[0], getPosition1[1])
-
-                } catch (e: Exception) {
-                    Toast.makeText(this, "위치 수신을 동의해주세요!", Toast.LENGTH_SHORT).show()
-//                finish()
-                }
-
-//            finally {
-
-
-
-//            }
-
-
+            showRequestDialog()
         }
 
         nMap.locationSource = locationSource
@@ -311,7 +344,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
 
             private fun transitionBottomSheetBackgroundColor(slideOffset: Float) {
-                bottomSheet.setBackgroundColor(
+                bottomSheet.setCardBackgroundColor(
                     interpolateColor(slideOffset,
                         Color.argb(255, 223, 221, 255),
                         resources.getColor(R.color.colorPrimaryDark))
@@ -366,5 +399,67 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         animation()
     }
 
+    //의뢰 리스트뷰 어댑터
+    fun showRequestDialog(){
+        var builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        var inflater:LayoutInflater = layoutInflater
+        var alertView:View = inflater.inflate(R.layout.request_dialog, null)
+        builder.setView(alertView)
+
+        var requestListView: ListView = alertView.findViewById(R.id.listview_requestdialog_list)
+        var dialog:AlertDialog = builder.create()
+        for(i in 0..8 step 2){
+            var RI = requestInfo(R.drawable.sad,
+                getGeoName(positions[i]),getGeoName(positions[i+1]),1000,23000,5000,positions[i+1],positions[i])
+            requestList.add(RI)
+        }
+//        var RI:requestInfo = requestInfo(R.drawable.sad,"부산대","광안리",1000,23000,5000)
+//        requestList.add(RI)
+//        requestList.add(RI)
+//        requestList.add(RI)
+//        requestList.add(RI)
+//        requestList.add(RI)
+        val adapter = requestListAdapter(this, requestList)
+        requestListView.adapter  = adapter
+        requestListView.setOnItemClickListener{parent, view, position, id ->
+            makeText(this, "${adapter.getItem(position)}입니다!", Toast.LENGTH_SHORT).show()
+            Log.e("선택한 출발지", adapter.getItem(position).source )
+            Log.e("선택한 출발지_코드", adapter.getItem(position).sourceCode )
+            Log.e("선택한 도착지", adapter.getItem(position).destination)
+            Log.e("선택한 도착지_코드", adapter.getItem(position).destinationCode )
+            try {
+                findPath(startPosition, adapter.getItem(position).sourceCode, adapter.getItem(position).destinationCode)
+            } catch (e: Exception) {
+                Toast.makeText(this, "위치 수신을 동의해주세요!", Toast.LENGTH_SHORT).show()
+//                finish()
+            }
+//            var oDialog = AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Light_Dialog)
+//            oDialog.setMessage("앱을 종료하시겠습니까?").setTitle("일반 Dialog").setPositiveButton("아니오", DialogInterface.OnClickListener()
+//        {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which)
+//            {
+//                Log.i("Dialog", "취소");
+//                Toast.makeText(getApplicationContext(), "취소", Toast.LENGTH_LONG).show();
+//            }
+//        })
+//       .setNeutralButton("예", new DialogInterface.OnClickListener()
+//       {
+//            public void onClick(DialogInterface dialog, int which)
+//            {
+//                m_oMainActivity.finish();
+//            }
+//        })
+//        .setCancelable(false).show();
+            dialog.dismiss()
+            requestList.clear()
+//            positions.clear()
+    }
+        dialog.setCancelable(false)
+        dialog.getWindow()?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.show()
+    }
+
 }
+
 
