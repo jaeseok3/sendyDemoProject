@@ -127,16 +127,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val toolbar : Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
         //사이드바 토글 생성
-//        val toggle = ActionBarDrawerToggle(
-//            this, drawer_layout, toolbar, 0, 0
-//        )
-        val toggle:ActionBarDrawerToggle = object : ActionBarDrawerToggle(
-            this,
-            drawer_layout,
-            toolbar,
-            0,
-            0
-        ){
+//        var toggle:ActionBarDrawerToggle
+        val toggle:ActionBarDrawerToggle = object : ActionBarDrawerToggle(this,  drawerLayout,toolbar,0,0){
             override fun onDrawerClosed(view:View){
                 super.onDrawerClosed(view)
                 Log.e("닫힘","드로워")
@@ -146,8 +138,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 super.onDrawerOpened(drawerView)
                 Log.e("열림","드로워")
             }
+
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+                super.onDrawerSlide(drawerView, slideOffset)
+                Log.e("열리는 중","드로워")
+            }
         }
+
         drawer_layout.addDrawerListener(toggle)
+
+
         toggle.syncState()
 
         //리더보드 어댑터 초기화

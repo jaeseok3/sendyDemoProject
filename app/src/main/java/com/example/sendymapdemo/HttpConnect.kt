@@ -40,8 +40,10 @@ fun login(test1:String){ //Login 후 사용자의 정보를 들고오는 함수
     val result: String? = task.getResult()
     val JO = JSONObject(result)
     val Jrank = JO.getString("rank")
+
     println(Jrank)
     val JA: JSONArray = JO.getJSONArray("result")
+
     for(i in 0 until JA.length()){
         val jo = JA.getJSONObject(i)
         UserInfo.add(jo.getString("ID"))
@@ -51,7 +53,7 @@ fun login(test1:String){ //Login 후 사용자의 정보를 들고오는 함수
     }
     headerName.text = UserInfo.get(0)
     Log.e("ID",UserInfo.get(0))
-    headerRank.setText(userList.size.toString())
+    headerRank.setText(Jrank)
     headerCredit.setText(UserInfo.get(2))
     Log.e("accum",UserInfo.get(2))
     headerAccum.setText(UserInfo.get(1))
@@ -84,12 +86,15 @@ fun httpConnect(){ //Login 후에 Http connection을 통해 리더보드에 들�
         httpUser?.add(jo.getString("Credit"))
         httpUser?.add(jo.getString("Property"))
         httpUser?.add(jo.getString("Car"))
+        httpUser?.add(jo.getString("rank"))
         httpArray?.add(httpUser)
-        val newUser = userInfo(httpArray[i][0],Integer.parseInt(httpArray[i][2]),Integer.parseInt(httpArray[i][1]))
+        val newUser = userInfo(httpArray[i][0],Integer.parseInt(httpArray[i][2]),Integer.parseInt(httpArray[i][1]),Integer.parseInt(httpArray[i][4]))
         userList.add(newUser)
 
 //            println("first ID : "+ (httpArray?.get(i)))
     }
+    ia=JA.length()
+    println("ia : "+ia + "JA length : "+JA.length())
     boardAdapter.notifyDataSetChanged()
 //    println("first ID : " + httpArray[0][0] + " First Property " + httpArray[0][2])
 //    println("second ID : " + httpArray[1][0] + " Second Property " + httpArray[1][2])

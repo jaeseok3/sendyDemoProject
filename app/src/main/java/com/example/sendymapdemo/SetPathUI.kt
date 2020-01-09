@@ -1,12 +1,9 @@
 package com.example.sendymapdemo
 
 import android.graphics.Color
-import android.location.Location
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.NaverMap
-import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
-import com.naver.maps.map.overlay.PathOverlay
 
 class SetPathUI(data: PathData, naverMap: NaverMap) {
     private val pathData: PathData = data

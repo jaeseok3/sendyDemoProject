@@ -10,7 +10,7 @@ class userInfo{
 
     constructor()
 
-    constructor(ID:String,accumulatedCredit:Int,credit:Int){
+    constructor(ID:String,accumulatedCredit:Int,credit:Int,rank:Int){
         this.ID = ID
         this.description = "HELLO, I AM USER"
         this.accumulatedCredit = accumulatedCredit
