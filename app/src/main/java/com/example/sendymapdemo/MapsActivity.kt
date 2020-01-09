@@ -1,5 +1,6 @@
 package com.example.sendymapdemo
 
+import android.animation.ObjectAnimator
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
@@ -316,7 +317,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         var isExpanded = 0
        var bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
        bottomSheet.visibility = View.GONE
-       bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+       bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         bottomSheetBehavior.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {
@@ -476,11 +477,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     dialog.dismiss()
 
                     var bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+                    bottomSheet.visibility = View.VISIBLE
                     bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                     val animation = AlphaAnimation(0.0f,1.0f)
-                    animation.duration = 1000
+                    animation.setAnimationListener(object : Animation.AnimationListener{
+                        override fun onAnimationRepeat(animation: Animation?) {
+                        }
+                        override fun onAnimationEnd(animation: Animation?) {
+                            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                        }
+
+                        override fun onAnimationStart(animation: Animation?) {
+                        }
+                    })
+                    animation.duration = 1500
                     bottomSheet.animation = animation
-                    bottomSheet.visibility = View.VISIBLE
 
                     requestList.clear()
                     positions.clear()
@@ -491,7 +502,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         dialog.getWindow()?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.show()
     }
-
 }
 
 
