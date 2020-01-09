@@ -1,6 +1,7 @@
 package com.example.sendymapdemo
 
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
@@ -60,39 +61,20 @@ lateinit var headerRank: TextView
 lateinit var headerCredit: TextView
 lateinit var headerAccum: TextView
 
-var pathOverlayStart = PathOverlay()
-var pathOverlayGoal = PathOverlay()
+var pathOverlay = PathOverlay()
 var markerStartPoint = Marker()
 var markerWayPoint = Marker()
 var markerGoalPoint = Marker()
 
-
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
-//    private lateinit var requestImg: ImageView
-////    private lateinit var requestSrc: TextView
-////    private lateinit var requestDst: TextView
-////    private lateinit var requestTime: TextView
-////    private lateinit var requestDuration: TextView
-////    private lateinit var requestReward: TextView
-    //private lateinit var requestInfoContaner: requestInfo
-
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
+    private var responseData: PathData ?= null
+    private var responseList = ArrayList<SummaryData>()
 
-    private var requestResultStart: PathData ?= null
-    private var requestResultGoal: PathData ?= null
-
-    private var resultGoalLatLng: LatLng ?= null
-    private var resultWayLatLng: LatLng ?= null
-
-    private lateinit var result1: LatLng
-    private lateinit var result2: LatLng
-    private var markerStartPoint = Marker()
-    private var markerWayPoint = Marker()
-    private var markerGoalPoint = Marker()
-    private var pathOverlayStart = PathOverlay()
-    private var pathOverlayGoal = PathOverlay()
+    private var wayLatLng: LatLng ?= null
+    private var goalLatLng: LatLng ?= null
 
     private lateinit var locationSource: FusedLocationSource
     private lateinit var currentLocation: Location
@@ -104,8 +86,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fabClose: Animation
 
     private lateinit var startPosition: String
-    private lateinit var goalPosition: String
-    private lateinit var wayPosition: String
 
     private lateinit var nMap: NaverMap
 
@@ -147,8 +127,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         drawer_layout.addDrawerListener(toggle)
-
-
         toggle.syncState()
 
         //리더보드 어댑터 초기화
@@ -160,12 +138,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         recyclerList.layoutManager = layoutManager
         recyclerList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
 
-//        while (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-//        {
-//            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
-//        }
-
-        var intent = Intent(applicationContext,LoginActivity::class.java)
+        val intent = Intent(applicationContext,LoginActivity::class.java)
         startActivity(intent)
 
         locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
@@ -181,11 +154,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             fragmentManager.beginTransaction().add(R.id.map, map).commit()
                         })
         mapFragment.getMapAsync(this)
-//     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-//         if(locationSource.onRequestPermissionsResult(requestCode, permissions, grantResults)){
-//             return
-//         }
-//         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun onMapReady(naverMap: NaverMap) {
@@ -197,21 +165,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         market.setOnClickListener { //두번째 버튼 눌렀을때 동작
             animation()
         }
-        startDelivery.setOnClickListener {  //첫번째 버튼 클릭했을때
+        startDelivery.setOnClickListener {
+            //첫번째 버튼 클릭했을때
             animation()
-
-            val getPosition1:ArrayList<String> = getLocationDB() //DB로부터 랜덤 2개를 불러옴
-            //goalPosition = "${129.082287},${35.231028}"
-            //wayPosition = "${129.118666},${35.153028}"
-            for(i in 0..5){
-                var newGeoInfo = geoInfo(getLocationDB())
-                positions.add(newGeoInfo.src)
-                Log.e("출발지", newGeoInfo.src)
-                positions.add(newGeoInfo.dst)
-                Log.e("도착지",newGeoInfo.dst)
+            for(i in 0..4){
+                val time = responseList[i].responseData.route.traoptimal[0].summary.duration / 60000
+                val distance=  responseList[i].responseData.route.traoptimal[0].summary.distance / 1000.toDouble()
+                val distanceStr = String.format("%.1f Km", distance)
+                val timeStr = "$time Min"
+                val RI = requestInfo(R.drawable.sad,
+                        getGeoName(responseList[i].wayPointLatLng),
+                        getGeoName(responseList[i].goalLatLng),
+                        timeStr, distanceStr,5000,
+                        responseList[i].goalLatLng,
+                        responseList[i].wayPointLatLng)
+                requestList.add(RI)
+                Log.e("requestListSize", "${requestList.size}")
             }
-
-            Log.e("Locationfind",getPosition1[0])
             showRequestDialog()
         }
 
@@ -223,35 +193,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             currentLocation = location
             startPosition = "${location.longitude},${location.latitude}"
             Log.e("현재위치", "${currentLocation.latitude},${currentLocation.longitude}")
-            Log.e("경유지", "$resultWayLatLng")
-            Log.e("도착지", "$resultGoalLatLng")
-            val setPathUIStart = requestResultStart?.let { it1 -> SetPathUI(it1, nMap) }
-            val setPathUIGoal = requestResultGoal?.let { it1 -> SetPathUI(it1, nMap) }
-            resultWayLatLng = setPathUIStart?.setUIPathStart()
-            resultGoalLatLng = setPathUIGoal?.setUIPathGoal()
-            if(resultWayLatLng != null && resultGoalLatLng != null){
-                Log.e("e", "${resultWayLatLng},${resultGoalLatLng},${arriveCheck}")
+            if(goalLatLng != null && wayLatLng != null){
+                Log.e("e", "${goalLatLng},${wayLatLng},${arriveCheck}")
                 when {
-                    checkError(resultWayLatLng!!) && !arriveCheck -> {
+                    checkError(wayLatLng!!) && !arriveCheck -> {
                         makeText(this, "출발지에 도착하였습니다.", LENGTH_SHORT).show()
-                        pathOverlayStart.map = null
                         markerStartPoint.map = null
                         arriveCheck = true
                     }
-                    checkError(resultGoalLatLng!!) && arriveCheck -> {
-                        pathOverlayGoal.map = null
+                    checkError(goalLatLng!!) && arriveCheck -> {
                         makeText(this, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
                         markerWayPoint.map = null
                         markerGoalPoint.map = null
                         arriveCheck = false
                     }
                 }
-            }
-            if(requestResultGoal != null && requestResultStart != null){
-                val startGuideList = requestResultStart?.route?.traoptimal!![0].guide
-                val goalGuideList = requestResultGoal?.route?.traoptimal!![0].guide
-
-                Log.e("인덱스", "${startGuideList[0].pointIndex}")
             }
         }
     }
@@ -274,29 +230,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             isFabOpen = true
         }
     }
-    private fun findPath(startPoint:String, goalPoint:String, wayPoints:String){
+    private fun findPath(currentPoint:String, startPoint:String, goalPoint:String){
         val restClient: RetrofitInterface = Http3RetrofitManager.getRetrofitService(RetrofitInterface::class.java)
         val option = "traoptimal"
-        val requestPathStartToWay = restClient.requestPath(startPoint, wayPoints, option)
-        val requestPathWayToGoal = restClient.requestPath(wayPoints, goalPoint, option)
+        val requestPath = restClient.requestPath(currentPoint, goalPoint, startPoint, option)
 
-        requestPathStartToWay.enqueue(object : Callback<PathData> {
+        requestPath.enqueue(object : Callback<PathData> {
             override fun onFailure(call: Call<PathData>, t: Throwable) {
                 error(message = t.toString())
             }
             override fun onResponse(call: Call<PathData>, response: Response<PathData>) {
-                if(response != null && response.isSuccessful) {
-                    requestResultStart = response.body()!!
-                }
-            }
-        })
-        requestPathWayToGoal.enqueue(object : Callback<PathData> {
-            override fun onFailure(call: Call<PathData>, t: Throwable) {
-                error(message = t.toString())
-            }
-            override fun onResponse(call: Call<PathData>, response: Response<PathData>) {
-                if(response != null && response.isSuccessful){
-                    requestResultGoal = response.body()!!
+                if(response.isSuccessful){
+                    responseData = response.body()
+                    val data = SummaryData(currentPoint, startPoint, goalPoint, response.body()!!)
+                    responseList.add(data)
                 }
             }
         })
@@ -306,27 +253,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val currentLng = currentLocation.longitude
         val goalLat = goalLatLng.latitude
         val goalLng = goalLatLng.longitude
-        return ((currentLat <= goalLat + 0.0001 && currentLat >= goalLat - 0.0001) ||
-                (currentLng <= goalLng + 0.0001 && currentLng >= goalLng - 0.0001))
+        return ((currentLat <= goalLat + 0.001 && currentLat >= goalLat - 0.001) ||
+                (currentLng <= goalLng + 0.001 && currentLng >= goalLng - 0.001))
     }
-
    private fun configureBottomNav(){
         //하단 슬라이딩 바
         val originalScaleX = fab.scaleX
         val originalScaleY = fab.scaleY
-        var isExpanded = 0
-       var bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
        bottomSheet.visibility = View.GONE
        bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         bottomSheetBehavior.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {
                     BottomSheetBehavior.STATE_EXPANDED -> {
-                        isExpanded = 1
                         //textFull.visibility = View.VISIBLE
                     }
                     BottomSheetBehavior.STATE_COLLAPSED -> {
-                        isExpanded = 0
                         //textFull.visibility = View.GONE
                     }
                     BottomSheetBehavior.STATE_DRAGGING -> {
@@ -435,45 +378,55 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     //fab버튼 클릭 리스너를 따로 구현 -> onMapReady안에서 구현한 클릭리스너가 작동하지 않음 -> activity_maps.xml에 명시
     fun fabClickListener(v:View){
         animation()
+        for(i in 0..8 step 2){
+            val newGeoInfo = geoInfo(getLocationDB())
+            positions.add(newGeoInfo.src)
+            Log.e("출발지", newGeoInfo.src)
+            positions.add(newGeoInfo.dst)
+            Log.e("도착지",newGeoInfo.dst)
+            try {
+                findPath(startPosition, positions[i], positions[i+1])
+            } catch (e: Exception) {
+                makeText(this, "위치 수신을 동의해주세요!", LENGTH_SHORT).show()
+            }
+        }
     }
 
     //의뢰 리스트뷰 어댑터
-    fun showRequestDialog(){
-        var builder: AlertDialog.Builder = AlertDialog.Builder(this)
-        var inflater:LayoutInflater = layoutInflater
-        var alertView:View = inflater.inflate(R.layout.request_dialog, null)
+    @SuppressLint("InflateParams")
+    private fun showRequestDialog(){
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        val inflater:LayoutInflater = layoutInflater
+        val alertView:View = inflater.inflate(R.layout.request_dialog, null)
         builder.setView(alertView)
 
-        var requestListView: ListView = alertView.findViewById(R.id.listview_requestdialog_list)
-        var dialog:AlertDialog = builder.create()
-        for(i in 0..8 step 2){
-            var RI = requestInfo(R.drawable.sad,
-                getGeoName(positions[i]),getGeoName(positions[i+1]),1000,23000,5000,positions[i+1],positions[i])
-            requestList.add(RI)
-        }
+        val requestListView: ListView = alertView.findViewById(R.id.listview_requestdialog_list)
+        val dialog:AlertDialog = builder.create()
 
         val adapter = requestListAdapter(this, requestList)
         requestListView.adapter  = adapter
         requestListView.setOnItemClickListener{parent, view, position, id ->
-            var oDialog = AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Light_Dialog)
+            val oDialog = AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Light_Dialog)
             oDialog.setMessage("수락시 의뢰 리스트가 초기화됩니다.").setTitle("해당 의뢰를 수락하시겠습니까?")
                 .setPositiveButton("아니오") {_, _ ->
                     makeText(this, "취소", Toast.LENGTH_LONG).show()
                 }
                 .setNeutralButton("예") {_, _ ->
-                    Log.e("선택한 출발지", adapter.getItem(position).source )
-                    Log.e("선택한 출발지_코드", adapter.getItem(position).sourceCode )
+                    Log.e("선택한 출발지", adapter.getItem(position).source)
+                    Log.e("선택한 출발지_코드", adapter.getItem(position).sourceCode)
                     Log.e("선택한 도착지", adapter.getItem(position).destination)
-                    Log.e("선택한 도착지_코드", adapter.getItem(position).destinationCode )
-                    try {
-                        findPath(startPosition, adapter.getItem(position).sourceCode, adapter.getItem(position).destinationCode)
-                    } catch (e: Exception) {
-                        makeText(this, "위치 수신을 동의해주세요!", Toast.LENGTH_SHORT).show()
-//                finish()
-                    }
+                    Log.e("선택한 도착지_코드", adapter.getItem(position).destinationCode)
+
+                    val setPathUI = SetPathUI(responseList[position].responseData, nMap)
+                    setPathUI.setUIPath()
+                    val arrWay = responseList[position].wayPointLatLng.split(",")
+                    val arrGoal = responseList[position].goalLatLng.split(",")
+                    wayLatLng = LatLng(arrWay[1].toDouble(), arrWay[0].toDouble())
+                    goalLatLng = LatLng(arrGoal[1].toDouble(), arrGoal[0].toDouble())
+
                     requestSrc.text = adapter.getItem(position).source
                     requestDst.text = adapter.getItem(position).destination
-                    remainDuration.text = adapter.getItem(position).duration.toString()
+
                     dialog.dismiss()
 
                     var bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
@@ -494,12 +447,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     bottomSheet.animation = animation
 
                     requestList.clear()
+                    responseList.clear()
                     positions.clear()
                 }
                 .setCancelable(false).show()
         }
         dialog.setCancelable(false)
-        dialog.getWindow()?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.show()
     }
 }

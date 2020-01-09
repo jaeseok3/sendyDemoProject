@@ -9,56 +9,37 @@ class SetPathUI(data: PathData, naverMap: NaverMap) {
     private val pathData: PathData = data
     private val nMap: NaverMap = naverMap
 
-    fun setUIPathGoal(): LatLng {
-        val latlngListGoal = ArrayList<LatLng>()
+    fun setUIPath(){
+        val latlngList = ArrayList<LatLng>()
         val pathArr = pathData.route.traoptimal[0].path
+        val startLng = pathData.route.traoptimal[0].summary.start.location[0]
+        val startLat = pathData.route.traoptimal[0].summary.start.location[1]
+        val wayPointLng = pathData.route.traoptimal[0].summary.waypoints[0].location[0]
+        val wayPointLat = pathData.route.traoptimal[0].summary.waypoints[0].location[1]
         val goalLng = pathData.route.traoptimal[0].summary.goal.location[0]
         val goalLat = pathData.route.traoptimal[0].summary.goal.location[1]
 
         for(i in pathArr.indices){
             val path = pathArr[i].toString()
             val pathLatLng = parsingPath(path)
-            latlngListGoal.add(pathLatLng)
+            latlngList.add(pathLatLng)
         }
 
-        pathOverlayGoal.coords = latlngListGoal
-        pathOverlayGoal.width = 30
-        pathOverlayGoal.color = Color.RED
-        pathOverlayGoal.patternImage = OverlayImage.fromResource(R.drawable.path_pattern)
-        pathOverlayGoal.patternInterval = 50
-        markerGoalPoint.position = latlngListGoal[latlngListGoal.size - 1]
-        markerGoalPoint.iconTintColor = Color.RED
-        markerGoalPoint.map = nMap
-        pathOverlayGoal.map = nMap
-
-        return LatLng(goalLat, goalLng)
-    }
-
-    fun setUIPathStart(): LatLng{
-        val latlngListStart = ArrayList<LatLng>()
-        val pathArr = pathData.route.traoptimal[0].path
-        val goalLng = pathData.route.traoptimal[0].summary.goal.location[0]
-        val goalLat = pathData.route.traoptimal[0].summary.goal.location[1]
-
-        for(i in pathArr!!.indices){
-            val path = pathArr[i].toString()
-            val pathLatLng = parsingPath(path)
-            latlngListStart.add(pathLatLng)
-        }
-
-        pathOverlayStart.coords = latlngListStart
-        pathOverlayStart.width = 30
-        pathOverlayStart.color = Color.BLUE
-        pathOverlayStart.patternImage = OverlayImage.fromResource(R.drawable.path_pattern)
-        pathOverlayStart.patternInterval = 50
-        markerStartPoint.position = latlngListStart[0]
-        markerWayPoint.position = latlngListStart[latlngListStart.size - 1]
-        markerStartPoint.map = nMap
+        pathOverlay.coords = latlngList
+        pathOverlay.width = 30
+        pathOverlay.color = Color.BLUE
+        pathOverlay.patternImage = OverlayImage.fromResource(R.drawable.path_pattern)
+        pathOverlay.patternInterval = 50
+        markerStartPoint.position = LatLng(startLat, startLng)
+        markerWayPoint.position = LatLng(wayPointLat, wayPointLng)
+        markerGoalPoint.position = LatLng(goalLat, goalLng)
         markerStartPoint.iconTintColor = Color.BLUE
+        markerWayPoint.iconTintColor = Color.GREEN
+        markerGoalPoint.iconTintColor = Color.RED
+        markerStartPoint.map = nMap
         markerWayPoint.map = nMap
-        pathOverlayStart.map = nMap
-
-        return LatLng(goalLat, goalLng)
+        markerGoalPoint.map = nMap
+        pathOverlay.map = nMap
     }
 
     private fun parsingPath(rawPathData: String): LatLng{

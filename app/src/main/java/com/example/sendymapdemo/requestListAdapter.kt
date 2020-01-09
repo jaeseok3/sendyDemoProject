@@ -44,9 +44,9 @@ class requestListAdapter(private val context: Context,
         requestImg.setImageResource(item.image)
         requestSrc.setText(item.source)
         requestDst.setText(item.destination)
-        requestTime.setText(Integer.toString(item.time))
-        requestDuration.setText(Integer.toString(item.duration))
-        requestReward.setText(Integer.toString(item.reward))
+        requestTime.setText(item.time)
+        requestDuration.setText(item.distance)
+        requestReward.setText(item.reward.toString())
 
 
         return rowView

@@ -6,8 +6,8 @@ class requestInfo{
     lateinit var destination:String
     lateinit var sourceCode:String
     lateinit var destinationCode: String
-    var time:Int = 0
-    var duration:Int = 0
+    var time:String = ""
+    var distance:String = ""
     var reward:Int = 0
 
     constructor()
@@ -15,8 +15,8 @@ class requestInfo{
     constructor(image:Int,
                 source:String,
                 destination:String,
-                time:Int,
-                duration:Int,
+                time:String,
+                distance:String,
                 reward:Int,
                 sourceCode:String,
                 destinationCode: String){
@@ -24,7 +24,7 @@ class requestInfo{
         this.source = source
         this.destination = destination
         this.time = time
-        this.duration = duration
+        this.distance = distance
         this.reward = reward
         this.sourceCode = sourceCode
         this.destinationCode = destinationCode
