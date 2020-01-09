@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/navHead"
-    android:layout_width="320dp"
+    android:layout_width="355dp"
     android:layout_height="wrap_content"
     android:background="@color/lightBlue"
     android:foreground="?attr/selectableItemBackground"

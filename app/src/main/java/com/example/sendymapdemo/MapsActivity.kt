@@ -120,14 +120,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-//        requestImg
-//        requestSrc
-//        requestDst
-//        requestTime
-//        requestDuration
-//        requestReward
-//        requestInfoContaner
-
         //네이게이션 뷰의 헤더에 접근하기 위한 코드
         val navigationHeader = findViewById<NavigationView>(R.id.nav_view)
         val headerView = navigationHeader.getHeaderView(0)
@@ -413,48 +405,33 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 getGeoName(positions[i]),getGeoName(positions[i+1]),1000,23000,5000,positions[i+1],positions[i])
             requestList.add(RI)
         }
-//        var RI:requestInfo = requestInfo(R.drawable.sad,"부산대","광안리",1000,23000,5000)
-//        requestList.add(RI)
-//        requestList.add(RI)
-//        requestList.add(RI)
-//        requestList.add(RI)
-//        requestList.add(RI)
+
         val adapter = requestListAdapter(this, requestList)
         requestListView.adapter  = adapter
         requestListView.setOnItemClickListener{parent, view, position, id ->
-            makeText(this, "${adapter.getItem(position)}입니다!", Toast.LENGTH_SHORT).show()
-            Log.e("선택한 출발지", adapter.getItem(position).source )
-            Log.e("선택한 출발지_코드", adapter.getItem(position).sourceCode )
-            Log.e("선택한 도착지", adapter.getItem(position).destination)
-            Log.e("선택한 도착지_코드", adapter.getItem(position).destinationCode )
-            try {
-                findPath(startPosition, adapter.getItem(position).sourceCode, adapter.getItem(position).destinationCode)
-            } catch (e: Exception) {
-                Toast.makeText(this, "위치 수신을 동의해주세요!", Toast.LENGTH_SHORT).show()
+            var oDialog = AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Light_Dialog)
+            oDialog.setMessage("수락시 의뢰 리스트가 초기화됩니다.").setTitle("해당 의뢰를 수락하시겠습니까?")
+                .setPositiveButton("아니오") {_, _ ->
+                    makeText(this, "취소", Toast.LENGTH_LONG).show()
+                }
+                .setNeutralButton("예") {_, _ ->
+                    Log.e("선택한 출발지", adapter.getItem(position).source )
+                    Log.e("선택한 출발지_코드", adapter.getItem(position).sourceCode )
+                    Log.e("선택한 도착지", adapter.getItem(position).destination)
+                    Log.e("선택한 도착지_코드", adapter.getItem(position).destinationCode )
+                    try {
+                        findPath(startPosition, adapter.getItem(position).sourceCode, adapter.getItem(position).destinationCode)
+                    } catch (e: Exception) {
+                        makeText(this, "위치 수신을 동의해주세요!", Toast.LENGTH_SHORT).show()
 //                finish()
-            }
-//            var oDialog = AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Light_Dialog)
-//            oDialog.setMessage("앱을 종료하시겠습니까?").setTitle("일반 Dialog").setPositiveButton("아니오", DialogInterface.OnClickListener()
-//        {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which)
-//            {
-//                Log.i("Dialog", "취소");
-//                Toast.makeText(getApplicationContext(), "취소", Toast.LENGTH_LONG).show();
-//            }
-//        })
-//       .setNeutralButton("예", new DialogInterface.OnClickListener()
-//       {
-//            public void onClick(DialogInterface dialog, int which)
-//            {
-//                m_oMainActivity.finish();
-//            }
-//        })
-//        .setCancelable(false).show();
-            dialog.dismiss()
-            requestList.clear()
-//            positions.clear()
-    }
+                    }
+
+                    dialog.dismiss()
+                    requestList.clear()
+                    positions.clear()
+                }
+                .setCancelable(false).show()
+        }
         dialog.setCancelable(false)
         dialog.getWindow()?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.show()
