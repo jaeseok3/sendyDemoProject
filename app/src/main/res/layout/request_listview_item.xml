@@ -12,9 +12,9 @@
     android:padding="14dp">
 
     <LinearLayout
-        android:layout_gravity="center"
-        android:layout_width="wrap_content"
+        android:layout_width="316dp"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:clipChildren="false">
 
         <ImageView
@@ -37,14 +37,14 @@
 
                 <TextView
                     android:id="@+id/requestSrc"
-                    android:layout_width="wrap_content"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:text="출발지"
                     android:textColor="@color/darkBlue"
                     android:textSize="20sp"
-                    app:autoSizeTextType="uniform"
+                    app:autoSizeMaxTextSize="20sp"
                     app:autoSizeMinTextSize="15sp"
-                    app:autoSizeMaxTextSize="20sp"/>
+                    app:autoSizeTextType="uniform" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -60,9 +60,9 @@
                     android:text="목적지"
                     android:textColor="@color/darkBlue"
                     android:textSize="20sp"
-                    app:autoSizeTextType="uniform"
+                    app:autoSizeMaxTextSize="20sp"
                     app:autoSizeMinTextSize="15sp"
-                    app:autoSizeMaxTextSize="20sp"/>
+                    app:autoSizeTextType="uniform" />
             </LinearLayout>
 
             <LinearLayout

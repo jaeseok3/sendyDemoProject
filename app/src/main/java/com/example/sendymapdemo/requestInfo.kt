@@ -8,7 +8,7 @@ class requestInfo{
     lateinit var destinationCode: String
     var time:String = ""
     var distance:String = ""
-    var reward:Int = 0
+    var reward:Double = 0.0
 
     constructor()
 
@@ -17,7 +17,7 @@ class requestInfo{
                 destination:String,
                 time:String,
                 distance:String,
-                reward:Int,
+                reward:Double,
                 sourceCode:String,
                 destinationCode: String){
         this.image = image

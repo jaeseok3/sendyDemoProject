@@ -24,7 +24,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Ranking"
+                    android:text="의뢰 리스트"
                     android:textColor="#FFFFFF"
                     style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"/>
             </LinearLayout>
@@ -36,7 +36,6 @@
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:orientation="vertical">
-
         <TextView
             android:id="@+id/textview_alterdialog_title"
             android:layout_width="match_parent"
@@ -54,6 +53,5 @@
             android:divider="@null"
             android:dividerHeight="10dp"
             android:id="@+id/listview_requestdialog_list"/>
-
     </LinearLayout>
 </LinearLayout>

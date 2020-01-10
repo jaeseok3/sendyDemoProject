@@ -20,10 +20,13 @@
         <activity android:name=".LoginActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"></activity>
         <activity android:name=".rankingActivity"
+            android:parentActivityName=".MapsActivity"
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity android:name=".requestActivity"
+            android:parentActivityName=".MapsActivity"
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity android:name=".historyActivity"
+            android:parentActivityName=".MapsActivity"
             android:theme="@style/AppTheme.NoActionBar"></activity>
 
         <meta-data

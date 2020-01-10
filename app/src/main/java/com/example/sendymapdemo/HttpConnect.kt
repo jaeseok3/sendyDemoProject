@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.annotation.IntegerRes
 import org.json.JSONArray
 import org.json.JSONObject
+import java.lang.Exception
 import java.net.URLEncoder
 
 var httpArray = ArrayList<ArrayList<String>>() //http 커넥션으로 받은 JSON 데이터를 모은 ArrayList
@@ -41,18 +42,26 @@ fun GetHistory(userID:String){
     }
     val result=task.getResult()
     val JO=JSONObject(result)
+    try{
     val JA: JSONArray = JO.getJSONArray("result")
-    for(i in 0 until JA.length()){
-        val jo = JA.getJSONObject(i)
-        //새로운 히스토리추가
-        var newHistory = historyInfo(
-            jo.getString("Src"),jo.getString("Dest"),jo.getString("Time"),jo.getString("Distance"),Integer.parseInt(jo.getString("Reward"))
-            ,jo.getString("HistoryTime"),jo.getString("HistoryDate")
-        )
-        historyList.add(newHistory) //히스토리 리스트에 추가
-
+            for (i in 0 until JA.length()) {
+            val jo = JA.getJSONObject(i)
+            //새로운 히스토리추가
+            var newHistory = historyInfo(
+                jo.getString("Src"),
+                jo.getString("Dest"),
+                jo.getString("Time"),
+                jo.getString("Distance"),
+                jo.getString("Reward").toDouble()
+                ,
+                jo.getString("HistoryTime"),
+                jo.getString("HistoryDate")
+            )
+            historyList.add(newHistory) //히스토리 리스트에 추가
+        }
+    } catch (e:Exception){
+        return
     }
-
 }
 fun getLocationDB():ArrayList<String>{
     var Location2=ArrayList<String>()

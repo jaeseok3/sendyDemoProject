@@ -12,44 +12,45 @@
     android:padding="14dp">
 
     <LinearLayout
-        android:layout_gravity="center"
-        android:layout_width="wrap_content"
+        android:layout_width="396dp"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:clipChildren="false">
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginBottom="5dp"
-            android:layout_marginTop="5dp"
             android:layout_marginStart="5dp"
-            android:padding="10dp"
-            android:layout_marginEnd="30dp">
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="5dp"
+            android:orientation="vertical"
+            android:padding="10dp">
+
             <TextView
                 android:id="@+id/historyDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/darkBlue"
-                android:textSize="14sp"
-                android:text="2020-01-10"
                 android:layout_margin="4dp"
-                />
+                android:text="2020-01-10"
+                android:textColor="@color/darkBlue"
+                android:textSize="14sp" />
+
             <TextView
                 android:id="@+id/historyTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/darkBlue"
-                android:textSize="14sp"
                 android:layout_margin="4dp"
                 android:text="23:56:36.4"
-                />
+                android:textColor="@color/darkBlue"
+                android:textSize="14sp" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_margin="5dp">
+            android:layout_margin="5dp"
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -59,15 +60,14 @@
 
                 <TextView
                     android:id="@+id/historySrc"
-                    android:layout_width="90dp"
+                    android:layout_width="70dp"
                     android:layout_height="wrap_content"
                     android:text="출발지"
-                    android:gravity="center"
                     android:textColor="@color/darkBlue"
                     android:textSize="20sp"
-                    app:autoSizeTextType="uniform"
+                    app:autoSizeMaxTextSize="20sp"
                     app:autoSizeMinTextSize="15sp"
-                    app:autoSizeMaxTextSize="20sp"/>
+                    app:autoSizeTextType="uniform" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -79,14 +79,14 @@
                 <TextView
                     android:id="@+id/historyDst"
                     android:layout_width="90dp"
-                    android:gravity="center"
                     android:layout_height="wrap_content"
+                    android:gravity="center"
                     android:text="목적지"
                     android:textColor="@color/darkBlue"
                     android:textSize="20sp"
-                    app:autoSizeTextType="uniform"
+                    app:autoSizeMaxTextSize="20sp"
                     app:autoSizeMinTextSize="15sp"
-                    app:autoSizeMaxTextSize="20sp"/>
+                    app:autoSizeTextType="uniform" />
             </LinearLayout>
 
             <LinearLayout

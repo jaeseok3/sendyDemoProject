@@ -1,5 +1,6 @@
 package com.example.sendymapdemo
 
+import android.app.Activity
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.location.Location
@@ -18,7 +19,6 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
@@ -27,12 +27,11 @@ import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
 import android.content.Intent
-import android.graphics.drawable.ColorDrawable
-import android.widget.Toast
-import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.animation.AlphaAnimation
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.naver.maps.map.util.FusedLocationSource
@@ -42,8 +41,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_maps.*
 import kotlinx.android.synthetic.main.activity_maps.requestDst
 import kotlinx.android.synthetic.main.activity_maps.requestSrc
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import kotlinx.android.synthetic.main.request_listview_item.*
 
 //leaderBoardAdapter에서 드로워를 닫을 때 필요해서 전역으로 선언
 lateinit var drawerLayout: DrawerLayout
@@ -67,15 +65,17 @@ var markerStartPoint = Marker()
 var markerWayPoint = Marker()
 var markerGoalPoint = Marker()
 
+//requestActivity에서 사용
+var responseData: PathData ?= null
+var responseList = ArrayList<SummaryData>()
+lateinit var nMap: NaverMap
+var wayLatLng: LatLng ?= null
+var goalLatLng: LatLng ?= null
+
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
-    private var responseData: PathData ?= null
-    private var responseList = ArrayList<SummaryData>()
-
-    private var wayLatLng: LatLng ?= null
-    private var goalLatLng: LatLng ?= null
 
     private lateinit var locationSource: FusedLocationSource
     private lateinit var currentLocation: Location
@@ -88,7 +88,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var startPosition: String
 
-    private lateinit var nMap: NaverMap
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -112,13 +111,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     startActivity(rankIntent)
                 }
                 R.id.menu_about -> {
-
+                    val builder = AlertDialog.Builder(this)
+                    val dialogView = layoutInflater.inflate(R.layout.about, null)
+                    val dialog:AlertDialog = builder.create()
+                    builder.setView(dialogView)
+                        .show()
                 }
                 R.id.menu_update -> {
 
                 }
                 R.id.menu_logout-> {
-
+                    val logout = Intent(this,LoginActivity::class.java)
+                    startActivity(logout)
                 }
             }
             drawerLayout.closeDrawer(GravityCompat.START)
@@ -190,19 +194,29 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             animation()
             for(i in 0..4){
                 val time = responseList[i].responseData.route.traoptimal[0].summary.duration / 60000
+                Log.e("거리_시간",time.toString())
                 val distance=  responseList[i].responseData.route.traoptimal[0].summary.distance / 1000.toDouble()
-                val distanceStr = String.format("%.1f"+"Km", distance)
+                Log.e("거리", distance.toString())
+                val distanceStr = String.format("%.1f Km", distance)
                 val timeStr = "$time"+"Min"
-                val RI = requestInfo(R.drawable.sad,
+                val face =
+                    if(distance <= 20) R.drawable.happy
+                    else if(distance > 20 && distance <= 40) R.drawable.sad
+                    else R.drawable.dead
+                val reward = Math.pow(time.toDouble(),2.0)
+                val RI = requestInfo(face,
                         getGeoName(responseList[i].wayPointLatLng),
                         getGeoName(responseList[i].goalLatLng),
-                        timeStr, distanceStr,5000,
+                        timeStr, distanceStr,reward,
                         responseList[i].goalLatLng,
                         responseList[i].wayPointLatLng)
                 requestList.add(RI)
                 Log.e("requestListSize", "${requestList.size}")
             }
-            showRequestDialog()
+            //showRequestDialog()
+
+            val requestIntent = Intent(this, requestActivity::class.java)
+            startActivityForResult(requestIntent,100)
         }
 
         nMap.locationSource = locationSource
@@ -313,56 +327,56 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 bottomSheet.setCardBackgroundColor(
                     interpolateColor(slideOffset,
                         Color.argb(255, 223, 221, 255),
-                        resources.getColor(R.color.colorPrimaryDark))
+                        getColor(R.color.colorPrimaryDark))
                 )
                 textRemain.setTextColor(
                     interpolateColor(slideOffset,
-                        resources.getColor(R.color.colorPrimaryDark),
+                        getColor(R.color.colorPrimaryDark),
                         Color.argb(255, 223, 221, 255))
                 )
                 requestSrc.setTextColor(
                     interpolateColor(slideOffset,
-                        resources.getColor(R.color.colorPrimaryDark),
+                        getColor(R.color.colorPrimaryDark),
                         Color.argb(255, 223, 221, 255))
                 )
                 requestDst.setTextColor(
                     interpolateColor(slideOffset,
-                        resources.getColor(R.color.colorPrimaryDark),
+                        getColor(R.color.colorPrimaryDark),
                         Color.argb(255, 223, 221, 255))
                 )
                 remainDurationText.setTextColor(
                     interpolateColor(slideOffset,
-                        resources.getColor(R.color.colorPrimaryDark),
+                        getColor(R.color.colorPrimaryDark),
                         Color.argb(255, 223, 221, 255))
                 )
                 remainDuration.setTextColor(
                     interpolateColor(slideOffset,
-                        resources.getColor(R.color.colorPrimaryDark),
+                        getColor(R.color.colorPrimaryDark),
                         Color.argb(255, 223, 221, 255))
                 )
                 dustInfoText.setTextColor(
                     interpolateColor(slideOffset,
-                        resources.getColor(R.color.colorPrimaryDark),
+                        getColor(R.color.colorPrimaryDark),
                         Color.argb(255, 223, 221, 255))
                 )
                 dustInfo.setTextColor(
                     interpolateColor(slideOffset,
-                        resources.getColor(R.color.colorPrimaryDark),
+                        getColor(R.color.colorPrimaryDark),
                         Color.argb(255, 223, 221, 255))
                 )
                 dangerInfoText.setTextColor(
                     interpolateColor(slideOffset,
-                        resources.getColor(R.color.colorPrimaryDark),
+                        getColor(R.color.colorPrimaryDark),
                         Color.argb(255, 223, 221, 255))
                 )
                 dangerInfo.setTextColor(
                     interpolateColor(slideOffset,
-                        resources.getColor(R.color.colorPrimaryDark),
+                        getColor(R.color.colorPrimaryDark),
                         Color.argb(255, 223, 221, 255))
                 )
                 arrow.setTextColor(
                     interpolateColor(slideOffset,
-                        resources.getColor(R.color.colorPrimaryDark),
+                        getColor(R.color.colorPrimaryDark),
                         Color.argb(255, 223, 221, 255))
                 )
             }
@@ -396,7 +410,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     } //configureBottomNav()
 
     //fab버튼 클릭 리스너를 따로 구현 -> onMapReady안에서 구현한 클릭리스너가 작동하지 않음 -> activity_maps.xml에 명시
-    fun fabClickListener(v:View){
+    fun fabClickListener(view: View){
+        view.bringToFront()
         animation()
         for(i in 0..8 step 2){
             val newGeoInfo = geoInfo(getLocationDB())
@@ -412,79 +427,118 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    //의뢰 리스트뷰 어댑터
-    @SuppressLint("InflateParams")
-    private fun showRequestDialog(){
-        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-        val inflater:LayoutInflater = layoutInflater
-        val alertView:View = inflater.inflate(R.layout.request_dialog, null)
-        builder.setView(alertView)
-
-        val requestListView: ListView = alertView.findViewById(R.id.listview_requestdialog_list)
-        val dialog:AlertDialog = builder.create()
-
-        val adapter = requestListAdapter(this, requestList)
-        requestListView.adapter  = adapter
-        requestListView.setOnItemClickListener{parent, view, position, id ->
-            val oDialog = AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Light_Dialog)
-            oDialog.setMessage("수락시 의뢰 리스트가 초기화됩니다.").setTitle("해당 의뢰를 수락하시겠습니까?")
-                .setPositiveButton("아니오") {_, _ ->
-                    makeText(this, "취소", Toast.LENGTH_LONG).show()
-                }
-                .setNeutralButton("예") {_, _ ->
-                    Log.e("선택한 출발지", adapter.getItem(position).source)
-                    Log.e("선택한 출발지_코드", adapter.getItem(position).sourceCode)
-                    Log.e("선택한 도착지", adapter.getItem(position).destination)
-                    Log.e("선택한 도착지_코드", adapter.getItem(position).destinationCode)
-
-                    //새로운 히스토리추가
-                    var newHistory = historyInfo(
-                        adapter.getItem(position).source,adapter.getItem(position).destination,
-                        adapter.getItem(position).time,adapter.getItem(position).distance,adapter.getItem(position).reward,
-                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
-                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"))
-                    )
-                    InsertHistory(newHistory)
+//    //의뢰 리스트뷰 어댑터
+//    @SuppressLint("InflateParams")
+//    private fun showRequestDialog(){
+//        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+//        val inflater:LayoutInflater = layoutInflater
+//        val alertView:View = inflater.inflate(R.layout.request_dialog, null)
+//        builder.setView(alertView)
+//
+//        val requestListView: ListView = alertView.findViewById(R.id.listview_requestdialog_list)
+//        val dialog:AlertDialog = builder.create()
+//
+//        val adapter = requestListAdapter(this, requestList)
+//        requestListView.adapter  = adapter
+//        requestListView.setOnItemClickListener{parent, view, position, id ->
+//            val oDialog = AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Light_Dialog)
+//            oDialog.setMessage("수락시 의뢰 리스트가 초기화됩니다.").setTitle("해당 의뢰를 수락하시겠습니까?")
+//                .setPositiveButton("아니오") {_, _ ->
+//                    makeText(this, "취소", Toast.LENGTH_LONG).show()
+//                }
+//                .setNeutralButton("예") {_, _ ->
+//                    Log.e("선택한 출발지", adapter.getItem(position).source)
+//                    Log.e("선택한 출발지_코드", adapter.getItem(position).sourceCode)
+//                    Log.e("선택한 도착지", adapter.getItem(position).destination)
+//                    Log.e("선택한 도착지_코드", adapter.getItem(position).destinationCode)
+//
+//                    //새로운 히스토리추가
+//                    var newHistory = historyInfo(
+//                        adapter.getItem(position).source,adapter.getItem(position).destination,
+//                        adapter.getItem(position).time,adapter.getItem(position).distance,adapter.getItem(position).reward,
+//                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
+//                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"))
+//                    )
 //                    historyList.add(newHistory) //히스토리 리스트에 추가
+//
+//                    val setPathUI = SetPathUI(responseList[position].responseData, nMap)
+//                    setPathUI.setUIPath()
+//                    val arrWay = responseList[position].wayPointLatLng.split(",")
+//                    val arrGoal = responseList[position].goalLatLng.split(",")
+//                    wayLatLng = LatLng(arrWay[1].toDouble(), arrWay[0].toDouble())
+//                    goalLatLng = LatLng(arrGoal[1].toDouble(), arrGoal[0].toDouble())
+//
+//                    requestSrc.text = adapter.getItem(position).source
+//                    requestDst.text = adapter.getItem(position).destination
+//
+//                    dialog.dismiss()
+//
+//                    var bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+//                    bottomSheet.visibility = View.VISIBLE
+//                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+//                    val animation = AlphaAnimation(0.0f,1.0f)
+//                    animation.setAnimationListener(object : Animation.AnimationListener{
+//                        override fun onAnimationRepeat(animation: Animation?) {
+//                        }
+//                        override fun onAnimationEnd(animation: Animation?) {
+//                            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+//                        }
+//
+//                        override fun onAnimationStart(animation: Animation?) {
+//                        }
+//                    })
+//                    animation.duration = 1500
+//                    bottomSheet.animation = animation
+//
+//                    requestList.clear()
+//                    responseList.clear()
+//                    positions.clear()
+//                }
+//                .setCancelable(false).show()
+//        }
+//        dialog.setCancelable(false)
+//        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+//        dialog.show()
+//    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when(requestCode){
+            100 -> {
+                when(resultCode){
+                    Activity.RESULT_OK ->{
+                        var resultSrc = data!!.getStringExtra("resultSrc")
+                        var resultDst = data.getStringExtra("resultDst")
+                        var resultDistance = data.getStringExtra("resultDistance")
+                        requestSrc.text = resultSrc
+                        requestDst.text = resultDst
+                        requestDuration.text = resultDistance
+                        var bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+                        bottomSheet.visibility = View.VISIBLE
+                        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+                        val animation = AlphaAnimation(0.0f,1.0f)
+                        animation.setAnimationListener(object : Animation.AnimationListener{
+                            override fun onAnimationRepeat(animation: Animation?) {
+                            }
+                            override fun onAnimationEnd(animation: Animation?) {
+                                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                            }
 
-                    val setPathUI = SetPathUI(responseList[position].responseData, nMap)
-                    setPathUI.setUIPath()
-                    val arrWay = responseList[position].wayPointLatLng.split(",")
-                    val arrGoal = responseList[position].goalLatLng.split(",")
-                    wayLatLng = LatLng(arrWay[1].toDouble(), arrWay[0].toDouble())
-                    goalLatLng = LatLng(arrGoal[1].toDouble(), arrGoal[0].toDouble())
+                            override fun onAnimationStart(animation: Animation?) {
+                            }
+                        })
+                        animation.duration = 1500
+                        bottomSheet.animation = animation
 
-                    requestSrc.text = adapter.getItem(position).source
-                    requestDst.text = adapter.getItem(position).destination
-
-                    dialog.dismiss()
-
-                    var bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
-                    bottomSheet.visibility = View.VISIBLE
-                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-                    val animation = AlphaAnimation(0.0f,1.0f)
-                    animation.setAnimationListener(object : Animation.AnimationListener{
-                        override fun onAnimationRepeat(animation: Animation?) {
-                        }
-                        override fun onAnimationEnd(animation: Animation?) {
-                            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-                        }
-
-                        override fun onAnimationStart(animation: Animation?) {
-                        }
-                    })
-                    animation.duration = 1500
-                    bottomSheet.animation = animation
-
-                    requestList.clear()
-                    responseList.clear()
-                    positions.clear()
+                        requestList.clear()
+                        responseList.clear()
+                        positions.clear()
+                    }
+                    Activity.RESULT_CANCELED -> {
+                        requestList.clear()
+                    }
                 }
-                .setCancelable(false).show()
+            }
         }
-        dialog.setCancelable(false)
-        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog.show()
     }
 }
 
