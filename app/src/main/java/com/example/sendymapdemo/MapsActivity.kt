@@ -439,9 +439,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     Log.e("선택한 도착지_코드", adapter.getItem(position).destinationCode)
 
                     //새로운 히스토리추가
-                    var newHistory = historyInfo(adapter.getItem(position).source,adapter.getItem(position).destination,
+                    var newHistory = historyInfo(
+                        adapter.getItem(position).source,adapter.getItem(position).destination,
                         adapter.getItem(position).time,adapter.getItem(position).distance,adapter.getItem(position).reward,
-                        LocalDateTime.now().format(DateTimeFormatter.ISO_DATE),LocalDateTime.now().format(DateTimeFormatter.ISO_TIME))
+                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
+                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"))
+                    )
                     historyList.add(newHistory) //히스토리 리스트에 추가
 
                     val setPathUI = SetPathUI(responseList[position].responseData, nMap)

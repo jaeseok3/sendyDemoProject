@@ -25,7 +25,7 @@ class historyInfo{
         this.time = time
         this.distance = distance
         this.reward = reward
-        this.historyTime = historyTime
         this.historyDate = historyDate
+        this.historyTime = historyTime
     }
 }
