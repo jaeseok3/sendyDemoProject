@@ -25,7 +25,8 @@ fun getLocationDB():ArrayList<String>{
     }
     return Location2
 }
-fun login(test1:String){ //Login 후 사용자의 정보를 들고오는 함수
+fun login(test1:String){
+//Login 후 사용자의 정보를 들고오는 함수
 //    println("login 함수")
     val UserInfo = ArrayList<String>()
     val test = "http://15.164.103.195/login.php?user=$test1"

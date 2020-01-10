@@ -31,8 +31,10 @@ import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.widget.Toast
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.animation.AlphaAnimation
 import android.widget.*
+import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.naver.maps.map.util.FusedLocationSource
@@ -45,10 +47,7 @@ import kotlinx.android.synthetic.main.activity_maps.requestSrc
 
 //leaderBoardAdapter에서 드로워를 닫을 때 필요해서 전역으로 선언
 lateinit var drawerLayout: DrawerLayout
-//리더보드 어댑터
-lateinit var boardAdapter:leaderBoardAdapter
-//유저들의 정보를 담은 리스트
-var userList = ArrayList<userInfo>()
+
 //의뢰정보를 담은 리스트
 var requestList = ArrayList<requestInfo>()
 var positions=ArrayList<String>()
@@ -93,10 +92,35 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        //리더보드 어댑터 초기화
+        boardAdapter = leaderBoardAdapter(userList)
+
         //네이게이션 뷰의 헤더에 접근하기 위한 코드
         val navigationHeader = findViewById<NavigationView>(R.id.nav_view)
         val headerView = navigationHeader.getHeaderView(0)
         drawerLayout = findViewById(R.id.drawer_layout)
+        navigationHeader.setNavigationItemSelectedListener { menuitem: MenuItem ->
+            when (menuitem.itemId) {
+                R.id.menu_history -> {
+                    Log.e("메뉴 : ","히스토리")
+                }
+                R.id.menu_ranking -> {
+                    val rankIntent = Intent(this, rankingActivity::class.java)
+                    startActivity(rankIntent)
+                }
+                R.id.menu_about -> {
+
+                }
+                R.id.menu_update -> {
+
+                }
+                R.id.menu_logout-> {
+
+                }
+            }
+            drawerLayout.closeDrawer(GravityCompat.START)
+            true
+        }
         headerName = headerView.findViewById(R.id.userID)
         headerDesc = headerView.findViewById(R.id.userDescription)
         headerRank = headerView.findViewById(R.id.userRank)
@@ -113,31 +137,19 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             override fun onDrawerClosed(view:View){
                 super.onDrawerClosed(view)
                 Log.e("닫힘","드로워")
-
             }
 
             override fun onDrawerOpened(drawerView: View){
                 super.onDrawerOpened(drawerView)
                 Log.e("열림","드로워")
-                login(userIdentity)
-                recyclerList.adapter = boardAdapter
             }
 
             override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
                 super.onDrawerSlide(drawerView, slideOffset)
                 Log.e("열리는 중","드로워")
-                //리더보드 어댑터 초기화
-
             }
         }
 
-        boardAdapter = leaderBoardAdapter(userList)
-        //리더보드 레이아웃 매니저
-        layoutManager = LinearLayoutManager(applicationContext)
-
-        recyclerList.adapter = boardAdapter
-        recyclerList.layoutManager = layoutManager
-        recyclerList.addItemDecoration(DividerItemDecoration(applicationContext, DividerItemDecoration.VERTICAL))
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
 
