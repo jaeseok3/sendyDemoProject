@@ -1,7 +1,7 @@
 package com.example.sendymapdemo
 
-import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
@@ -29,6 +29,10 @@ import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
+import android.location.LocationListener
+import android.location.LocationManager
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import android.view.LayoutInflater
 import android.view.animation.AlphaAnimation
@@ -37,11 +41,15 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.widget.LocationButtonView
-import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_maps.*
 import kotlinx.android.synthetic.main.activity_maps.requestDst
 import kotlinx.android.synthetic.main.activity_maps.requestSrc
+import kotlinx.coroutines.*
+import java.lang.Runnable
+import java.lang.Thread.sleep
+import com.google.android.material.navigation.NavigationView as NavigationView
+import com.naver.maps.map.overlay.LocationOverlay as LocationOverlay
 
 //leaderBoardAdapter에서 드로워를 닫을 때 필요해서 전역으로 선언
 lateinit var drawerLayout: DrawerLayout
@@ -67,6 +75,7 @@ var markerWayPoint = Marker()
 var markerGoalPoint = Marker()
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+    private val mainHandler: Handler ?= null
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
@@ -76,7 +85,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var wayLatLng: LatLng ?= null
     private var goalLatLng: LatLng ?= null
 
-    private lateinit var locationSource: FusedLocationSource
+    private lateinit var locationSource: LocationSource
     private lateinit var currentLocation: Location
 
     private var isFabOpen: Boolean = false
@@ -155,7 +164,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         })
         mapFragment.getMapAsync(this)
     }
-
     override fun onMapReady(naverMap: NaverMap) {
         val startDelivery: View = findViewById(R.id.fab1)
         val market: View = findViewById(R.id.fab2)
@@ -192,7 +200,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         nMap.addOnLocationChangeListener { location ->
             currentLocation = location
             startPosition = "${location.longitude},${location.latitude}"
-            Log.e("현재위치", "${currentLocation.latitude},${currentLocation.longitude}")
+            Log.e("현재위치", "${location.latitude},${location.longitude}")
             if(goalLatLng != null && wayLatLng != null){
                 Log.e("e", "${goalLatLng},${wayLatLng},${arriveCheck}")
                 when {
@@ -209,6 +217,37 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
                 }
             }
+        }
+        locationStartBtn.setOnClickListener {
+            if(nMap.locationTrackingMode == LocationTrackingMode.None){
+                Log.e("Flag", "${nMap.locationTrackingMode}")
+                GlobalScope.launch(Dispatchers.Default) {
+                    for (i in 0 until latlngList.size) {
+                        currentLocation.latitude = latlngList[i].latitude
+                        currentLocation.longitude = latlngList[i].longitude
+                        Log.e("위치변경", "${currentLocation.latitude}, ${currentLocation.longitude}")
+                        drawingLocationUI(currentLocation)
+                        sleep(500)
+                        if (nMap.locationTrackingMode == LocationTrackingMode.Follow ||
+                                nMap.locationTrackingMode == LocationTrackingMode.NoFollow) {
+                            break
+                        }
+                    }
+                }
+            }
+            else{
+                Log.e("Flag", "${nMap.locationTrackingMode}")
+                nMap.locationTrackingMode = LocationTrackingMode.None
+            }
+        }
+    }
+    private fun drawingLocationUI(location: Location) = GlobalScope.launch(Dispatchers.Main){
+        nMap.let {
+            val locationOverlay = it.locationOverlay
+            locationOverlay.isVisible = true
+            locationOverlay.position = LatLng(location.latitude, location.longitude)
+            Log.e("위치변경", "${locationOverlay.position}")
+            it.moveCamera(CameraUpdate.scrollTo(LatLng(location.latitude, location.longitude)))
         }
     }
     private fun animation(){
