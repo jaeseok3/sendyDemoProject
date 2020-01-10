@@ -17,13 +17,20 @@ class historyActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.history_activiry)
+
         //어댑터 초기화
+        historyList.clear()
+        GetHistory(userIdentity)
         historyAdapter = historyListAdapter(historyList)
+        historyAdapter.notifyDataSetChanged()
         //레이아웃 매니저
         historylayoutManager = LinearLayoutManager(this)
 
         historyRecyclerList.adapter = historyAdapter
         historyRecyclerList.layoutManager = historylayoutManager
         historyRecyclerList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
+//        historyAdapter= historyListAdapter(historyList)
+
     }
+
 }

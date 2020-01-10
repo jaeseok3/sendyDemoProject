@@ -1,6 +1,5 @@
 package com.example.sendymapdemo
 
-import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.location.Location
@@ -192,8 +191,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             for(i in 0..4){
                 val time = responseList[i].responseData.route.traoptimal[0].summary.duration / 60000
                 val distance=  responseList[i].responseData.route.traoptimal[0].summary.distance / 1000.toDouble()
-                val distanceStr = String.format("%.1f Km", distance)
-                val timeStr = "$time Min"
+                val distanceStr = String.format("%.1f"+"Km", distance)
+                val timeStr = "$time"+"Min"
                 val RI = requestInfo(R.drawable.sad,
                         getGeoName(responseList[i].wayPointLatLng),
                         getGeoName(responseList[i].goalLatLng),
@@ -445,7 +444,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
                         LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"))
                     )
-                    historyList.add(newHistory) //히스토리 리스트에 추가
+                    InsertHistory(newHistory)
+//                    historyList.add(newHistory) //히스토리 리스트에 추가
 
                     val setPathUI = SetPathUI(responseList[position].responseData, nMap)
                     setPathUI.setUIPath()
