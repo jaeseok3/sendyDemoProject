@@ -113,30 +113,35 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             override fun onDrawerClosed(view:View){
                 super.onDrawerClosed(view)
                 Log.e("닫힘","드로워")
+
             }
 
             override fun onDrawerOpened(drawerView: View){
                 super.onDrawerOpened(drawerView)
                 Log.e("열림","드로워")
+                login(userIdentity)
+                recyclerList.adapter = boardAdapter
             }
 
             override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
                 super.onDrawerSlide(drawerView, slideOffset)
                 Log.e("열리는 중","드로워")
+                //리더보드 어댑터 초기화
+
             }
         }
 
-        drawer_layout.addDrawerListener(toggle)
-        toggle.syncState()
-
-        //리더보드 어댑터 초기화
         boardAdapter = leaderBoardAdapter(userList)
         //리더보드 레이아웃 매니저
-        layoutManager = LinearLayoutManager(this)
+        layoutManager = LinearLayoutManager(applicationContext)
 
         recyclerList.adapter = boardAdapter
         recyclerList.layoutManager = layoutManager
-        recyclerList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
+        recyclerList.addItemDecoration(DividerItemDecoration(applicationContext, DividerItemDecoration.VERTICAL))
+        drawer_layout.addDrawerListener(toggle)
+        toggle.syncState()
+
+
 
         val intent = Intent(applicationContext,LoginActivity::class.java)
         startActivity(intent)
