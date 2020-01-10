@@ -1,32 +1,31 @@
 package com.example.sendymapdemo
 
-class requestInfo{
-    var image:Int = 0
+class historyInfo{
     lateinit var source:String
     lateinit var destination:String
-    lateinit var sourceCode:String
-    lateinit var destinationCode: String
+//    lateinit var sourceCode:String
+//    lateinit var destinationCode: String
     var time:String = ""
     var distance:String = ""
+    var historyTime:String = ""
+    var historyDate:String = ""
     var reward:Double = 0.0
 
     constructor()
 
-    constructor(image:Int,
-                source:String,
+    constructor(source:String,
                 destination:String,
                 time:String,
                 distance:String,
                 reward:Double,
-                sourceCode:String,
-                destinationCode: String){
-        this.image = image
+                historyTime:String,
+                historyDate:String){
         this.source = source
         this.destination = destination
         this.time = time
         this.distance = distance
         this.reward = reward
-        this.sourceCode = sourceCode
-        this.destinationCode = destinationCode
+        this.historyDate = historyDate
+        this.historyTime = historyTime
     }
 }

@@ -7,17 +7,17 @@ import android.widget.BaseAdapter
 import android.widget.ListView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.history_item.view.*
 import kotlinx.android.synthetic.main.navigation_recyclerview_item.view.*
-var ia:Int = 0
 
-class leaderBoardAdapter(private val items: ArrayList<userInfo>) : RecyclerView.Adapter<leaderBoardAdapter.ViewHolder>() {
+class historyListAdapter(private val items: ArrayList<historyInfo>) : RecyclerView.Adapter<historyListAdapter.ViewHolder>() {
     override fun getItemCount() = items.size
-    override fun onBindViewHolder(holder: leaderBoardAdapter.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: historyListAdapter.ViewHolder, position: Int) {
         println("on bind view holder")
         val item = items[position]
         val listener = View.OnClickListener {it ->
-            Toast.makeText(it.context, "${item.ID}입니다!", Toast.LENGTH_SHORT).show()
-            drawerLayout.closeDrawers()
+            Toast.makeText(it.context, "${item.source}입니다!", Toast.LENGTH_SHORT).show()
+
         }
         holder.apply {
             bind(listener, item)
@@ -28,16 +28,20 @@ class leaderBoardAdapter(private val items: ArrayList<userInfo>) : RecyclerView.
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int):
             ViewHolder {
         val inflatedView = LayoutInflater.from(parent.context)
-            .inflate(R.layout.navigation_recyclerview_item, parent, false)
-        return leaderBoardAdapter.ViewHolder(inflatedView)
+            .inflate(R.layout.history_item, parent, false)
+        return historyListAdapter.ViewHolder(inflatedView)
     }
 
     class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         private var view: View = v
-        fun bind(listener: View.OnClickListener, item: userInfo) {
-            view.boardName.text = item.ID
-            view.boardRank.text = item.rank.toString()
-            view.boardAccum.text = item.accumulatedCredit.toString()
+        fun bind(listener: View.OnClickListener, item: historyInfo) {
+            view.historyDate.text = item.historyDate
+            view.historyTime.text = item.historyTime
+            view.historySrc.text = item.source
+            view.historyDst.text = item.destination
+            view.historyDuration.text = item.distance
+            view.historyTime_amount.text = item.time
+            view.historyReward.text = item.reward.toString()
             view.setOnClickListener(listener)
         }
     }

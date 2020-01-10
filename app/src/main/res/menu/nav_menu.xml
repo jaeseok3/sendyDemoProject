@@ -1,26 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
     <group>
         <item
-            android:id="@+id/nav_profile"
-            android:title="Profile"/>
+        android:id="@+id/menu_history"
+        android:title="History"/>
         <item
-            android:id="@+id/nav_messages"
-            android:title="Messages"/>
+            android:id="@+id/menu_ranking"
+            android:title="Ranking"/>
         <item
-            android:id="@+id/nav_friends"
-            android:title="Friends"/>
+            android:id="@+id/menu_about"
+            android:title="About"/>
     </group>
-
 
     <item android:title="Account Settings">
         <menu>
             <item
-                android:id="@+id/nav_update"
+                android:id="@+id/menu_update"
                 android:title="Update Profile"/>
             <item
-                android:id="@+id/nav_logout"
+                android:id="@+id/menu_logout"
                 android:title="Sign Out"/>
         </menu>
     </item>

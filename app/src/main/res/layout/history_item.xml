@@ -12,21 +12,44 @@
     android:padding="14dp">
 
     <LinearLayout
-        android:layout_width="316dp"
+        android:layout_width="396dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:clipChildren="false">
 
-        <ImageView
-            android:id="@+id/requestFeeling"
-            android:layout_width="62dp"
-            android:layout_height="62dp"
-            android:layout_marginRight="13dp"
-            android:src="@drawable/happy" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="5dp"
+            android:orientation="vertical"
+            android:padding="10dp">
+
+            <TextView
+                android:id="@+id/historyDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="2020-01-10"
+                android:textColor="@color/darkBlue"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/historyTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="23:56:36.4"
+                android:textColor="@color/darkBlue"
+                android:textSize="14sp" />
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="5dp"
             android:orientation="vertical">
 
             <LinearLayout
@@ -36,8 +59,8 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/requestSrc"
-                    android:layout_width="100dp"
+                    android:id="@+id/historySrc"
+                    android:layout_width="70dp"
                     android:layout_height="wrap_content"
                     android:text="출발지"
                     android:textColor="@color/darkBlue"
@@ -54,9 +77,10 @@
                     android:textSize="20sp" />
 
                 <TextView
-                    android:id="@+id/requestDst"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/historyDst"
+                    android:layout_width="90dp"
                     android:layout_height="wrap_content"
+                    android:gravity="center"
                     android:text="목적지"
                     android:textColor="@color/darkBlue"
                     android:textSize="20sp"
@@ -79,7 +103,7 @@
                     android:textSize="12sp" />
 
                 <TextView
-                    android:id="@+id/requestDuration"
+                    android:id="@+id/historyDuration"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="2000"
@@ -101,7 +125,7 @@
                     android:textSize="12sp" />
 
                 <TextView
-                    android:id="@+id/requestTime"
+                    android:id="@+id/historyTime_amount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="360"
@@ -118,12 +142,12 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="얻을 수 있는 총 보상:"
+                    android:text="얻은 총 보상:"
                     android:textColor="@color/colorPrimaryDark"
                     android:textSize="12sp" />
 
                 <TextView
-                    android:id="@+id/requestReward"
+                    android:id="@+id/historyReward"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="50000"
