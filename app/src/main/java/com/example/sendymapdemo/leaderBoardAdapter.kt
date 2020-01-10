@@ -26,14 +26,13 @@ class leaderBoardAdapter(private val items: ArrayList<userInfo>) : RecyclerView.
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int):
-            leaderBoardAdapter.ViewHolder {
+            ViewHolder {
         val inflatedView = LayoutInflater.from(parent.context)
             .inflate(R.layout.navigation_recyclerview_item, parent, false)
         return leaderBoardAdapter.ViewHolder(inflatedView)
     }
 
     class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
-        private  var ii=1
         private var view: View = v
         fun bind(listener: View.OnClickListener, item: userInfo) {
             view.boardName.text = item.ID
