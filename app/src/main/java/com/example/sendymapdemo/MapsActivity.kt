@@ -35,7 +35,6 @@ import android.view.MenuItem
 import android.view.animation.AlphaAnimation
 import android.widget.*
 import androidx.core.view.GravityCompat
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.widget.LocationButtonView
@@ -44,10 +43,14 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_maps.*
 import kotlinx.android.synthetic.main.activity_maps.requestDst
 import kotlinx.android.synthetic.main.activity_maps.requestSrc
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 //leaderBoardAdapter에서 드로워를 닫을 때 필요해서 전역으로 선언
 lateinit var drawerLayout: DrawerLayout
 
+//히스토리 리스트
+var historyList = ArrayList<historyInfo>()
 //의뢰정보를 담은 리스트
 var requestList = ArrayList<requestInfo>()
 var positions=ArrayList<String>()
@@ -102,7 +105,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         navigationHeader.setNavigationItemSelectedListener { menuitem: MenuItem ->
             when (menuitem.itemId) {
                 R.id.menu_history -> {
-                    Log.e("메뉴 : ","히스토리")
+                    val historyIntent = Intent(this, historyActivity::class.java)
+                    startActivity(historyIntent)
                 }
                 R.id.menu_ranking -> {
                     val rankIntent = Intent(this, rankingActivity::class.java)
@@ -433,6 +437,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     Log.e("선택한 출발지_코드", adapter.getItem(position).sourceCode)
                     Log.e("선택한 도착지", adapter.getItem(position).destination)
                     Log.e("선택한 도착지_코드", adapter.getItem(position).destinationCode)
+
+                    //새로운 히스토리추가
+                    var newHistory = historyInfo(adapter.getItem(position).source,adapter.getItem(position).destination,
+                        adapter.getItem(position).time,adapter.getItem(position).distance,adapter.getItem(position).reward,
+                        LocalDateTime.now().format(DateTimeFormatter.ISO_DATE),LocalDateTime.now().format(DateTimeFormatter.ISO_TIME))
+                    historyList.add(newHistory) //히스토리 리스트에 추가
 
                     val setPathUI = SetPathUI(responseList[position].responseData, nMap)
                     setPathUI.setUIPath()

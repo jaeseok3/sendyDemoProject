@@ -21,6 +21,10 @@
             android:theme="@style/Theme.AppCompat.NoActionBar"></activity>
         <activity android:name=".rankingActivity"
             android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name=".requestActivity"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name=".historyActivity"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
 
         <meta-data
             android:name="com.naver.maps.map.CLIENT_ID"
