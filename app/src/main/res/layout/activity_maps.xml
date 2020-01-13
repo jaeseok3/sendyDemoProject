@@ -97,12 +97,14 @@
         app:elevation="6dp"
         app:pressedTranslationZ="12dp"
         />
-    <Switch
-        android:id="@+id/findPath"
+    <Button
+        android:id="@+id/locationStartBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:gravity="center"/>
+        android:layout_marginTop="60dp"
+        android:layout_marginLeft="10dp"
+        android:gravity="center"
+        android:text="Following Path"/>
 
 
     <androidx.cardview.widget.CardView

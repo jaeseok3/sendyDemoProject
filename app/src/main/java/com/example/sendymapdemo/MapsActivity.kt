@@ -2,6 +2,7 @@ package com.example.sendymapdemo
 
 import android.app.Activity
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
@@ -27,6 +28,13 @@ import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
 import android.content.Intent
+import android.graphics.drawable.ColorDrawable
+import android.location.LocationListener
+import android.location.LocationManager
+import android.os.Handler
+import android.os.Looper
+import android.widget.Toast
+import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.animation.AlphaAnimation
 import android.widget.*
@@ -36,12 +44,16 @@ import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.widget.LocationButtonView
-import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_maps.*
 import kotlinx.android.synthetic.main.activity_maps.requestDst
 import kotlinx.android.synthetic.main.activity_maps.requestSrc
 import kotlinx.android.synthetic.main.request_listview_item.*
+import kotlinx.coroutines.*
+import java.lang.Runnable
+import java.lang.Thread.sleep
+import com.google.android.material.navigation.NavigationView as NavigationView
+import com.naver.maps.map.overlay.LocationOverlay as LocationOverlay
 
 //leaderBoardAdapter에서 드로워를 닫을 때 필요해서 전역으로 선언
 lateinit var drawerLayout: DrawerLayout
@@ -78,7 +90,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
 
-    private lateinit var locationSource: FusedLocationSource
+    private lateinit var locationSource: LocationSource
     private lateinit var currentLocation: Location
 
     private var isFabOpen: Boolean = false
@@ -92,7 +104,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onBackPressed() {
         onDestroy()
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -161,14 +172,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 Log.e("열리는 중","드로워")
             }
         }
-
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
-
         var userIDID=intent.getStringExtra("ID")
         login(userIDID!!)
-
-
 
         locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
 
@@ -218,8 +225,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 requestList.add(RI)
                 Log.e("requestListSize", "${requestList.size}")
             }
-            //showRequestDialog()
-
             val requestIntent = Intent(this, requestActivity::class.java)
             startActivityForResult(requestIntent,100)
         }
@@ -231,7 +236,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         nMap.addOnLocationChangeListener { location ->
             currentLocation = location
             startPosition = "${location.longitude},${location.latitude}"
-            Log.e("현재위치", "${currentLocation.latitude},${currentLocation.longitude}")
+            Log.e("현재위치", "${location.latitude},${location.longitude}")
             if(goalLatLng != null && wayLatLng != null){
                 Log.e("e", "${goalLatLng},${wayLatLng},${arriveCheck}")
                 when {
@@ -248,6 +253,37 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
                 }
             }
+        }
+        locationStartBtn.setOnClickListener {
+            if(nMap.locationTrackingMode == LocationTrackingMode.None){
+                Log.e("Flag", "${nMap.locationTrackingMode}")
+                GlobalScope.launch(Dispatchers.Default) {
+                    for (i in 0 until latlngList.size) {
+                        currentLocation.latitude = latlngList[i].latitude
+                        currentLocation.longitude = latlngList[i].longitude
+                        Log.e("위치변경", "${currentLocation.latitude}, ${currentLocation.longitude}")
+                        drawingLocationUI(currentLocation)
+                        sleep(250)
+                        if (nMap.locationTrackingMode == LocationTrackingMode.Follow ||
+                                nMap.locationTrackingMode == LocationTrackingMode.NoFollow) {
+                            break
+                        }
+                    }
+                }
+            }
+            else{
+                Log.e("Flag", "${nMap.locationTrackingMode}")
+                nMap.locationTrackingMode = LocationTrackingMode.None
+            }
+        }
+    }
+    private fun drawingLocationUI(location: Location) = GlobalScope.launch(Dispatchers.Main){
+        nMap.let {
+            val locationOverlay = it.locationOverlay
+            locationOverlay.isVisible = true
+            locationOverlay.position = LatLng(location.latitude, location.longitude)
+            Log.e("위치변경", "${locationOverlay.position}")
+            it.moveCamera(CameraUpdate.scrollTo(LatLng(location.latitude, location.longitude)))
         }
     }
     private fun animation(){
@@ -431,80 +467,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
     }
-
-//    //의뢰 리스트뷰 어댑터
-//    @SuppressLint("InflateParams")
-//    private fun showRequestDialog(){
-//        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-//        val inflater:LayoutInflater = layoutInflater
-//        val alertView:View = inflater.inflate(R.layout.request_dialog, null)
-//        builder.setView(alertView)
-//
-//        val requestListView: ListView = alertView.findViewById(R.id.listview_requestdialog_list)
-//        val dialog:AlertDialog = builder.create()
-//
-//        val adapter = requestListAdapter(this, requestList)
-//        requestListView.adapter  = adapter
-//        requestListView.setOnItemClickListener{parent, view, position, id ->
-//            val oDialog = AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Light_Dialog)
-//            oDialog.setMessage("수락시 의뢰 리스트가 초기화됩니다.").setTitle("해당 의뢰를 수락하시겠습니까?")
-//                .setPositiveButton("아니오") {_, _ ->
-//                    makeText(this, "취소", Toast.LENGTH_LONG).show()
-//                }
-//                .setNeutralButton("예") {_, _ ->
-//                    Log.e("선택한 출발지", adapter.getItem(position).source)
-//                    Log.e("선택한 출발지_코드", adapter.getItem(position).sourceCode)
-//                    Log.e("선택한 도착지", adapter.getItem(position).destination)
-//                    Log.e("선택한 도착지_코드", adapter.getItem(position).destinationCode)
-//
-//                    //새로운 히스토리추가
-//                    var newHistory = historyInfo(
-//                        adapter.getItem(position).source,adapter.getItem(position).destination,
-//                        adapter.getItem(position).time,adapter.getItem(position).distance,adapter.getItem(position).reward,
-//                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
-//                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"))
-//                    )
-//                    historyList.add(newHistory) //히스토리 리스트에 추가
-//
-//                    val setPathUI = SetPathUI(responseList[position].responseData, nMap)
-//                    setPathUI.setUIPath()
-//                    val arrWay = responseList[position].wayPointLatLng.split(",")
-//                    val arrGoal = responseList[position].goalLatLng.split(",")
-//                    wayLatLng = LatLng(arrWay[1].toDouble(), arrWay[0].toDouble())
-//                    goalLatLng = LatLng(arrGoal[1].toDouble(), arrGoal[0].toDouble())
-//
-//                    requestSrc.text = adapter.getItem(position).source
-//                    requestDst.text = adapter.getItem(position).destination
-//
-//                    dialog.dismiss()
-//
-//                    var bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
-//                    bottomSheet.visibility = View.VISIBLE
-//                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-//                    val animation = AlphaAnimation(0.0f,1.0f)
-//                    animation.setAnimationListener(object : Animation.AnimationListener{
-//                        override fun onAnimationRepeat(animation: Animation?) {
-//                        }
-//                        override fun onAnimationEnd(animation: Animation?) {
-//                            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-//                        }
-//
-//                        override fun onAnimationStart(animation: Animation?) {
-//                        }
-//                    })
-//                    animation.duration = 1500
-//                    bottomSheet.animation = animation
-//
-//                    requestList.clear()
-//                    responseList.clear()
-//                    positions.clear()
-//                }
-//                .setCancelable(false).show()
-//        }
-//        dialog.setCancelable(false)
-//        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-//        dialog.show()
-//    }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when(requestCode){
@@ -517,6 +479,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         requestSrc.text = resultSrc
                         requestDst.text = resultDst
                         remainDuration.text = resultDistance
+
                         var bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
                         bottomSheet.visibility = View.VISIBLE
                         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED

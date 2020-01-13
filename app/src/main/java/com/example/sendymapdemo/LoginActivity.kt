@@ -8,6 +8,7 @@ import android.view.Window
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 
 lateinit var userIdentity:String
 class LoginActivity : AppCompatActivity() {
@@ -19,6 +20,11 @@ class LoginActivity : AppCompatActivity() {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
+        }
 
         val mEditTextSearchKeyword = findViewById<EditText>(R.id.usrusr)
         val mButton:Button = findViewById(R.id.logiin)

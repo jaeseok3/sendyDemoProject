@@ -53,7 +53,7 @@ class requestActivity : AppCompatActivity(){
                         var mainIntent = Intent(this, MapsActivity::class.java)
                         mainIntent.putExtra("resultSrc", adapter.getItem(position).source)
                         mainIntent.putExtra("resultDst", adapter.getItem(position).destination)
-                        mainIntent.putExtra("resultDistance",adapter.getItem(position).distance)
+//                        mainIntent.putExtra("resultDistance",adapter.getItem(position).distance)
                         setResult(Activity.RESULT_OK, mainIntent)
                         finish()
                     }
