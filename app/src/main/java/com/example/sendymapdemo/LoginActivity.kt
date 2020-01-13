@@ -1,5 +1,6 @@
 package com.example.sendymapdemo
 
+import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -36,17 +37,16 @@ class LoginActivity : AppCompatActivity() {
                 var userID=mEditTextSearchKeyword.text.toString()
                 Toast.makeText(this,"$userID 님 환영합니다",Toast.LENGTH_SHORT).show()
                 userIdentity=userID
-                login(userID)
 
-//                httpConnect()
+                val intent = Intent(applicationContext,MapsActivity::class.java)
+                intent.putExtra("ID", userID)
+                startActivityForResult(intent, 110)
+
                 finish()
-
             }
             else{
                 Toast.makeText(this,"아이디를 10자 내로 입력하세요!",Toast.LENGTH_SHORT).show()
             }
-
         }
-
     }
 }

@@ -1,9 +1,6 @@
 package com.example.sendymapdemo
 
-import android.app.IntentService
-import android.content.Intent
 import android.graphics.Color
-import android.location.LocationManager
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.overlay.OverlayImage
@@ -34,6 +31,7 @@ class SetPathUI(data: PathData, naverMap: NaverMap) {
         pathOverlay.color = Color.BLUE
         pathOverlay.patternImage = OverlayImage.fromResource(R.drawable.path_pattern)
         pathOverlay.patternInterval = 50
+        pathOverlay.passedColor = Color.GRAY
         markerStartPoint.position = LatLng(startLat, startLng)
         markerWayPoint.position = LatLng(wayPointLat, wayPointLng)
         markerGoalPoint.position = LatLng(goalLat, goalLng)
