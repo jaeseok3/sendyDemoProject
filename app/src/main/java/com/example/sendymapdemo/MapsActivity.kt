@@ -59,6 +59,7 @@ lateinit var headerDesc: TextView
 lateinit var headerRank: TextView
 lateinit var headerCredit: TextView
 lateinit var headerAccum: TextView
+lateinit var headerPhoto:ImageView
 
 var pathOverlay = PathOverlay()
 var markerStartPoint = Marker()
@@ -88,6 +89,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var startPosition: String
 
+    override fun onBackPressed() {
+        onDestroy()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -113,7 +117,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 R.id.menu_about -> {
                     val builder = AlertDialog.Builder(this)
                     val dialogView = layoutInflater.inflate(R.layout.about, null)
-                    val dialog:AlertDialog = builder.create()
+                    //val dialog:AlertDialog = builder.create()
                     builder.setView(dialogView)
                         .show()
                 }
@@ -133,6 +137,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         headerRank = headerView.findViewById(R.id.userRank)
         headerCredit = headerView.findViewById(R.id.userCredit)
         headerAccum = headerView.findViewById(R.id.userAccum)
+        headerPhoto = headerView.findViewById(R.id.ivUserProfilePhoto)
 
         configureBottomNav()
 
@@ -160,10 +165,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
 
+        var userIDID=intent.getStringExtra("ID")
+        login(userIDID!!)
 
 
-        val intent = Intent(applicationContext,LoginActivity::class.java)
-        startActivity(intent)
 
         locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
 
@@ -511,7 +516,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         var resultDistance = data.getStringExtra("resultDistance")
                         requestSrc.text = resultSrc
                         requestDst.text = resultDst
-                        requestDuration.text = resultDistance
+                        remainDuration.text = resultDistance
                         var bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
                         bottomSheet.visibility = View.VISIBLE
                         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
