@@ -1,8 +1,6 @@
 package com.example.sendymapdemo
 
 import android.app.Activity
-import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
@@ -28,18 +26,11 @@ import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
 import android.content.Intent
-import android.graphics.drawable.ColorDrawable
-import android.location.LocationListener
-import android.location.LocationManager
 import android.os.Handler
-import android.os.Looper
-import android.widget.Toast
-import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.animation.AlphaAnimation
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.naver.maps.map.util.FusedLocationSource
@@ -48,12 +39,11 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_maps.*
 import kotlinx.android.synthetic.main.activity_maps.requestDst
 import kotlinx.android.synthetic.main.activity_maps.requestSrc
-import kotlinx.android.synthetic.main.request_listview_item.*
 import kotlinx.coroutines.*
 import java.lang.Runnable
+import java.lang.Thread.getDefaultUncaughtExceptionHandler
 import java.lang.Thread.sleep
 import com.google.android.material.navigation.NavigationView as NavigationView
-import com.naver.maps.map.overlay.LocationOverlay as LocationOverlay
 
 //leaderBoardAdapter에서 드로워를 닫을 때 필요해서 전역으로 선언
 lateinit var drawerLayout: DrawerLayout
@@ -71,6 +61,7 @@ lateinit var headerDesc: TextView
 lateinit var headerRank: TextView
 lateinit var headerCredit: TextView
 lateinit var headerAccum: TextView
+lateinit var headerPhoto:ImageView
 
 var pathOverlay = PathOverlay()
 var markerStartPoint = Marker()
@@ -81,13 +72,12 @@ var markerGoalPoint = Marker()
 lateinit var nMap: NaverMap
 var wayLatLng: LatLng ?= null
 var goalLatLng: LatLng ?= null
-var startPosition: String ?= null
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
-    private lateinit var userID: String
+
     private lateinit var locationSource: LocationSource
     private lateinit var currentLocation: Location
 
@@ -97,6 +87,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fabOpen: Animation
     private lateinit var fabClose: Animation
 
+    private lateinit var startPosition: String
+
+    override fun onBackPressed() {
+        onDestroy()
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -121,7 +116,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 R.id.menu_about -> {
                     val builder = AlertDialog.Builder(this)
                     val dialogView = layoutInflater.inflate(R.layout.about, null)
-                    val dialog:AlertDialog = builder.create()
+                    //val dialog:AlertDialog = builder.create()
                     builder.setView(dialogView)
                         .show()
                 }
@@ -141,6 +136,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         headerRank = headerView.findViewById(R.id.userRank)
         headerCredit = headerView.findViewById(R.id.userCredit)
         headerAccum = headerView.findViewById(R.id.userAccum)
+        headerPhoto = headerView.findViewById(R.id.ivUserProfilePhoto)
 
         configureBottomNav()
 
@@ -166,7 +162,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
-        login(userID)
+        var userIDID=intent.getStringExtra("ID")
+        login(userIDID!!)
 
         locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
 
@@ -185,6 +182,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(naverMap: NaverMap) {
         val startDelivery: View = findViewById(R.id.fab1)
         val market: View = findViewById(R.id.fab2)
+        val animationDialog = loadingActivity(this)
         nMap = naverMap
         val locationButtonView = findViewById<LocationButtonView>(R.id.locationBtn)
         locationButtonView.map = nMap
@@ -192,11 +190,47 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             animation()
         }
         startDelivery.setOnClickListener {
+            fun readList(){
+                for (i in 0..4) {
+                    val time = responseList[i].responseData.route.traoptimal[0].summary.duration / 60000
+                    Log.e("거리_시간", time.toString())
+                    val distance = responseList[i].responseData.route.traoptimal[0].summary.distance / 1000.toDouble()
+                    Log.e("거리", distance.toString())
+                    val distanceStr = String.format("%.1f Km", distance)
+                    val timeStr = "$time" + "Min"
+                    val face =
+                            if (distance <= 20) R.drawable.happy
+                            else if (distance > 20 && distance <= 40) R.drawable.sad
+                            else R.drawable.dead
+                    val reward = Math.pow(time.toDouble(), 2.0)
+                    val RI = requestInfo(face,
+                            getGeoName(responseList[i].wayPointLatLng),
+                            getGeoName(responseList[i].goalLatLng),
+                            timeStr, distanceStr, reward,
+                            responseList[i].goalLatLng,
+                            responseList[i].wayPointLatLng)
+                    requestList.add(RI)
+
+                    Log.e("requestListSize", "${requestList.size}")
+                }
+            }
             //첫번째 버튼 클릭했을때
+            try{
+                readList()
+            } catch(e:Exception){
+                val handler = Handler()
+                handler.postDelayed({
+                    readList()
+                }, 1500)
+            } finally {
+                val handler = Handler()
+                handler.postDelayed({
+                    val requestIntent = Intent(this, RequestActivity::class.java)
+                    requestIntent.putExtra("startPoint", startPosition)
+                    startActivityForResult(requestIntent,100)
+                }, 1000)
+            }
             animation()
-            val requestIntent = Intent(this, requestActivity::class.java)
-            requestIntent.putExtra("startPoint", startPosition)
-            startActivityForResult(requestIntent,100)
         }
 
         nMap.locationSource = locationSource
@@ -246,8 +280,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             pathOverlay.progress = progressRate
                             break
                         }
-
                     }
+                    pathOverlay.map = null
                 }
             }
             else{
@@ -418,29 +452,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         })
     } //configureBottomNav()
-
-    //fab버튼 클릭 리스너를 따로 구현 -> onMapReady안에서 구현한 클릭리스너가 작동하지 않음 -> activity_maps.xml에 명시
-    fun fabClickListener(view: View){
-        view.bringToFront()
-        animation()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        for(i in 0..8 step 2){
-            val newGeoInfo = geoInfo(getLocationDB())
-            positions.add(newGeoInfo.src)
-            Log.e("출발지", newGeoInfo.src)
-            positions.add(newGeoInfo.dst)
-            Log.e("도착지",newGeoInfo.dst)
-            try {
-                findPath(startPosition!!, positions[i], positions[i+1])
-            } catch (e: Exception) {
-                Log.e("e", "${e.printStackTrace()}")
-            }
-        }
-    }
-
     private fun findPath(currentPoint:String, startPoint:String, goalPoint:String){
         val restClient: RetrofitInterface = Http3RetrofitManager.getRetrofitService(RetrofitInterface::class.java)
         val option = "traoptimal"
@@ -455,21 +466,36 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     responseData = response.body()
                     val data = SummaryData(currentPoint, startPoint, goalPoint, response.body()!!)
                     responseList.add(data)
+                    Log.e("사이즈", "${responseList.size}")
                 }
             }
         })
     }
-
+    //fab버튼 클릭 리스너를 따로 구현 -> onMapReady안에서 구현한 클릭리스너가 작동하지 않음 -> activity_maps.xml에 명시
+    fun fabClickListener(view: View){
+        view.bringToFront()
+        try{
+            for(i in 0..8 step 2) {
+                val newGeoInfo = geoInfo(getLocationDB())
+                positions.add(newGeoInfo.src)
+                Log.e("출발지", newGeoInfo.src)
+                positions.add(newGeoInfo.dst)
+                Log.e("도착지", newGeoInfo.dst)
+                try {
+                    findPath(startPosition, positions[i], positions[i + 1])
+                } catch (e: Exception) {
+                    Log.e("e", "${e.printStackTrace()}")
+                }
+            }
+        }catch (e: InterruptedException){
+            e.printStackTrace()
+        }finally {
+            animation()
+        }
+    }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when(requestCode){
-            110 -> {
-                when(resultCode){
-                    Activity.RESULT_OK -> {
-                        userID = data!!.getStringExtra("ID")!!
-                    }
-                }
-            }
             100 -> {
                 when(resultCode){
                     Activity.RESULT_OK ->{
@@ -478,7 +504,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         var resultDistance = data.getStringExtra("resultDistance")
                         requestSrc.text = resultSrc
                         requestDst.text = resultDst
-//                        requestDuration.text = resultDistance
+                        remainDuration.text = resultDistance
+
                         var bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
                         bottomSheet.visibility = View.VISIBLE
                         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
