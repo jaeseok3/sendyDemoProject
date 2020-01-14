@@ -41,15 +41,12 @@ class LoginActivity : AppCompatActivity() {
                 val intent = Intent(applicationContext,MapsActivity::class.java)
                 intent.putExtra("ID",userID)
                 startActivity(intent)
-//                httpConnect()
-                finish()
 
+                finish()
             }
             else{
                 Toast.makeText(this,"아이디를 10자 내로 입력하세요!",Toast.LENGTH_SHORT).show()
             }
-
         }
-
     }
 }

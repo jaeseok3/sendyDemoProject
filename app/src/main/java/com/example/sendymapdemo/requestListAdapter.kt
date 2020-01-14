@@ -40,7 +40,7 @@ class requestListAdapter(private val context: Context,
         var requestDuration: TextView = rowView.findViewById(R.id.requestDuration)
         var requestReward: TextView = rowView.findViewById(R.id.requestReward)
 
-        var item = getItem(position) as requestInfo
+        var item = getItem(position)
         requestImg.setImageResource(item.image)
         requestSrc.setText(item.source)
         requestDst.setText(item.destination)

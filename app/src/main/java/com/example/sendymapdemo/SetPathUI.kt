@@ -33,6 +33,7 @@ class SetPathUI(data: PathData, naverMap: NaverMap) {
         pathOverlay.color = Color.BLUE
         pathOverlay.patternImage = OverlayImage.fromResource(R.drawable.path_pattern)
         pathOverlay.patternInterval = 50
+        pathOverlay.passedColor = Color.GRAY
         markerStartPoint.position = LatLng(startLat, startLng)
         markerWayPoint.position = LatLng(wayPointLat, wayPointLng)
         markerGoalPoint.position = LatLng(goalLat, goalLng)

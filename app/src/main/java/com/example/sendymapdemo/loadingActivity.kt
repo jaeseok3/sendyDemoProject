@@ -12,7 +12,6 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import kotlin.math.pow
 
-
 class loadingActivity(context : Context) : Dialog(context){
     private var c: Context? = null
     init{
@@ -28,14 +27,4 @@ class loadingActivity(context : Context) : Dialog(context){
         val animation : Animation = AnimationUtils.loadAnimation(c,R.anim.loading)
         logo.animation = animation
     }
-
-    override fun show(){
-        super.show()
-        Log.e("사이즈",responseList.size.toString())
-    }
-
-    override fun dismiss() {
-        super.dismiss()
-    }
-
 }
