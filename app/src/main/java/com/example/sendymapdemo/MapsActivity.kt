@@ -22,12 +22,14 @@ import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import android.content.Intent
+import android.os.AsyncTask
 import android.os.Handler
 import android.view.MenuItem
 import android.view.animation.AlphaAnimation
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
+import com.naver.maps.map.overlay.PathOverlay
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.widget.LocationButtonView
 import kotlinx.android.synthetic.main.activity_main.*
@@ -35,17 +37,12 @@ import kotlinx.android.synthetic.main.activity_maps.*
 import kotlinx.android.synthetic.main.activity_maps.requestDst
 import kotlinx.android.synthetic.main.activity_maps.requestSrc
 import kotlinx.coroutines.*
-import java.lang.Runnable
-import java.lang.Thread.getDefaultUncaughtExceptionHandler
-import kotlinx.coroutines.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
-import java.io.IOException
 import java.io.InputStreamReader
 import java.lang.Thread.sleep
 import java.net.URL
-import kotlin.math.pow
 import com.google.android.material.navigation.NavigationView as NavigationView
 
 //leaderBoardAdapter에서 드로워를 닫을 때 필요해서 전역으로 선언
@@ -62,8 +59,12 @@ var markerStartPoint = Marker()
 var markerWayPoint = Marker()
 var markerGoalPoint = Marker()
 
+var pathOverlay = PathOverlay()
+
 //requestActivity에서 사용
 lateinit var nMap: NaverMap
+var wayLatLng: LatLng ?= null
+var goalLatLng: LatLng ?= null
 
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -280,13 +281,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         runBlocking {
                             progressRate += 1.0 / latlngList.size
                             drawingLocationUI(LatLng(latlngList[i].latitude, latlngList[i].longitude), progressRate).join()
+                            getDangerGrade(latlngList[i].latitude.toString(), latlngList[i].longitude.toString(),
+                                latlngList[i].latitude.toString(), latlngList[i].longitude.toString())
                         }
                         delay(100)
-                        drawingLocationUI(currentLocation)
-                        getDangerGrade(currentLocation.latitude.toString(), currentLocation.longitude.toString(),
-                            latlngList[i].latitude.toString(), latlngList[i].longitude.toString())
-                        //dangerInfo.text
-                        sleep(250)
                         if (nMap.locationTrackingMode == LocationTrackingMode.Follow ||
                                 nMap.locationTrackingMode == LocationTrackingMode.NoFollow) {
                             progressRate = 0.0
@@ -353,24 +351,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             selectLocation.isClickable = true
             isFabOpen = true
         }
-    }
-    private fun findPath(currentPoint:String, startPoint:String, goalPoint:String){
-        val restClient: RetrofitInterface = Http3RetrofitManager.getRetrofitService(RetrofitInterface::class.java)
-        val option = "traoptimal"
-        val requestPath = restClient.requestPath(currentPoint, goalPoint, startPoint, option)
-
-        requestPath.enqueue(object : Callback<PathData> {
-            override fun onFailure(call: Call<PathData>, t: Throwable) {
-                error(message = t.toString())
-            }
-            override fun onResponse(call: Call<PathData>, response: Response<PathData>) {
-                if(response.isSuccessful){
-                    responseData = response.body()
-                    val data = SummaryData(currentPoint, startPoint, goalPoint, response.body()!!)
-                    responseList.add(data)
-                }
-            }
-        })
     }
     private fun getDangerGrade(startLat:String, startLng:String, endLat:String, endLng:String) {
         lateinit var temp : String
