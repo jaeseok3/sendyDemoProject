@@ -1,12 +1,10 @@
 package com.example.sendymapdemo
 
-import android.app.IntentService
-import android.content.Intent
 import android.graphics.Color
-import android.location.LocationManager
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.overlay.OverlayImage
+import com.naver.maps.map.overlay.PathOverlay
 
 val latlngList = ArrayList<LatLng>()
 
@@ -15,6 +13,7 @@ class SetPathUI(data: PathData, naverMap: NaverMap) {
     private val nMap: NaverMap = naverMap
 
     fun setUIPath(){
+        val pathOverlay = PathOverlay()
         val pathArr = pathData.route.traoptimal[0].path
         val startLng = pathData.route.traoptimal[0].summary.start.location[0]
         val startLat = pathData.route.traoptimal[0].summary.start.location[1]

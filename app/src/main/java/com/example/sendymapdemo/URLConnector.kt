@@ -25,29 +25,27 @@ class URLConnector(url: String) : Thread() {
         val output = StringBuilder()
         try {
             val url = URL(urlStr)
-            val conn = url.openConnection() as HttpURLConnection
+            val conn: HttpURLConnection = url.openConnection() as HttpURLConnection
 
-            if (conn != null) {
-                conn!!.connectTimeout = 10000
-                conn!!.requestMethod = "GET"
-                conn!!.doInput = true
-                conn!!.doOutput = true
+            conn.connectTimeout = 10000
+            conn.requestMethod = "GET"
+            conn.doInput = true
+            conn.doOutput = true
 
-                val resCode = conn!!.getResponseCode()
-                if (resCode == HTTP_OK) {
-                    val reader = BufferedReader(InputStreamReader(conn!!.inputStream))
-                    var line: String?=null
-                    while (true) {
-                        line = reader.readLine()
-                        if (line == null) {
-                            break
-                        }
-                        output.append(line!! + "\n")
+            val resCode = conn.responseCode
+            if (resCode == HTTP_OK) {
+                val reader = BufferedReader(InputStreamReader(conn.inputStream))
+                var line: String?
+                while (true) {
+                    line = reader.readLine()
+                    if (line == null) {
+                        break
                     }
-
-                    reader.close()
-                    conn!!.disconnect()
+                    output.append(line + "\n")
                 }
+
+                reader.close()
+                conn.disconnect()
             }
         } catch (ex: Exception) {
             Log.e("HTTPConnection", "Exception in processing response.", ex)
