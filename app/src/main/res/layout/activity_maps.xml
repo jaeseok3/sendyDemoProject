@@ -108,17 +108,15 @@
 
 
     <androidx.cardview.widget.CardView
-        xmlns:card_view="http://schemas.android.com/apk/res-auto"
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/bottomSheet"
         app:behavior_hideable="false"
         app:behavior_peekHeight="58dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-        card_view:cardBackgroundColor="@color/lightBlue"
-        card_view:cardCornerRadius="16dp"
-        card_view:cardUseCompatPadding="true">
+        app:cardBackgroundColor="@color/lightBlue"
+        app:cardCornerRadius="16dp"
+        app:cardUseCompatPadding="true">
         <LinearLayout
             android:orientation="vertical"
             android:clipChildren="false"
@@ -263,12 +261,13 @@
                         android:textColor="@color/colorPrimaryDark"
                         android:textSize="20sp"
                         android:textStyle="bold" />
+
                     <TextView
                         android:id="@+id/dangerInfo"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="2000"
+                        android:text="none"
                         android:textColor="@color/colorPrimaryDark"
                         android:textSize="20sp" />
                 </LinearLayout>

@@ -34,7 +34,7 @@ class LoginActivity : AppCompatActivity() {
 
             if(mEditTextSearchKeyword.text.toString().length in 1..10){
                 Log.e("vaa",mEditTextSearchKeyword.text.toString())
-                var userID=mEditTextSearchKeyword.text.toString()
+                val userID=mEditTextSearchKeyword.text.toString()
                 Toast.makeText(this,"$userID 님 환영합니다",Toast.LENGTH_SHORT).show()
                 userIdentity=userID
 

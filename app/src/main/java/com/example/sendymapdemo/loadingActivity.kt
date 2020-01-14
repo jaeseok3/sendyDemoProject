@@ -10,6 +10,7 @@ import android.view.Window
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
+import kotlin.math.pow
 
 class loadingActivity(context : Context) : Dialog(context){
     private var c: Context? = null

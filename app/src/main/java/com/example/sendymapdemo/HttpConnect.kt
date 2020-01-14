@@ -1,22 +1,32 @@
 package com.example.sendymapdemo
 
 import android.util.Log
-import android.widget.Toast
-import androidx.annotation.IntegerRes
 import org.json.JSONArray
 import org.json.JSONObject
-import java.lang.Exception
 import java.net.URLEncoder
 
-var httpArray = ArrayList<ArrayList<String>>() //http 커넥션으로 받은 JSON 데이터를 모은 ArrayList
+
+fun updateCredit(ID:String,reward:Double){
+    val userID:String=ID
+    val reward:Double=reward
+    val query ="http://15.164.103.195/httpUpdateCredit.php?user=$userID&reward=$reward"
+    val task=URLConnector(query)
+    task.start()
+    try{
+        task.join()
+    } catch (e:InterruptedException){
+        e.printStackTrace()
+    }
+}
 fun InsertHistory(newHistory: historyInfo) {
-    val asource:String=URLEncoder.encode("${newHistory.source}","UTF-8")
-    val adest:String=URLEncoder.encode("${newHistory.destination}","UTF-8")
-    val adate:String=URLEncoder.encode("${newHistory.historyDate}","UTF-8")
-    val atime:String=URLEncoder.encode("${newHistory.historyTime}","UTF-8")
-    val adis:String=URLEncoder.encode("${newHistory.distance}","UTF-8")
+    val aIdentity:String=URLEncoder.encode(userIdentity,"UTF-8")
+    val asource:String=URLEncoder.encode(newHistory.source,"UTF-8")
+    val adest:String=URLEncoder.encode(newHistory.destination,"UTF-8")
+    val adate:String=URLEncoder.encode(newHistory.historyDate,"UTF-8")
+    val atime:String=URLEncoder.encode(newHistory.historyTime,"UTF-8")
+    val adis:String=URLEncoder.encode(newHistory.distance,"UTF-8")
     val areward:String=URLEncoder.encode("${newHistory.reward}","UTF-8")
-    val test = "http://15.164.103.195/httpHistoryInsert.php?user=$userIdentity" +
+    val test = "http://15.164.103.195/httpHistoryInsert.php?"+"user=$aIdentity" +
             "&time=${newHistory.time}"+"&src=$asource"+"&dest=$adest"+"&distance=$adis&reward=$areward&htime=$atime&hdate=$adate"
 
 
@@ -40,14 +50,14 @@ fun GetHistory(userID:String){
     } catch (e: InterruptedException) {
         e.printStackTrace()
     }
-    val result=task.getResult()
+    val result: String? =task.getResult()
     val JO=JSONObject(result)
     try{
     val JA: JSONArray = JO.getJSONArray("result")
             for (i in 0 until JA.length()) {
             val jo = JA.getJSONObject(i)
             //새로운 히스토리추가
-            var newHistory = historyInfo(
+            val newHistory = historyInfo(
                 jo.getString("Src"),
                 jo.getString("Dest"),
                 jo.getString("Time"),
@@ -64,7 +74,7 @@ fun GetHistory(userID:String){
     }
 }
 fun getLocationDB():ArrayList<String>{
-    var Location2=ArrayList<String>()
+    val Location2=ArrayList<String>()
     val test = "http://15.164.103.195/httpLocation.php"
     val task = URLConnector(test)
     task.start()
@@ -83,7 +93,8 @@ fun getLocationDB():ArrayList<String>{
     }
     return Location2
 }
-fun login(test1:String){ //Login 후 사용자의 정보를 들고오는 함수
+
+fun updateRanking(test1:String){
     val UserInfo = ArrayList<String>()
     val test = "http://15.164.103.195/login.php?user=$test1"
     val task = URLConnector(test)
@@ -93,7 +104,6 @@ fun login(test1:String){ //Login 후 사용자의 정보를 들고오는 함수
     } catch (e: InterruptedException) {
         e.printStackTrace()
     }
-
     val result: String? = task.getResult()
     val JO = JSONObject(result)
     val Jrank = JO.getString("rank")
@@ -108,18 +118,11 @@ fun login(test1:String){ //Login 후 사용자의 정보를 들고오는 함수
         UserInfo.add(jo.getString("Property"))
         UserInfo.add(jo.getString("Car"))
     }
-    headerName.text = UserInfo.get(0)
-    Log.e("ID",UserInfo.get(0))
-    headerRank.text = Jrank
-    headerCredit.text = UserInfo.get(2)
-    Log.e("accum",UserInfo.get(2))
-    headerAccum.text = UserInfo.get(1)
-    Log.e("credit",UserInfo.get(1))
     while(task.isAlive){}
     UserInfo.clear()
     httpConnect()
-
 }
+
 fun httpConnect(){ //Login 후에 Http connection을 통해 리더보드에 들어갈 데이터 호출
     println("http connect 함수")
     val test = "http://15.164.103.195/httpConnection.php"
@@ -130,9 +133,8 @@ fun httpConnect(){ //Login 후에 Http connection을 통해 리더보드에 들�
     } catch (e: InterruptedException) {
         e.printStackTrace()
     }
-
+    val httpArray = ArrayList<ArrayList<String>>() //http 커넥션으로 받은 JSON 데이터를 모은 ArrayList
     userList.clear()
-    boardAdapter = leaderBoardAdapter(userList)
     boardAdapter.notifyDataSetChanged()
     val result: String? = task.getResult()
     val JO: JSONObject = JSONObject(result)

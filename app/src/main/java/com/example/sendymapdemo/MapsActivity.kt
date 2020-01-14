@@ -13,7 +13,6 @@ import android.widget.Toast.makeText
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
 import com.naver.maps.map.overlay.Marker
-import com.naver.maps.map.overlay.PathOverlay
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -22,9 +21,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.naver.maps.map.LocationTrackingMode
-import com.naver.maps.map.NaverMap
-import com.naver.maps.map.OnMapReadyCallback
 import android.content.Intent
 import android.os.Handler
 import android.view.MenuItem
@@ -32,7 +28,6 @@ import android.view.animation.AlphaAnimation
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.widget.LocationButtonView
 import kotlinx.android.synthetic.main.activity_main.*
@@ -42,42 +37,50 @@ import kotlinx.android.synthetic.main.activity_maps.requestSrc
 import kotlinx.coroutines.*
 import java.lang.Runnable
 import java.lang.Thread.getDefaultUncaughtExceptionHandler
+import kotlinx.coroutines.*
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
 import java.lang.Thread.sleep
+import java.net.URL
+import kotlin.math.pow
 import com.google.android.material.navigation.NavigationView as NavigationView
 
 //leaderBoardAdapter에서 드로워를 닫을 때 필요해서 전역으로 선언
 lateinit var drawerLayout: DrawerLayout
 
-//히스토리 리스트
-var historyList = ArrayList<historyInfo>()
+
 //의뢰정보를 담은 리스트
 var requestList = ArrayList<requestInfo>()
 var positions=ArrayList<String>()
 
-//리더보드 레이아웃 매니저
-lateinit var layoutManager: LinearLayoutManager
-lateinit var headerName: TextView
-lateinit var headerDesc: TextView
-lateinit var headerRank: TextView
-lateinit var headerCredit: TextView
-lateinit var headerAccum: TextView
-lateinit var headerPhoto:ImageView
 
-var pathOverlay = PathOverlay()
+
 var markerStartPoint = Marker()
 var markerWayPoint = Marker()
 var markerGoalPoint = Marker()
 
 //requestActivity에서 사용
 lateinit var nMap: NaverMap
-var wayLatLng: LatLng ?= null
-var goalLatLng: LatLng ?= null
+
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
 
+    //리더보드 레이아웃 매니저
+    private lateinit var headerName: TextView
+    private lateinit var headerDesc: TextView
+    private lateinit var headerRank: TextView
+    private lateinit var headerCredit: TextView
+    private lateinit var headerAccum: TextView
+    private lateinit var headerPhoto:ImageView
+
+    var wayLatLng: LatLng ?= null
+    var goalLatLng: LatLng ?= null
     private lateinit var locationSource: LocationSource
     private lateinit var currentLocation: Location
 
@@ -88,7 +91,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fabClose: Animation
 
     private lateinit var startPosition: String
-
+    var resultReward:Double = 0.0
     override fun onBackPressed() {
         onDestroy()
     }
@@ -116,9 +119,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 R.id.menu_about -> {
                     val builder = AlertDialog.Builder(this)
                     val dialogView = layoutInflater.inflate(R.layout.about, null)
-                    //val dialog:AlertDialog = builder.create()
-                    builder.setView(dialogView)
-                        .show()
+                    val dialog:AlertDialog = builder.create()
+                    builder.setView(dialogView).show()
                 }
                 R.id.menu_update -> {
 
@@ -153,6 +155,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             override fun onDrawerOpened(drawerView: View){
                 super.onDrawerOpened(drawerView)
                 Log.e("열림","드로워")
+                login(userIdentity)
             }
 
             override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
@@ -162,8 +165,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
-        var userIDID=intent.getStringExtra("ID")
-        login(userIDID!!)
+        val userID=intent.getStringExtra("ID")
+        login(userID!!)
+
 
         locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
 
@@ -251,9 +255,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
                     checkError(goalLatLng!!) && arriveCheck -> {
                         makeText(this, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
+//                        var abc:Double=(intent.getStringExtra("resultReward"))
+
+                        updateCredit(userIdentity,resultReward)
                         markerWayPoint.map = null
                         markerGoalPoint.map = null
                         arriveCheck = false
+
                     }
                 }
             }
@@ -274,6 +282,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             drawingLocationUI(LatLng(latlngList[i].latitude, latlngList[i].longitude), progressRate).join()
                         }
                         delay(100)
+                        drawingLocationUI(currentLocation)
+                        getDangerGrade(currentLocation.latitude.toString(), currentLocation.longitude.toString(),
+                            latlngList[i].latitude.toString(), latlngList[i].longitude.toString())
+                        //dangerInfo.text
+                        sleep(250)
                         if (nMap.locationTrackingMode == LocationTrackingMode.Follow ||
                                 nMap.locationTrackingMode == LocationTrackingMode.NoFollow) {
                             progressRate = 0.0
@@ -306,6 +319,22 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         delay(300)
         pathOverlay.progress = progressRate
+        when{
+            checkError(wayLatLng!!) && !arriveCheck -> {
+                makeText(applicationContext, "출발지에 도착하였습니다.", LENGTH_SHORT).show()
+                markerStartPoint.map = null
+                markerWayPoint.map = null
+                arriveCheck = true
+            }
+            checkError(goalLatLng!!) && arriveCheck -> {
+                makeText(applicationContext, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
+                //                        var abc:Double=(intent.getStringExtra("resultReward"))
+
+                updateCredit(userIdentity,resultReward)
+                markerGoalPoint.map = null
+                arriveCheck = false
+
+            }}
     }
     private fun animation(){
         val currentLocation: View = findViewById(R.id.fab1)
@@ -325,6 +354,68 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             selectLocation.isClickable = true
             isFabOpen = true
         }
+    }
+    private fun findPath(currentPoint:String, startPoint:String, goalPoint:String){
+        val restClient: RetrofitInterface = Http3RetrofitManager.getRetrofitService(RetrofitInterface::class.java)
+        val option = "traoptimal"
+        val requestPath = restClient.requestPath(currentPoint, goalPoint, startPoint, option)
+
+        requestPath.enqueue(object : Callback<PathData> {
+            override fun onFailure(call: Call<PathData>, t: Throwable) {
+                error(message = t.toString())
+            }
+            override fun onResponse(call: Call<PathData>, response: Response<PathData>) {
+                if(response.isSuccessful){
+                    responseData = response.body()
+                    val data = SummaryData(currentPoint, startPoint, goalPoint, response.body()!!)
+                    responseList.add(data)
+                }
+            }
+        })
+    }
+    private fun getDangerGrade(startLat:String, startLng:String, endLat:String, endLng:String) {
+        lateinit var temp : String
+        class getDangerGrade : AsyncTask<Void, Void, Void>(){
+            override fun doInBackground(vararg params: Void?): Void? {
+                val stream = URL("http://apis.data.go.kr/B552061/roadDgdgrLink/getRestRoadDgdgrLink?serviceKey=%2BwvPpNobnpO%2BxNDsB3NdwZqjZYg4C8JqEy7NhZxXof%2F2Owy9Vu2eYP1pZVtIw%2FcPEVTx8nKQ1ph%2F4ppRNxKBLA%3D%3D&" +
+                        "searchLineString=LineString("+
+                        startLng + " " +
+                        startLat + ", " +
+                        endLng + " " +
+                        endLat + ")&vhctyCd=1&type=json&numOfRows=10&pageNo=1").openStream()
+                val read = BufferedReader(InputStreamReader(stream,"UTF-8"))
+                temp  = read.readLine()
+                Log.e("파싱 진행중", temp)
+
+                return null
+            }
+
+            override fun onPostExecute(result: Void?) {
+                var grade : String
+                super.onPostExecute(result)
+                val json = JSONObject(temp)
+                if(json.get("resultCode") != "10") {
+                    val chiefObject = (json["items"] as JSONObject)
+                    val upperArray : JSONArray = chiefObject.getJSONArray("item")
+                    val upperObject = upperArray.getJSONObject(0)
+                    grade = upperObject.getString("anals_grd")
+                    grade =  when(grade){
+                        "01" -> "1등급"
+                        "02" -> "2등급"
+                        "03" -> "3등급"
+                        "04" -> "4등급"
+                        "05" -> "5등급"
+                        else -> "none"
+                    }
+                }
+                else
+                    grade = "none"
+                dangerInfo.text = grade
+                Log.e("파싱결과",grade)
+
+            }
+        }
+        getDangerGrade().execute()
     }
     private fun checkError(goalLatLng: LatLng): Boolean {
         val currentLat = currentLocation.latitude
@@ -499,13 +590,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             100 -> {
                 when(resultCode){
                     Activity.RESULT_OK ->{
-                        var resultSrc = data!!.getStringExtra("resultSrc")
-                        var resultDst = data.getStringExtra("resultDst")
-                        var resultDistance = data.getStringExtra("resultDistance")
+                        val resultSrc = data!!.getStringExtra("resultSrc")
+                        val resultDst = data.getStringExtra("resultDst")
+                        val resultDistance = data.getStringExtra("resultDistance")
+                        wayLatLng=LatLng(data.getDoubleExtra("wayLatLng[0]",0.0),data.getDoubleExtra("wayLatLng[1]",0.0))
+                        goalLatLng=LatLng(data.getDoubleExtra("goalLatLng[0]",0.0),data.getDoubleExtra("goalLatLng[1]",0.0))
+                        resultReward=data.getDoubleExtra("resultReward",0.0)
+
                         requestSrc.text = resultSrc
                         requestDst.text = resultDst
                         remainDuration.text = resultDistance
-
                         var bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
                         bottomSheet.visibility = View.VISIBLE
                         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
@@ -533,6 +627,40 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
+    }
+
+    fun login(test1:String){ //Login 후 사용자의 정보를 들고오는 함수
+        val UserInfo = ArrayList<String>()
+        val test = "http://15.164.103.195/login.php?user=$test1"
+        val task = URLConnector(test)
+        task.start()
+        try {
+            task.join()
+        } catch (e: InterruptedException) {
+            e.printStackTrace()
+        }
+
+        val result: String? = task.getResult()
+        val JO = JSONObject(result)
+        val Jrank = JO.getString("rank")
+
+        println(Jrank)
+        val JA: JSONArray = JO.getJSONArray("result")
+
+        for(i in 0 until JA.length()){
+            val jo = JA.getJSONObject(i)
+            UserInfo.add(jo.getString("ID"))
+            UserInfo.add(jo.getString("Credit"))
+            UserInfo.add(jo.getString("Property"))
+            UserInfo.add(jo.getString("Car"))
+        }
+        headerName.text = UserInfo.get(0)
+        headerRank.text = Jrank
+        headerCredit.text = UserInfo.get(2)
+        headerAccum.text = UserInfo.get(1)
+        while(task.isAlive){}
+        UserInfo.clear()
+        httpConnect()
     }
 }
 
