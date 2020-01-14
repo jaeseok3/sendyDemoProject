@@ -15,6 +15,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class requestActivity : AppCompatActivity(){
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.request_activity)
@@ -47,12 +48,18 @@ class requestActivity : AppCompatActivity(){
                         setPathUI.setUIPath()
                         val arrWay = responseList[position].wayPointLatLng.split(",")
                         val arrGoal = responseList[position].goalLatLng.split(",")
-                        wayLatLng = LatLng(arrWay[1].toDouble(), arrWay[0].toDouble())
-                        goalLatLng = LatLng(arrGoal[1].toDouble(), arrGoal[0].toDouble())
+//                        wayLatLng = LatLng(arrWay[1].toDouble(), arrWay[0].toDouble())
+//                        goalLatLng = LatLng(arrGoal[1].toDouble(), arrGoal[0].toDouble())
 
                         var mainIntent = Intent(this, MapsActivity::class.java)
                         mainIntent.putExtra("resultSrc", adapter.getItem(position).source)
                         mainIntent.putExtra("resultDst", adapter.getItem(position).destination)
+                        mainIntent.putExtra("resultReward",adapter.getItem(position).reward)
+                        mainIntent.putExtra("wayLatLng[0]",arrWay[1].toDouble())
+                        mainIntent.putExtra("wayLatLng[1]",arrWay[0].toDouble())
+                        mainIntent.putExtra("goalLatLng[0]",arrGoal[1].toDouble())
+                        mainIntent.putExtra("goalLatLng[1]",arrGoal[0].toDouble())
+                        println("resultReward : "+adapter.getItem(position).reward)
 //                        mainIntent.putExtra("resultDistance",adapter.getItem(position).distance)
                         setResult(Activity.RESULT_OK, mainIntent)
                         finish()

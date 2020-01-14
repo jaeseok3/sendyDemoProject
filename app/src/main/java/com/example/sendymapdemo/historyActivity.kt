@@ -1,7 +1,6 @@
 package com.example.sendymapdemo
 
 import android.os.Bundle
-
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -11,7 +10,8 @@ import kotlinx.android.synthetic.main.history_activiry.*
 lateinit var historyAdapter:historyListAdapter
 lateinit var historylayoutManager: LinearLayoutManager
 
-
+//히스토리 리스트
+var historyList = ArrayList<historyInfo>()
 class historyActivity : AppCompatActivity(){
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -1,8 +1,6 @@
 package com.example.sendymapdemo
 
 import android.app.Activity
-import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
@@ -15,7 +13,6 @@ import android.widget.Toast.makeText
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
 import com.naver.maps.map.overlay.Marker
-import com.naver.maps.map.overlay.PathOverlay
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -24,56 +21,32 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.naver.maps.map.LocationTrackingMode
-import com.naver.maps.map.NaverMap
-import com.naver.maps.map.OnMapReadyCallback
 import android.content.Intent
-import android.graphics.drawable.ColorDrawable
-import android.location.LocationListener
-import android.location.LocationManager
-import android.os.Handler
-import android.os.Looper
-import android.widget.Toast
-import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.animation.AlphaAnimation
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.widget.LocationButtonView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_maps.*
-import kotlinx.android.synthetic.main.activity_maps.requestDst
-import kotlinx.android.synthetic.main.activity_maps.requestSrc
-import kotlinx.android.synthetic.main.request_listview_item.*
 import kotlinx.coroutines.*
-import java.lang.Runnable
+import org.json.JSONArray
+import org.json.JSONObject
 import java.lang.Thread.sleep
 import com.google.android.material.navigation.NavigationView as NavigationView
-import com.naver.maps.map.overlay.LocationOverlay as LocationOverlay
 
 //leaderBoardAdapter에서 드로워를 닫을 때 필요해서 전역으로 선언
 lateinit var drawerLayout: DrawerLayout
 
-//히스토리 리스트
-var historyList = ArrayList<historyInfo>()
+
 //의뢰정보를 담은 리스트
 var requestList = ArrayList<requestInfo>()
 var positions=ArrayList<String>()
 
-//리더보드 레이아웃 매니저
-lateinit var layoutManager: LinearLayoutManager
-lateinit var headerName: TextView
-lateinit var headerDesc: TextView
-lateinit var headerRank: TextView
-lateinit var headerCredit: TextView
-lateinit var headerAccum: TextView
-lateinit var headerPhoto:ImageView
 
-var pathOverlay = PathOverlay()
+
 var markerStartPoint = Marker()
 var markerWayPoint = Marker()
 var markerGoalPoint = Marker()
@@ -82,14 +55,23 @@ var markerGoalPoint = Marker()
 var responseData: PathData ?= null
 var responseList = ArrayList<SummaryData>()
 lateinit var nMap: NaverMap
-var wayLatLng: LatLng ?= null
-var goalLatLng: LatLng ?= null
+
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
 
+    //리더보드 레이아웃 매니저
+    private lateinit var headerName: TextView
+    private lateinit var headerDesc: TextView
+    private lateinit var headerRank: TextView
+    private lateinit var headerCredit: TextView
+    private lateinit var headerAccum: TextView
+    private lateinit var headerPhoto:ImageView
+
+    var wayLatLng: LatLng ?= null
+    var goalLatLng: LatLng ?= null
     private lateinit var locationSource: LocationSource
     private lateinit var currentLocation: Location
 
@@ -100,7 +82,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fabClose: Animation
 
     private lateinit var startPosition: String
-
+    var resultReward:Double = 0.0
     override fun onBackPressed() {
         onDestroy()
     }
@@ -165,6 +147,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             override fun onDrawerOpened(drawerView: View){
                 super.onDrawerOpened(drawerView)
                 Log.e("열림","드로워")
+                login(userIdentity)
             }
 
             override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
@@ -174,8 +157,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
-        var userIDID=intent.getStringExtra("ID")
-        login(userIDID!!)
+        val userID=intent.getStringExtra("ID")
+        login(userID!!)
+
 
         locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
 
@@ -247,9 +231,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
                     checkError(goalLatLng!!) && arriveCheck -> {
                         makeText(this, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
+//                        var abc:Double=(intent.getStringExtra("resultReward"))
+
+                        updateCredit(userIdentity,resultReward)
                         markerWayPoint.map = null
                         markerGoalPoint.map = null
                         arriveCheck = false
+
                     }
                 }
             }
@@ -473,14 +461,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             100 -> {
                 when(resultCode){
                     Activity.RESULT_OK ->{
-                        var resultSrc = data!!.getStringExtra("resultSrc")
-                        var resultDst = data.getStringExtra("resultDst")
-                        var resultDistance = data.getStringExtra("resultDistance")
+                        val resultSrc = data!!.getStringExtra("resultSrc")
+                        val resultDst = data.getStringExtra("resultDst")
+                        val resultDistance = data.getStringExtra("resultDistance")
+                        wayLatLng=LatLng(data.getDoubleExtra("wayLatLng[0]",0.0),data.getDoubleExtra("wayLatLng[1]",0.0))
+                        goalLatLng=LatLng(data.getDoubleExtra("goalLatLng[0]",0.0),data.getDoubleExtra("goalLatLng[1]",0.0))
+                        resultReward=data.getDoubleExtra("resultReward",0.0)
+
                         requestSrc.text = resultSrc
                         requestDst.text = resultDst
                         remainDuration.text = resultDistance
 
-                        var bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+                        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
                         bottomSheet.visibility = View.VISIBLE
                         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                         val animation = AlphaAnimation(0.0f,1.0f)
@@ -507,6 +499,40 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
+    }
+
+    fun login(test1:String){ //Login 후 사용자의 정보를 들고오는 함수
+        val UserInfo = ArrayList<String>()
+        val test = "http://15.164.103.195/login.php?user=$test1"
+        val task = URLConnector(test)
+        task.start()
+        try {
+            task.join()
+        } catch (e: InterruptedException) {
+            e.printStackTrace()
+        }
+
+        val result: String? = task.getResult()
+        val JO = JSONObject(result)
+        val Jrank = JO.getString("rank")
+
+        println(Jrank)
+        val JA: JSONArray = JO.getJSONArray("result")
+
+        for(i in 0 until JA.length()){
+            val jo = JA.getJSONObject(i)
+            UserInfo.add(jo.getString("ID"))
+            UserInfo.add(jo.getString("Credit"))
+            UserInfo.add(jo.getString("Property"))
+            UserInfo.add(jo.getString("Car"))
+        }
+        headerName.text = UserInfo.get(0)
+        headerRank.text = Jrank
+        headerCredit.text = UserInfo.get(2)
+        headerAccum.text = UserInfo.get(1)
+        while(task.isAlive){}
+        UserInfo.clear()
+        httpConnect()
     }
 }
 
