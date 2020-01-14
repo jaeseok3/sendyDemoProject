@@ -329,7 +329,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             checkError(goalLatLng!!) && arriveCheck -> {
                 makeText(applicationContext, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
                 //                        var abc:Double=(intent.getStringExtra("resultReward"))
-
                 updateCredit(userIdentity,resultReward)
                 markerGoalPoint.map = null
                 arriveCheck = false

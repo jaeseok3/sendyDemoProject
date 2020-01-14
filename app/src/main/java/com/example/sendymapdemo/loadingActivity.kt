@@ -5,12 +5,10 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.util.Log
 import android.view.Window
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
-import kotlin.math.pow
 
 class loadingActivity(context : Context) : Dialog(context){
     private var c: Context? = null
@@ -27,4 +25,13 @@ class loadingActivity(context : Context) : Dialog(context){
         val animation : Animation = AnimationUtils.loadAnimation(c,R.anim.loading)
         logo.animation = animation
     }
+
+    override fun show(){
+        super.show()
+    }
+
+    override fun dismiss() {
+        super.dismiss()
+    }
+
 }
