@@ -1,7 +1,6 @@
 package com.example.sendymapdemo
 
 import android.content.Intent
-import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -39,8 +38,8 @@ class LoginActivity : AppCompatActivity() {
                 userIdentity=userID
 
                 val intent = Intent(applicationContext,MapsActivity::class.java)
-                intent.putExtra("ID", userID)
-                startActivityForResult(intent, 110)
+                intent.putExtra("ID",userID)
+                startActivity(intent)
 
                 finish()
             }
