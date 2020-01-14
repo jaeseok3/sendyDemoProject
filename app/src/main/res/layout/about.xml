@@ -1,64 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    card_view:cardBackgroundColor="@color/lightBlue"
-    card_view:cardCornerRadius="16dp"
-    card_view:cardUseCompatPadding="true">
+    android:background="@android:drawable/screen_background_light_transparent"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:orientation="vertical">
 
-    <LinearLayout
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:orientation="vertical">
+        card_view:cardBackgroundColor="@color/lightBlue"
+        card_view:cardCornerRadius="16dp"
+        card_view:cardElevation="15dp"
+        card_view:cardUseCompatPadding="true">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_margin="8dp"
-            android:text="ABOUT"
-            android:textSize="14sp" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_margin="10dp"
-            android:padding="10dp"
-            android:text="SendyGO"
-            android:textSize="18sp"
-            android:textStyle="bold"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:padding="10dp">
+            android:layout_margin="10dp"
+            android:orientation="vertical">
+
             <TextView
-                android:layout_width="100dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:gravity="center"
-                android:text="TOM"
+                android:text="ABOUT"
                 android:textSize="14sp" />
+
             <TextView
-                android:layout_width="100dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
+                android:layout_margin="10dp"
                 android:gravity="center"
-                android:text="ALEX"
-                android:textSize="14sp" />
-            <TextView
-                android:layout_width="100dp"
+                android:padding="10dp"
+                android:text="SendyGO"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
                 android:gravity="center"
-                android:text="DAMON"
-                android:textSize="14sp" />
+                android:orientation="horizontal"
+                android:padding="10dp">
+
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:gravity="center"
+                    android:text="TOM"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:gravity="center"
+                    android:text="ALEX"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:gravity="center"
+                    android:text="DAMON"
+                    android:textSize="14sp" />
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
 
 
-</androidx.cardview.widget.CardView>
+    </androidx.cardview.widget.CardView>
+</LinearLayout>

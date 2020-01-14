@@ -15,7 +15,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class requestActivity : AppCompatActivity(){
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.request_activity)
@@ -61,6 +60,7 @@ class requestActivity : AppCompatActivity(){
                         mainIntent.putExtra("goalLatLng[1]",arrGoal[0].toDouble())
                         println("resultReward : "+adapter.getItem(position).reward)
 //                        mainIntent.putExtra("resultDistance",adapter.getItem(position).distance)
+                        mainIntent.putExtra("resultDistance",adapter.getItem(position).distance)
                         setResult(Activity.RESULT_OK, mainIntent)
                         finish()
                     }

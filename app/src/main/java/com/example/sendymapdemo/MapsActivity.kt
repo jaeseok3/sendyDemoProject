@@ -22,6 +22,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import android.content.Intent
+import android.os.AsyncTask
 import android.view.MenuItem
 import android.view.animation.AlphaAnimation
 import android.widget.*
@@ -34,7 +35,12 @@ import kotlinx.android.synthetic.main.activity_maps.*
 import kotlinx.coroutines.*
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
 import java.lang.Thread.sleep
+import java.net.URL
+import kotlin.math.pow
 import com.google.android.material.navigation.NavigationView as NavigationView
 
 //leaderBoardAdapter에서 드로워를 닫을 때 필요해서 전역으로 선언
@@ -110,9 +116,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 R.id.menu_about -> {
                     val builder = AlertDialog.Builder(this)
                     val dialogView = layoutInflater.inflate(R.layout.about, null)
-                    //val dialog:AlertDialog = builder.create()
-                    builder.setView(dialogView)
-                        .show()
+                    val dialog:AlertDialog = builder.create()
+                    builder.setView(dialogView).show()
                 }
                 R.id.menu_update -> {
 
@@ -199,7 +204,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     if(distance <= 20) R.drawable.happy
                     else if(distance > 20 && distance <= 40) R.drawable.sad
                     else R.drawable.dead
-                val reward = Math.pow(time.toDouble(),2.0)
+                val reward = time.toDouble().pow(2.0)
                 val RI = requestInfo(face,
                         getGeoName(responseList[i].wayPointLatLng),
                         getGeoName(responseList[i].goalLatLng),
@@ -251,6 +256,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         currentLocation.longitude = latlngList[i].longitude
                         Log.e("위치변경", "${currentLocation.latitude}, ${currentLocation.longitude}")
                         drawingLocationUI(currentLocation)
+                        getDangerGrade(currentLocation.latitude.toString(), currentLocation.longitude.toString(),
+                            latlngList[i].latitude.toString(), latlngList[i].longitude.toString())
+                        //dangerInfo.text
                         sleep(250)
                         if (nMap.locationTrackingMode == LocationTrackingMode.Follow ||
                                 nMap.locationTrackingMode == LocationTrackingMode.NoFollow) {
@@ -273,6 +281,22 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             Log.e("위치변경", "${locationOverlay.position}")
             it.moveCamera(CameraUpdate.scrollTo(LatLng(location.latitude, location.longitude)))
         }
+        when{
+            checkError(wayLatLng!!) && !arriveCheck -> {
+                makeText(applicationContext, "출발지에 도착하였습니다.", LENGTH_SHORT).show()
+                markerStartPoint.map = null
+                markerWayPoint.map = null
+                arriveCheck = true
+            }
+            checkError(goalLatLng!!) && arriveCheck -> {
+                makeText(applicationContext, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
+                //                        var abc:Double=(intent.getStringExtra("resultReward"))
+
+                updateCredit(userIdentity,resultReward)
+                markerGoalPoint.map = null
+                arriveCheck = false
+
+            }}
     }
     private fun animation(){
         val currentLocation: View = findViewById(R.id.fab1)
@@ -310,6 +334,50 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         })
+    }
+    private fun getDangerGrade(startLat:String, startLng:String, endLat:String, endLng:String) {
+        lateinit var temp : String
+        class getDangerGrade : AsyncTask<Void, Void, Void>(){
+            override fun doInBackground(vararg params: Void?): Void? {
+                val stream = URL("http://apis.data.go.kr/B552061/roadDgdgrLink/getRestRoadDgdgrLink?serviceKey=%2BwvPpNobnpO%2BxNDsB3NdwZqjZYg4C8JqEy7NhZxXof%2F2Owy9Vu2eYP1pZVtIw%2FcPEVTx8nKQ1ph%2F4ppRNxKBLA%3D%3D&" +
+                        "searchLineString=LineString("+
+                        startLng + " " +
+                        startLat + ", " +
+                        endLng + " " +
+                        endLat + ")&vhctyCd=1&type=json&numOfRows=10&pageNo=1").openStream()
+                val read = BufferedReader(InputStreamReader(stream,"UTF-8"))
+                temp  = read.readLine()
+                Log.e("파싱 진행중", temp)
+
+                return null
+            }
+
+            override fun onPostExecute(result: Void?) {
+                var grade : String
+                super.onPostExecute(result)
+                val json = JSONObject(temp)
+                if(json.get("resultCode") != "10") {
+                    val chiefObject = (json["items"] as JSONObject)
+                    val upperArray : JSONArray = chiefObject.getJSONArray("item")
+                    val upperObject = upperArray.getJSONObject(0)
+                    grade = upperObject.getString("anals_grd")
+                    grade =  when(grade){
+                        "01" -> "1등급"
+                        "02" -> "2등급"
+                        "03" -> "3등급"
+                        "04" -> "4등급"
+                        "05" -> "5등급"
+                        else -> "none"
+                    }
+                }
+                else
+                    grade = "none"
+                dangerInfo.text = grade
+                Log.e("파싱결과",grade)
+
+            }
+        }
+        getDangerGrade().execute()
     }
     private fun checkError(goalLatLng: LatLng): Boolean {
         val currentLat = currentLocation.latitude
@@ -471,8 +539,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         requestSrc.text = resultSrc
                         requestDst.text = resultDst
                         remainDuration.text = resultDistance
-
-                        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+                        var bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
                         bottomSheet.visibility = View.VISIBLE
                         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                         val animation = AlphaAnimation(0.0f,1.0f)
