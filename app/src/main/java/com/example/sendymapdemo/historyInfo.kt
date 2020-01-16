@@ -9,7 +9,7 @@ class historyInfo{
     var distance:String = ""
     var historyTime:String = ""
     var historyDate:String = ""
-    var reward:Double = 0.0
+    var reward:String = ""
 
     constructor()
 
@@ -17,7 +17,7 @@ class historyInfo{
                 destination:String,
                 time:String,
                 distance:String,
-                reward:Double,
+                reward:String,
                 historyTime:String,
                 historyDate:String){
         this.source = source

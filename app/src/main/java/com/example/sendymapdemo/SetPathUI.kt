@@ -13,7 +13,6 @@ class SetPathUI(data: PathData, naverMap: NaverMap) {
     private val nMap: NaverMap = naverMap
 
     fun setUIPath(){
-        val pathOverlay = PathOverlay()
         val pathArr = pathData.route.traoptimal[0].path
         val startLng = pathData.route.traoptimal[0].summary.start.location[0]
         val startLat = pathData.route.traoptimal[0].summary.start.location[1]

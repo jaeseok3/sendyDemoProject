@@ -62,8 +62,7 @@ fun GetHistory(userID:String){
                 jo.getString("Dest"),
                 jo.getString("Time"),
                 jo.getString("Distance"),
-                jo.getString("Reward").toDouble()
-                ,
+                jo.getString("Reward"),
                 jo.getString("HistoryTime"),
                 jo.getString("HistoryDate")
             )

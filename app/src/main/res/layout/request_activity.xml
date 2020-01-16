@@ -45,10 +45,6 @@
             android:text="의뢰를 선택하세요"
             android:textSize="18sp"
             android:textStyle="bold"/>
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/swipe_layout">
         <ListView
             android:layout_gravity="center"
             android:layout_width="match_parent"
@@ -56,6 +52,5 @@
             android:divider="@null"
             android:dividerHeight="10dp"
             android:id="@+id/listview_requestdialog_list"/>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     </LinearLayout>
 </LinearLayout>

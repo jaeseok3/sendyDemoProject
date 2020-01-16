@@ -92,6 +92,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fabClose: Animation
 
     private lateinit var startPosition: String
+    private lateinit var resultDistance: String
+    var progressRate = 0.0
     var resultReward:Double = 0.0
     override fun onBackPressed() {
         onDestroy()
@@ -195,46 +197,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             animation()
         }
         startDelivery.setOnClickListener {
-            fun readList(){
-                for (i in 0..4) {
-                    val time = responseList[i].responseData.route.traoptimal[0].summary.duration / 60000
-                    Log.e("거리_시간", time.toString())
-                    val distance = responseList[i].responseData.route.traoptimal[0].summary.distance / 1000.toDouble()
-                    Log.e("거리", distance.toString())
-                    val distanceStr = String.format("%.1f Km", distance)
-                    val timeStr = "$time" + "Min"
-                    val face =
-                            if (distance <= 20) R.drawable.happy
-                            else if (distance > 20 && distance <= 40) R.drawable.sad
-                            else R.drawable.dead
-                    val reward = Math.pow(time.toDouble(), 2.0)
-                    val RI = requestInfo(face,
-                            getGeoName(responseList[i].wayPointLatLng),
-                            getGeoName(responseList[i].goalLatLng),
-                            timeStr, distanceStr, reward,
-                            responseList[i].goalLatLng,
-                            responseList[i].wayPointLatLng)
-                    requestList.add(RI)
-
-                    Log.e("requestListSize", "${requestList.size}")
-                }
-            }
             //첫번째 버튼 클릭했을때
-            try{
-                readList()
-            } catch(e:Exception){
-                val handler = Handler()
-                handler.postDelayed({
-                    readList()
-                }, 1500)
-            } finally {
-                val handler = Handler()
-                handler.postDelayed({
-                    val requestIntent = Intent(this, RequestActivity::class.java)
-                    requestIntent.putExtra("startPoint", startPosition)
-                    startActivityForResult(requestIntent,100)
-                }, 1000)
-            }
+            val requestIntent = Intent(this, RequestActivity::class.java)
+            requestIntent.putExtra("startPoint", startPosition)
+            startActivityForResult(requestIntent,100)
             animation()
         }
 
@@ -269,8 +235,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         locationStartBtn.setOnClickListener {
             if(nMap.locationTrackingMode == LocationTrackingMode.None){
-                var progressRate = 0.0
-                markerStartPoint.map = null
                 Log.e("Flag", "${nMap.locationTrackingMode}")
                 GlobalScope.async {
                     for (i in 0 until latlngList.size) {
@@ -279,20 +243,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
                         Log.e("위치변경", "${currentLocation.latitude}, ${currentLocation.longitude}")
                         runBlocking {
-                            progressRate += 1.0 / latlngList.size
-                            drawingLocationUI(LatLng(latlngList[i].latitude, latlngList[i].longitude), progressRate).join()
+                            drawingLocationUI(LatLng(latlngList[i].latitude, latlngList[i].longitude))
                             getDangerGrade(latlngList[i].latitude.toString(), latlngList[i].longitude.toString(),
                                 latlngList[i].latitude.toString(), latlngList[i].longitude.toString())
                         }
-                        delay(100)
+                        delay(2000)
                         if (nMap.locationTrackingMode == LocationTrackingMode.Follow ||
                                 nMap.locationTrackingMode == LocationTrackingMode.NoFollow) {
                             progressRate = 0.0
-                            pathOverlay.progress = progressRate
+                            drawingLocationUI(LatLng(currentLocation.latitude, currentLocation.longitude))
                             break
                         }
                     }
-                    pathOverlay.map = null
                 }
             }
             else{
@@ -301,37 +263,39 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
     }
-    private fun drawingLocationUI(latLng: LatLng, progressRate: Double) = GlobalScope.launch(Dispatchers.Main){
+    private fun drawingLocationUI(latLng: LatLng) = GlobalScope.launch(Dispatchers.Main){
         nMap.let {
             val locationOverlay = it.locationOverlay
+            progressRate += 1.0 / latlngList.size
             locationOverlay.isVisible = true
             locationOverlay.position = latLng
             Log.e("위치변경", "${locationOverlay.position}")
             it.moveCamera(CameraUpdate.scrollTo(latLng))
-            if(checkError(wayLatLng!!)){
-                markerWayPoint.map = null
-            }
-            else if(checkError(goalLatLng!!)){
-                markerGoalPoint.map = null
-            }
+            val handler = Handler()
+            handler.postDelayed({
+                val arrStr = resultDistance.split(" Km")
+                val distanceDouble = arrStr[0].toDouble() * (1 - progressRate)
+                val distanceStr = String.format("%.1f", distanceDouble) + " Km"
+                Log.e("남은거리", distanceStr)
+                remainDuration.text = distanceStr
+                pathOverlay.progress = progressRate
+                Log.e("progress", "$progressRate")
+                when{
+                    checkError(wayLatLng!!) && !arriveCheck -> {
+                        makeText(applicationContext, "출발지에 도착하였습니다.", LENGTH_SHORT).show()
+                        markerStartPoint.map = null
+                        markerWayPoint.map = null
+                        arriveCheck = true
+                    }
+                    checkError(goalLatLng!!) && arriveCheck -> {
+                        makeText(applicationContext, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
+                        updateCredit(userIdentity,resultReward)
+                        markerGoalPoint.map = null
+                        pathOverlay.map = null
+                        arriveCheck = false
+                    }}
+            },1000)
         }
-        delay(300)
-        pathOverlay.progress = progressRate
-        when{
-            checkError(wayLatLng!!) && !arriveCheck -> {
-                makeText(applicationContext, "출발지에 도착하였습니다.", LENGTH_SHORT).show()
-                markerStartPoint.map = null
-                markerWayPoint.map = null
-                arriveCheck = true
-            }
-            checkError(goalLatLng!!) && arriveCheck -> {
-                makeText(applicationContext, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
-                //                        var abc:Double=(intent.getStringExtra("resultReward"))
-                updateCredit(userIdentity,resultReward)
-                markerGoalPoint.map = null
-                arriveCheck = false
-
-            }}
     }
     private fun animation(){
         val currentLocation: View = findViewById(R.id.fab1)
@@ -522,46 +486,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         })
     } //configureBottomNav()
-    private fun findPath(currentPoint:String, startPoint:String, goalPoint:String){
-        val restClient: RetrofitInterface = Http3RetrofitManager.getRetrofitService(RetrofitInterface::class.java)
-        val option = "traoptimal"
-        val requestPath = restClient.requestPath(currentPoint, goalPoint, startPoint, option)
-
-        requestPath.enqueue(object : Callback<PathData> {
-            override fun onFailure(call: Call<PathData>, t: Throwable) {
-                error(message = t.toString())
-            }
-            override fun onResponse(call: Call<PathData>, response: Response<PathData>) {
-                if(response.isSuccessful){
-                    responseData = response.body()
-                    val data = SummaryData(currentPoint, startPoint, goalPoint, response.body()!!)
-                    responseList.add(data)
-                    Log.e("사이즈", "${responseList.size}")
-                }
-            }
-        })
-    }
     //fab버튼 클릭 리스너를 따로 구현 -> onMapReady안에서 구현한 클릭리스너가 작동하지 않음 -> activity_maps.xml에 명시
     fun fabClickListener(view: View){
         view.bringToFront()
-        try{
-            for(i in 0..8 step 2) {
-                val newGeoInfo = geoInfo(getLocationDB())
-                positions.add(newGeoInfo.src)
-                Log.e("출발지", newGeoInfo.src)
-                positions.add(newGeoInfo.dst)
-                Log.e("도착지", newGeoInfo.dst)
-                try {
-                    findPath(startPosition, positions[i], positions[i + 1])
-                } catch (e: Exception) {
-                    Log.e("e", "${e.printStackTrace()}")
-                }
-            }
-        }catch (e: InterruptedException){
-            e.printStackTrace()
-        }finally {
-            animation()
-        }
+        animation()
     }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -571,7 +499,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     Activity.RESULT_OK ->{
                         val resultSrc = data!!.getStringExtra("resultSrc")
                         val resultDst = data.getStringExtra("resultDst")
-                        val resultDistance = data.getStringExtra("resultDistance")
+                        resultDistance = data.getStringExtra("resultDistance")!!
                         wayLatLng=LatLng(data.getDoubleExtra("wayLatLng[0]",0.0),data.getDoubleExtra("wayLatLng[1]",0.0))
                         goalLatLng=LatLng(data.getDoubleExtra("goalLatLng[0]",0.0),data.getDoubleExtra("goalLatLng[1]",0.0))
                         resultReward=data.getDoubleExtra("resultReward",0.0)
@@ -579,7 +507,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         requestSrc.text = resultSrc
                         requestDst.text = resultDst
                         remainDuration.text = resultDistance
-                        var bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+                        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
                         bottomSheet.visibility = View.VISIBLE
                         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                         val animation = AlphaAnimation(0.0f,1.0f)
@@ -597,7 +525,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         bottomSheet.animation = animation
 
                         requestList.clear()
-                        responseList.clear()
                         positions.clear()
                     }
                     Activity.RESULT_CANCELED -> {

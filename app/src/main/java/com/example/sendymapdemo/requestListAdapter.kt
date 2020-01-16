@@ -1,5 +1,6 @@
 package com.example.sendymapdemo
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -8,7 +9,7 @@ import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
 
-class requestListAdapter(private val context: Context,
+class requestListAdapter(context: Context,
                          private val dataSource: ArrayList<requestInfo>) : BaseAdapter() {
 
     private val inflater: LayoutInflater
@@ -29,6 +30,7 @@ class requestListAdapter(private val context: Context,
     }
 
     //4
+    @SuppressLint("ViewHolder")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         // Get view for row item
         val rowView = inflater.inflate(R.layout.request_listview_item, parent, false)
