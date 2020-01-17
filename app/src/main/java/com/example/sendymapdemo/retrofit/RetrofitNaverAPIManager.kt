@@ -1,4 +1,4 @@
-package com.example.sendymapdemo
+package com.example.sendymapdemo.retrofit
 
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -9,10 +9,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
-object Http3RetrofitManager {
+object RetrofitNaverAPIManager {
     private val ALL_TIMEOUT = 10L
-    private val AIR_OPENAPI_HOST = "http://openapi.airkorea.or.kr"
-    private val AIR_OPENAPI_KEY = "EECWWmjUunxzPTvSMYy5pg8ehUEUtZfEFYWAHsiA5TbH245IpCmf8JGBSprIXK9O3bruBdFlfNOm3boD%2FRkpaA%3D%3D"
     private val NAVER_HOST = "https://naveropenapi.apigw.ntruss.com"
     private val NAVER_API_CLIENT = "nx5wmexmtw"
     private val NAVER_API_SECRET = "CS9kPn8fkidEzaDL3dv4tmQ6ymHVkXf2cy2doDZl"

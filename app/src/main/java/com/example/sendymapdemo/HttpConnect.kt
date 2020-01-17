@@ -1,24 +1,13 @@
 package com.example.sendymapdemo
 
 import android.util.Log
+import com.example.sendymapdemo.dataClass.HistoryData
+import com.example.sendymapdemo.dataClass.UserData
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URLEncoder
 
-
-fun updateCredit(ID:String,reward:Double){
-    val userID:String=ID
-    val reward:Double=reward
-    val query ="http://15.164.103.195/httpUpdateCredit.php?user=$userID&reward=$reward"
-    val task=URLConnector(query)
-    task.start()
-    try{
-        task.join()
-    } catch (e:InterruptedException){
-        e.printStackTrace()
-    }
-}
-fun InsertHistory(newHistory: historyInfo) {
+fun InsertHistory(newHistory: HistoryData) {
     val aIdentity:String=URLEncoder.encode(userIdentity,"UTF-8")
     val asource:String=URLEncoder.encode(newHistory.source,"UTF-8")
     val adest:String=URLEncoder.encode(newHistory.destination,"UTF-8")
@@ -29,7 +18,6 @@ fun InsertHistory(newHistory: historyInfo) {
     val test = "http://15.164.103.195/httpHistoryInsert.php?"+"user=$aIdentity" +
             "&time=${newHistory.time}"+"&src=$asource"+"&dest=$adest"+"&distance=$adis&reward=$areward&htime=$atime&hdate=$adate"
 
-
     println(test)
     val task = URLConnector(test)
     task.start()
@@ -39,7 +27,6 @@ fun InsertHistory(newHistory: historyInfo) {
     } catch (e: InterruptedException) {
         e.printStackTrace()
     }
-
 }
 fun GetHistory(userID:String){
     val test = "http://15.164.103.195/httpHistory.php?user=$userID"
@@ -57,14 +44,14 @@ fun GetHistory(userID:String){
             for (i in 0 until JA.length()) {
             val jo = JA.getJSONObject(i)
             //새로운 히스토리추가
-            val newHistory = historyInfo(
-                jo.getString("Src"),
-                jo.getString("Dest"),
-                jo.getString("Time"),
-                jo.getString("Distance"),
-                jo.getString("Reward"),
-                jo.getString("HistoryTime"),
-                jo.getString("HistoryDate")
+            val newHistory = HistoryData(
+                    jo.getString("Src"),
+                    jo.getString("Dest"),
+                    jo.getString("Time"),
+                    jo.getString("Distance"),
+                    jo.getString("Reward"),
+                    jo.getString("HistoryTime"),
+                    jo.getString("HistoryDate")
             )
             historyList.add(newHistory) //히스토리 리스트에 추가
         }
@@ -149,7 +136,7 @@ fun httpConnect(){ //Login 후에 Http connection을 통해 리더보드에 들�
         httpUser.add(jo.getString("rank"))
 
         httpArray.add(httpUser)
-        val newUser = userInfo(httpArray[i][0],Integer.parseInt(httpArray[i][2]),Integer.parseInt(httpArray[i][1]),Integer.parseInt(httpArray[i][4]))
+        val newUser = UserData(httpArray[i][0], Integer.parseInt(httpArray[i][2]), Integer.parseInt(httpArray[i][1]), Integer.parseInt(httpArray[i][4]))
         println("http User : " + httpUser.get(2) + "http Array[0][2] : " + httpArray[i][2])
         userList.add(newUser)
     }

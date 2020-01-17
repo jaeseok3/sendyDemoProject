@@ -7,9 +7,7 @@ import java.net.HttpURLConnection
 import java.net.HttpURLConnection.HTTP_OK
 import java.net.URL
 
-
 class URLConnector(url: String) : Thread() {
-
     private var result: String? = null
     private var URL1: String=url
     override fun run() {

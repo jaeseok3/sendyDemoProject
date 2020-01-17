@@ -4,13 +4,14 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.sendymapdemo.dataClass.UserData
 import kotlinx.android.synthetic.main.ranking_activity.*
 
 //리더보드 어댑터
 lateinit var boardAdapter:leaderBoardAdapter
 
 //유저들의 정보를 담은 리스트
-var userList = ArrayList<userInfo>()
+var userList = ArrayList<UserData>()
 
 class rankingActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {

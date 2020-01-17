@@ -1,10 +1,10 @@
 package com.example.sendymapdemo
 
 import android.graphics.Color
+import com.example.sendymapdemo.dataClass.PathData
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.overlay.OverlayImage
-import com.naver.maps.map.overlay.PathOverlay
 
 val latlngList = ArrayList<LatLng>()
 

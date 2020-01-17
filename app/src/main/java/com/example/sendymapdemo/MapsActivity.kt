@@ -13,9 +13,6 @@ import android.widget.Toast.makeText
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
 import com.naver.maps.map.overlay.Marker
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -29,6 +26,11 @@ import android.view.animation.AlphaAnimation
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
+import com.example.sendymapdemo.dataClass.RequestListData
+import com.example.sendymapdemo.koinModule.ApplicationMain
+import com.example.sendymapdemo.retrofit.RetrofitInterface
+import com.example.sendymapdemo.retrofit.RetrofitNaverAPIManager
+import com.example.sendymapdemo.retrofit.RetrofitServerManager
 import com.naver.maps.map.overlay.PathOverlay
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.widget.LocationButtonView
@@ -41,19 +43,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.lang.Thread.sleep
 import java.net.URL
 import com.google.android.material.navigation.NavigationView as NavigationView
-
-//leaderBoardAdapter에서 드로워를 닫을 때 필요해서 전역으로 선언
-lateinit var drawerLayout: DrawerLayout
-
-
-//의뢰정보를 담은 리스트
-var requestList = ArrayList<requestInfo>()
-var positions=ArrayList<String>()
-
-
 
 var markerStartPoint = Marker()
 var markerWayPoint = Marker()
@@ -61,18 +52,17 @@ var markerGoalPoint = Marker()
 
 var pathOverlay = PathOverlay()
 
-//requestActivity에서 사용
 lateinit var nMap: NaverMap
-var wayLatLng: LatLng ?= null
-var goalLatLng: LatLng ?= null
-
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
 
+    private val restClient: RetrofitInterface = RetrofitServerManager.getRetrofitService(RetrofitInterface::class.java)
+
     //리더보드 레이아웃 매니저
+    private lateinit var drawerLayout: DrawerLayout
     private lateinit var headerName: TextView
     private lateinit var headerDesc: TextView
     private lateinit var headerRank: TextView
@@ -171,11 +161,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val userID=intent.getStringExtra("ID")
         login(userID!!)
 
-
         locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
 
-        fabOpen = AnimationUtils.loadAnimation(App.instance.Context(), R.anim.fab_open)
-        fabClose = AnimationUtils.loadAnimation(App.instance.Context(), R.anim.fab_close)
+        fabOpen = AnimationUtils.loadAnimation(ApplicationMain.instance.Context(), R.anim.fab_open)
+        fabClose = AnimationUtils.loadAnimation(ApplicationMain.instance.Context(), R.anim.fab_close)
 
         val fragmentManager = supportFragmentManager
         val mapFragment = fragmentManager.findFragmentById(R.id.map) as MapFragment?
@@ -224,7 +213,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         makeText(this, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
 //                        var abc:Double=(intent.getStringExtra("resultReward"))
 
-                        updateCredit(userIdentity,resultReward)
+                        restClient.updateCredit(userIdentity, resultReward)
                         markerWayPoint.map = null
                         markerGoalPoint.map = null
                         arriveCheck = false
@@ -289,7 +278,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
                     checkError(goalLatLng!!) && arriveCheck -> {
                         makeText(applicationContext, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
-                        updateCredit(userIdentity,resultReward)
+                        restClient.updateCredit(userIdentity,resultReward)
                         markerGoalPoint.map = null
                         pathOverlay.map = null
                         arriveCheck = false
@@ -523,12 +512,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         })
                         animation.duration = 1500
                         bottomSheet.animation = animation
-
-                        requestList.clear()
-                        positions.clear()
-                    }
-                    Activity.RESULT_CANCELED -> {
-                        requestList.clear()
                     }
                 }
             }

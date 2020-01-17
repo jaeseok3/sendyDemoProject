@@ -3,14 +3,12 @@ package com.example.sendymapdemo
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.BaseAdapter
-import android.widget.ListView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.example.sendymapdemo.dataClass.HistoryData
 import kotlinx.android.synthetic.main.history_item.view.*
-import kotlinx.android.synthetic.main.navigation_recyclerview_item.view.*
 
-class historyListAdapter(private val items: ArrayList<historyInfo>) : RecyclerView.Adapter<historyListAdapter.ViewHolder>() {
+class historyListAdapter(private val items: ArrayList<HistoryData>) : RecyclerView.Adapter<historyListAdapter.ViewHolder>() {
     override fun getItemCount() = items.size
     override fun onBindViewHolder(holder: historyListAdapter.ViewHolder, position: Int) {
         println("on bind view holder")
@@ -34,7 +32,7 @@ class historyListAdapter(private val items: ArrayList<historyInfo>) : RecyclerVi
 
     class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         private var view: View = v
-        fun bind(listener: View.OnClickListener, item: historyInfo) {
+        fun bind(listener: View.OnClickListener, item: HistoryData) {
             view.historyDate.text = item.historyDate
             view.historyTime.text = item.historyTime
             view.historySrc.text = item.source

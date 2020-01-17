@@ -3,38 +3,37 @@ package com.example.sendymapdemo
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
-import android.widget.Adapter
-import android.widget.BaseAdapter
-import android.widget.ListAdapter
 import android.widget.ListView
 import android.widget.Toast.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.example.sendymapdemo.dataClass.HistoryData
+import com.example.sendymapdemo.dataClass.PathData
+import com.example.sendymapdemo.dataClass.RequestListData
+import com.example.sendymapdemo.retrofit.RetrofitInterface
+import com.example.sendymapdemo.retrofit.RetrofitNaverAPIManager
 import com.naver.maps.geometry.LatLng
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.lang.Thread.sleep
-import java.lang.ref.WeakReference
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.math.pow
 
 class RequestActivity : AppCompatActivity() {
-    lateinit var mSwipeRefreshLayout: SwipeRefreshLayout
-    lateinit var requestListView: ListView
-    lateinit var adapter: requestListAdapter
-    lateinit var startPosition: String
-    lateinit var animationDialog: loadingActivity
-    lateinit var context: Context
+    private var requestList = ArrayList<RequestListData>()
+    private var positions = ArrayList<String>()
+    private var wayLatLng: LatLng ?= null
+    private var goalLatLng: LatLng ?= null
+    private lateinit var requestListView: ListView
+    private lateinit var adapter: requestListAdapter
+    private lateinit var startPosition: String
+    private lateinit var context: Context
 
     private fun findPath(currentPoint:String, startPoint:String, goalPoint:String){
-        val restClient: RetrofitInterface = Http3RetrofitManager.getRetrofitService(RetrofitInterface::class.java)
+        val restClient: RetrofitInterface = RetrofitNaverAPIManager.getRetrofitService(RetrofitInterface::class.java)
         val option = "traoptimal"
         val requestPath = restClient.requestPath(currentPoint, goalPoint, startPoint, option)
 
@@ -44,12 +43,8 @@ class RequestActivity : AppCompatActivity() {
             }
             override fun onResponse(call: Call<PathData>, response: Response<PathData>) {
                 if(response.isSuccessful){
-//                    responseData = response.body()
-                    val data = SummaryData(currentPoint, startPoint, goalPoint, response.body()!!)
-                    val time = data.responseData.route.traoptimal[0].summary.duration / 60000
-                    Log.e("거리_시간", time.toString())
-                    val distance = data.responseData.route.traoptimal[0].summary.distance / 1000.toDouble()
-                    Log.e("거리", distance.toString())
+                    val time = response.body()!!.route.traoptimal[0].summary.duration / 60000
+                    val distance = response.body()!!.route.traoptimal[0].summary.distance / 1000.toDouble()
 
                     val distanceStr = String.format("%.1f Km", distance)
                     val timeStr = "$time" + "Min"
@@ -58,18 +53,17 @@ class RequestActivity : AppCompatActivity() {
                             else if (distance > 20 && distance <= 40) R.drawable.sad
                             else R.drawable.dead
                     val reward = time.toDouble().pow(2).toInt()
-                    val RI = requestInfo(face,
-                            getGeoName(data.wayPointLatLng),
-                            getGeoName(data.goalLatLng),
+                    val RI = RequestListData(face,
+                            getGeoName(wayLatLng.toString()),
+                            getGeoName(goalLatLng.toString()),
                             timeStr, distanceStr, reward,
-                            data.goalLatLng,
-                            data.wayPointLatLng,
-                            data.responseData)
+                            goalLatLng.toString(),
+                            wayLatLng.toString(),
+                            response.body()!!)
                     requestList.add(RI)
 
                     adapter = requestListAdapter(context, requestList)
                     requestListView.adapter = adapter
-                    Log.e("requestListSize", "${requestList.size}")
                 }
             }
         })
@@ -83,7 +77,7 @@ class RequestActivity : AppCompatActivity() {
         context = this
 
         for(i in 0..8 step 2) {
-            val newGeoInfo = geoInfo(getLocationDB())
+            val newGeoInfo = GeoData(getLocationDB())
             positions.add(newGeoInfo.src)
             Log.e("출발지", newGeoInfo.src)
             positions.add(newGeoInfo.dst)
@@ -91,15 +85,13 @@ class RequestActivity : AppCompatActivity() {
             try {
                 findPath(startPosition, positions[i], positions[i + 1])
             } catch (e: Exception) {
-                Log.e("e", "${e.printStackTrace()}")
+                e.printStackTrace()
             }
         }
-        Log.e("onCreate", "animationDialog Show")
     }
 
     override fun onResume() {
         super.onResume()
-
         requestListView.setOnItemClickListener { _, _, position, _ ->
             val oDialog = AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Light_Dialog)
             oDialog.setMessage("수락시 의뢰 리스트가 초기화됩니다.").setTitle("해당 의뢰를 수락하시겠습니까?")
@@ -112,11 +104,11 @@ class RequestActivity : AppCompatActivity() {
                     Log.e("선택한 도착지", adapter.getItem(position).destination)
                     Log.e("선택한 도착지_코드", adapter.getItem(position).destinationCode)
                     //새로운 히스토리추가
-                    var newHistory = historyInfo(
-                        adapter.getItem(position).source, adapter.getItem(position).destination,
-                        adapter.getItem(position).time, adapter.getItem(position).distance, adapter.getItem(position).reward.toString(),
-                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
-                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"))
+                    val newHistory = HistoryData(
+                            adapter.getItem(position).source, adapter.getItem(position).destination,
+                            adapter.getItem(position).time, adapter.getItem(position).distance, adapter.getItem(position).reward.toString(),
+                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
+                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"))
                     )
                     InsertHistory(newHistory) //히스토리 리스트에 추가
 
@@ -127,7 +119,7 @@ class RequestActivity : AppCompatActivity() {
                     wayLatLng = LatLng(arrWay[1].toDouble(), arrWay[0].toDouble())
                     goalLatLng = LatLng(arrGoal[1].toDouble(), arrGoal[0].toDouble())
 
-                    var mainIntent = Intent(this, MapsActivity::class.java)
+                    val mainIntent = Intent(this, MapsActivity::class.java)
                     mainIntent.putExtra("resultSrc", adapter.getItem(position).source)
                     mainIntent.putExtra("resultDst", adapter.getItem(position).destination)
                     mainIntent.putExtra("resultDistance",adapter.getItem(position).distance)
@@ -136,6 +128,8 @@ class RequestActivity : AppCompatActivity() {
                     mainIntent.putExtra("goalLatLng[0]", arrGoal[1].toDouble())
                     mainIntent.putExtra("goalLatLng[1]", arrGoal[0].toDouble())
                     setResult(Activity.RESULT_OK, mainIntent)
+                    requestList.clear()
+                    positions.clear()
                     finish()
                 }
                 .setCancelable(false).show()
@@ -145,7 +139,6 @@ class RequestActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         super.onBackPressed()
-        setResult(Activity.RESULT_CANCELED)
         requestList.clear()
         positions.clear()
         finish()
