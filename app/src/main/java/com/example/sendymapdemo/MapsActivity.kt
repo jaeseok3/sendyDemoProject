@@ -26,11 +26,11 @@ import android.view.animation.AlphaAnimation
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
-import com.example.sendymapdemo.dataClass.RequestListData
+import androidx.lifecycle.ViewModelProviders
 import com.example.sendymapdemo.koinModule.ApplicationMain
-import com.example.sendymapdemo.retrofit.RetrofitInterface
-import com.example.sendymapdemo.retrofit.RetrofitNaverAPIManager
-import com.example.sendymapdemo.retrofit.RetrofitServerManager
+import com.example.sendymapdemo.model.retrofit.RetrofitInterface
+import com.example.sendymapdemo.model.retrofit.RetrofitServerManager
+import com.example.sendymapdemo.viewModels.UserViewModel
 import com.naver.maps.map.overlay.PathOverlay
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.widget.LocationButtonView
@@ -58,6 +58,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
+
+    private val userViewModel = ViewModelProviders.of(this).get(UserViewModel::class.java)
 
     private val restClient: RetrofitInterface = RetrofitServerManager.getRetrofitService(RetrofitInterface::class.java)
 
@@ -156,6 +158,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 Log.e("열리는 중","드로워")
             }
         }
+
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
         val userID=intent.getStringExtra("ID")
@@ -222,6 +225,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
+
         locationStartBtn.setOnClickListener {
             if(nMap.locationTrackingMode == LocationTrackingMode.None){
                 Log.e("Flag", "${nMap.locationTrackingMode}")

@@ -1,6 +1,7 @@
-package com.example.sendymapdemo.retrofit
+package com.example.sendymapdemo.model.retrofit
 
 import com.example.sendymapdemo.dataClass.PathData
+import com.example.sendymapdemo.dataClass.UserData
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -24,5 +25,5 @@ interface RetrofitInterface {
     @GET("login.php")
     fun login(
             @Query("user") userID: String
-    )
+    ): Call<UserData>
 }

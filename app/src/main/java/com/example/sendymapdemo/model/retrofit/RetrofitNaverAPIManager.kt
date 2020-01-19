@@ -1,4 +1,4 @@
-package com.example.sendymapdemo.retrofit
+package com.example.sendymapdemo.model.retrofit
 
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient

@@ -9,11 +9,9 @@ import android.widget.ListView
 import android.widget.Toast.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.example.sendymapdemo.dataClass.HistoryData
-import com.example.sendymapdemo.dataClass.PathData
-import com.example.sendymapdemo.dataClass.RequestListData
-import com.example.sendymapdemo.retrofit.RetrofitInterface
-import com.example.sendymapdemo.retrofit.RetrofitNaverAPIManager
+import com.example.sendymapdemo.dataClass.*
+import com.example.sendymapdemo.model.retrofit.RetrofitInterface
+import com.example.sendymapdemo.model.retrofit.RetrofitNaverAPIManager
 import com.naver.maps.geometry.LatLng
 import retrofit2.Call
 import retrofit2.Callback

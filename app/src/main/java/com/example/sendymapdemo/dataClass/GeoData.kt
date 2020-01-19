@@ -1,4 +1,4 @@
-package com.example.sendymapdemo
+package com.example.sendymapdemo.dataClass
 
 class GeoData{
     lateinit var src:String
