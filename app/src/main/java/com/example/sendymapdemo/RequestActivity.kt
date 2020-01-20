@@ -13,6 +13,7 @@ import com.example.sendymapdemo.dataClass.*
 import com.example.sendymapdemo.model.retrofit.RetrofitInterface
 import com.example.sendymapdemo.model.retrofit.RetrofitNaverAPIManager
 import com.naver.maps.geometry.LatLng
+import org.koin.android.ext.android.inject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -21,6 +22,8 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.pow
 
 class RequestActivity : AppCompatActivity() {
+    private val NAVER_API_CLIENT = "nx5wmexmtw"
+    private val NAVER_API_SECRET = "CS9kPn8fkidEzaDL3dv4tmQ6ymHVkXf2cy2doDZl"
     private var requestList = ArrayList<RequestListData>()
     private var positions = ArrayList<String>()
     private var wayLatLng: LatLng ?= null
@@ -30,10 +33,13 @@ class RequestActivity : AppCompatActivity() {
     private lateinit var startPosition: String
     private lateinit var context: Context
 
+    private val userData: UserData by inject()
+    private val retrofitInterface: RetrofitInterface by inject()
+
     private fun findPath(currentPoint:String, startPoint:String, goalPoint:String){
         val restClient: RetrofitInterface = RetrofitNaverAPIManager.getRetrofitService(RetrofitInterface::class.java)
         val option = "traoptimal"
-        val requestPath = restClient.requestPath(currentPoint, goalPoint, startPoint, option)
+        val requestPath = restClient.requestPath(currentPoint, goalPoint, startPoint, option, NAVER_API_CLIENT, NAVER_API_SECRET)
 
         requestPath.enqueue(object : Callback<PathData> {
             override fun onFailure(call: Call<PathData>, t: Throwable) {
@@ -108,7 +114,8 @@ class RequestActivity : AppCompatActivity() {
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"))
                     )
-                    InsertHistory(newHistory) //히스토리 리스트에 추가
+                    retrofitInterface.InsertHistory(userData.ID, newHistory.time, newHistory.source, newHistory.destination, newHistory.distance,
+                            newHistory.reward, newHistory.historyTime, newHistory.historyDate)
 
                     val setPathUI = SetPathUI(requestList[position].responseData, nMap)
                     setPathUI.setUIPath()

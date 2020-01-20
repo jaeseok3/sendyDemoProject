@@ -7,27 +7,6 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URLEncoder
 
-fun InsertHistory(newHistory: HistoryData) {
-    val aIdentity:String=URLEncoder.encode(userIdentity,"UTF-8")
-    val asource:String=URLEncoder.encode(newHistory.source,"UTF-8")
-    val adest:String=URLEncoder.encode(newHistory.destination,"UTF-8")
-    val adate:String=URLEncoder.encode(newHistory.historyDate,"UTF-8")
-    val atime:String=URLEncoder.encode(newHistory.historyTime,"UTF-8")
-    val adis:String=URLEncoder.encode(newHistory.distance,"UTF-8")
-    val areward:String=URLEncoder.encode("${newHistory.reward}","UTF-8")
-    val test = "http://15.164.103.195/httpHistoryInsert.php?"+"user=$aIdentity" +
-            "&time=${newHistory.time}"+"&src=$asource"+"&dest=$adest"+"&distance=$adis&reward=$areward&htime=$atime&hdate=$adate"
-
-    println(test)
-    val task = URLConnector(test)
-    task.start()
-    try {
-        task.join()
-        Log.e("db","db삽입성공")
-    } catch (e: InterruptedException) {
-        e.printStackTrace()
-    }
-}
 fun GetHistory(userID:String){
     val test = "http://15.164.103.195/httpHistory.php?user=$userID"
     val task = URLConnector(test)
@@ -136,7 +115,7 @@ fun httpConnect(){ //Login 후에 Http connection을 통해 리더보드에 들�
         httpUser.add(jo.getString("rank"))
 
         httpArray.add(httpUser)
-        val newUser = UserData(httpArray[i][0], Integer.parseInt(httpArray[i][2]), Integer.parseInt(httpArray[i][1]), Integer.parseInt(httpArray[i][4]))
+        val newUser = UserData(httpArray[i][0], httpArray[i][2], httpArray[i][1], httpArray[i][4])
         println("http User : " + httpUser.get(2) + "http Array[0][2] : " + httpArray[i][2])
         userList.add(newUser)
     }

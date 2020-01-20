@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import com.example.sendymapdemo.dataClass.UserData
 import com.example.sendymapdemo.model.dao.UserDao
 
-@Database(entities = [UserData::class], version = 1)
+@Database(entities = [UserData::class], version = 1, exportSchema = false)
 abstract class UserRoomDataBase : RoomDatabase() {
     abstract fun userDao(): UserDao
 

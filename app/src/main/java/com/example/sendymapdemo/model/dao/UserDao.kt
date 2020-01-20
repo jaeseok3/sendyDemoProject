@@ -15,4 +15,7 @@ interface UserDao {
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     fun update(userData: UserData)
+
+    @Query("UPDATE userdata SET credit = :credit WHERE id = :userID")
+    fun updateCredit(userID: String, credit: Double)
 }

@@ -6,14 +6,14 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "userdata")
 data class UserData(
-        @ColumnInfo(name = "Car")
-        val Car: String,
-        @ColumnInfo(name = "Credit")
-        val Credit: String,
+        @ColumnInfo(name = "Car", defaultValue = "default")
+        val Car: String = "default",
+        @ColumnInfo(name = "Credit", defaultValue = "default")
+        val Credit: String = "default",
         @PrimaryKey
-        val ID: String,
-        @ColumnInfo(name = "rank")
-        val rank: String,
-        @ColumnInfo(name = "Property")
-        val Property: String
+        val ID: String = "default",
+        @ColumnInfo(name = "rank", defaultValue = "default")
+        val rank: String = "default",
+        @ColumnInfo(name = "Property", defaultValue = "default")
+        val Property: String = "default"
 )

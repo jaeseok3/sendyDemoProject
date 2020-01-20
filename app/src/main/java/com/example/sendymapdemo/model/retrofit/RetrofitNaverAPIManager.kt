@@ -12,8 +12,6 @@ import java.util.concurrent.TimeUnit
 object RetrofitNaverAPIManager {
     private val ALL_TIMEOUT = 10L
     private val NAVER_HOST = "https://naveropenapi.apigw.ntruss.com"
-    private val NAVER_API_CLIENT = "nx5wmexmtw"
-    private val NAVER_API_SECRET = "CS9kPn8fkidEzaDL3dv4tmQ6ymHVkXf2cy2doDZl"
 
     private var okHttpClient: OkHttpClient
     private var retrofit: Retrofit
@@ -42,8 +40,6 @@ object RetrofitNaverAPIManager {
         override fun intercept(chain: Interceptor.Chain): Response {
             val chainRequest = chain.request()
             val request = chainRequest.newBuilder().apply {
-                addHeader("X-NCP-APIGW-API-KEY-ID", NAVER_API_CLIENT)
-                addHeader("X-NCP-APIGW-API-KEY", NAVER_API_SECRET)
             }.build()
             return chain.proceed(request)
         }

@@ -9,8 +9,8 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
-import androidx.lifecycle.ViewModelProviders
-import com.example.sendymapdemo.viewModels.UserViewModel
+import com.example.sendymapdemo.model.repository.UserRepository
+import org.koin.android.ext.android.inject
 
 class LoginActivity : AppCompatActivity() {
     override fun onBackPressed() {
@@ -22,7 +22,7 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        val userViewModel = ViewModelProviders.of(this).get(UserViewModel::class.java)
+        val userRepository: UserRepository by inject()
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
         {
@@ -37,7 +37,7 @@ class LoginActivity : AppCompatActivity() {
                 val userID=mEditTextSearchKeyword.text.toString()
                 Toast.makeText(this,"$userID 님 환영합니다",Toast.LENGTH_SHORT).show()
 
-                userViewModel.getUserData(userID)
+                userRepository.getData(userID)
 
                 val intent = Intent(applicationContext,MapsActivity::class.java)
                 startActivity(intent)

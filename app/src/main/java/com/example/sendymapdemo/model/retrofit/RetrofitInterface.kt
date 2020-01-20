@@ -4,7 +4,7 @@ import com.example.sendymapdemo.dataClass.PathData
 import com.example.sendymapdemo.dataClass.UserData
 import retrofit2.Call
 import retrofit2.http.GET
-import retrofit2.http.POST
+import retrofit2.http.Header
 import retrofit2.http.Query
 
 interface RetrofitInterface {
@@ -13,17 +13,31 @@ interface RetrofitInterface {
             @Query("start") startPosition: String,
             @Query("goal") goalPosition: String,
             @Query("waypoints") wayPointPosition: String,
-            @Query("options") options: String
+            @Query("options") options: String,
+            @Header("X-NCP-APIGW-API-KEY-ID") apiID: String,
+            @Header("X-NCP-APIGW-API-KEY") apiSecret: String
     ): Call<PathData>
 
-    @POST("httpUpdateCredit.php")
+    @GET("httpUpdateCredit.php")
     fun updateCredit(
             @Query("user") userID: String,
             @Query("reward") reward: Double
     )
 
-    @GET("login.php")
+    @GET("login2.php")
     fun login(
             @Query("user") userID: String
     ): Call<UserData>
+
+    @GET("httpHistoryInsert.php")
+    fun InsertHistory(
+            @Query("user") userID: String,
+            @Query("time") time: String,
+            @Query("src") source: String,
+            @Query("dest") destination: String,
+            @Query("distance") distance: String,
+            @Query("reward") reward: String,
+            @Query("htime") htime: String,
+            @Query("hdate") hdate: String
+    )
 }

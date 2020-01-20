@@ -27,10 +27,9 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.ViewModelProviders
+import com.example.sendymapdemo.dataClass.UserData
 import com.example.sendymapdemo.koinModule.ApplicationMain
-import com.example.sendymapdemo.model.retrofit.RetrofitInterface
-import com.example.sendymapdemo.model.retrofit.RetrofitServerManager
-import com.example.sendymapdemo.viewModels.UserViewModel
+import com.example.sendymapdemo.model.repository.UserRepository
 import com.naver.maps.map.overlay.PathOverlay
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.widget.LocationButtonView
@@ -41,6 +40,7 @@ import kotlinx.android.synthetic.main.activity_maps.requestSrc
 import kotlinx.coroutines.*
 import org.json.JSONArray
 import org.json.JSONObject
+import org.koin.android.ext.android.inject
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.URL
@@ -58,10 +58,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
-
-    private val userViewModel = ViewModelProviders.of(this).get(UserViewModel::class.java)
-
-    private val restClient: RetrofitInterface = RetrofitServerManager.getRetrofitService(RetrofitInterface::class.java)
+    private val userRepository: UserRepository by inject()
+    private val userData: UserData by inject()
 
     //리더보드 레이아웃 매니저
     private lateinit var drawerLayout: DrawerLayout
@@ -87,9 +85,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var resultDistance: String
     var progressRate = 0.0
     var resultReward:Double = 0.0
+
     override fun onBackPressed() {
         onDestroy()
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -150,7 +150,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             override fun onDrawerOpened(drawerView: View){
                 super.onDrawerOpened(drawerView)
                 Log.e("열림","드로워")
-                login(userIdentity)
+                userRepository.getData(userData.ID)
             }
 
             override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
@@ -161,8 +161,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
-        val userID=intent.getStringExtra("ID")
-        login(userID!!)
 
         locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
 
@@ -181,7 +179,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(naverMap: NaverMap) {
         val startDelivery: View = findViewById(R.id.fab1)
         val market: View = findViewById(R.id.fab2)
-        val animationDialog = loadingActivity(this)
         nMap = naverMap
         val locationButtonView = findViewById<LocationButtonView>(R.id.locationBtn)
         locationButtonView.map = nMap
@@ -214,9 +211,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
                     checkError(goalLatLng!!) && arriveCheck -> {
                         makeText(this, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
-//                        var abc:Double=(intent.getStringExtra("resultReward"))
 
-                        restClient.updateCredit(userIdentity, resultReward)
+                        userRepository.updateCredit(userData.ID, resultReward)
+
                         markerWayPoint.map = null
                         markerGoalPoint.map = null
                         arriveCheck = false
@@ -282,7 +279,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
                     checkError(goalLatLng!!) && arriveCheck -> {
                         makeText(applicationContext, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
-                        restClient.updateCredit(userIdentity,resultReward)
+                        userRepository.updateCredit(userData.ID, resultReward)
                         markerGoalPoint.map = null
                         pathOverlay.map = null
                         arriveCheck = false
@@ -520,40 +517,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
-    }
-
-    fun login(test1:String){ //Login 후 사용자의 정보를 들고오는 함수
-        val UserInfo = ArrayList<String>()
-        val test = "http://15.164.103.195/login.php?user=$test1"
-        val task = URLConnector(test)
-        task.start()
-        try {
-            task.join()
-        } catch (e: InterruptedException) {
-            e.printStackTrace()
-        }
-
-        val result: String? = task.getResult()
-        val JO = JSONObject(result)
-        val Jrank = JO.getString("rank")
-
-        println(Jrank)
-        val JA: JSONArray = JO.getJSONArray("result")
-
-        for(i in 0 until JA.length()){
-            val jo = JA.getJSONObject(i)
-            UserInfo.add(jo.getString("ID"))
-            UserInfo.add(jo.getString("Credit"))
-            UserInfo.add(jo.getString("Property"))
-            UserInfo.add(jo.getString("Car"))
-        }
-        headerName.text = UserInfo.get(0)
-        headerRank.text = Jrank
-        headerCredit.text = UserInfo.get(2)
-        headerAccum.text = UserInfo.get(1)
-        while(task.isAlive){}
-        UserInfo.clear()
-        httpConnect()
     }
 }
 

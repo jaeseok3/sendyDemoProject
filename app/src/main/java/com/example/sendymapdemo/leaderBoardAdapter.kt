@@ -33,8 +33,8 @@ class leaderBoardAdapter(private val items: ArrayList<UserData>) : RecyclerView.
         private var view: View = v
         fun bind(listener: View.OnClickListener, item: UserData) {
             view.boardName.text = item.ID
-            view.boardRank.text = item.rank.toString()
-            view.boardAccum.text = item.accumulatedCredit.toString()
+            view.boardRank.text = item.rank
+            view.boardAccum.text = item.Credit
             view.setOnClickListener(listener)
         }
     }

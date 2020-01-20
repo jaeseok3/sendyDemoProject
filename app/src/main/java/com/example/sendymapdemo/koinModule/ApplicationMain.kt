@@ -3,9 +3,9 @@ package com.example.sendymapdemo.koinModule
 import android.app.Application
 import android.content.Context
 import org.koin.android.ext.koin.androidContext
-import org.koin.android.ext.koin.androidFileProperties
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
+import org.koin.core.logger.Level
 
 //로그인 했을때 회원정보를 koin으로?
 class ApplicationMain : Application(){
@@ -17,6 +17,11 @@ class ApplicationMain : Application(){
         super.onCreate()
         instance = this
 
+        startKoin {
+            androidContext(this@ApplicationMain)
+            androidLogger(level = Level.ERROR)
+            listOf(userDataModule, apiModule)
+        }
     }
 
     fun Context() : Context = applicationContext
