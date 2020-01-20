@@ -4,7 +4,9 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.sendymapdemo.dataClass.ID
 import kotlinx.android.synthetic.main.history_activiry.*
+import org.koin.android.ext.android.inject
 
 
 lateinit var historyAdapter:historyListAdapter
@@ -13,6 +15,7 @@ lateinit var historylayoutManager: LinearLayoutManager
 //히스토리 리스트
 var historyList = ArrayList<historyInfo>()
 class historyActivity : AppCompatActivity(){
+    val Login : ID by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,7 +23,7 @@ class historyActivity : AppCompatActivity(){
 
         //어댑터 초기화
         historyList.clear()
-        GetHistory(userIdentity)
+        GetHistory(Login.ID)
         historyAdapter = historyListAdapter(historyList)
         historyAdapter.notifyDataSetChanged()
         //레이아웃 매니저

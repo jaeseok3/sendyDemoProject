@@ -13,9 +13,6 @@ import android.widget.Toast.makeText
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
 import com.naver.maps.map.overlay.Marker
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -29,6 +26,9 @@ import android.view.animation.AlphaAnimation
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
+import com.example.sendymapdemo.dataClass.ID
+import com.example.sendymapdemo.dataClass.nMap
+import com.example.sendymapdemo.dataClass.pathOverlay
 import com.naver.maps.map.overlay.PathOverlay
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.widget.LocationButtonView
@@ -39,38 +39,23 @@ import kotlinx.android.synthetic.main.activity_maps.requestSrc
 import kotlinx.coroutines.*
 import org.json.JSONArray
 import org.json.JSONObject
+import org.koin.android.ext.android.get
+import org.koin.android.ext.android.inject
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.lang.Thread.sleep
 import java.net.URL
 import com.google.android.material.navigation.NavigationView as NavigationView
 
-//leaderBoardAdapter에서 드로워를 닫을 때 필요해서 전역으로 선언
-lateinit var drawerLayout: DrawerLayout
-
-
-//의뢰정보를 담은 리스트
-var requestList = ArrayList<requestInfo>()
-var positions=ArrayList<String>()
-
-
-
-var markerStartPoint = Marker()
-var markerWayPoint = Marker()
-var markerGoalPoint = Marker()
-
-var pathOverlay = PathOverlay()
-
-//requestActivity에서 사용
-lateinit var nMap: NaverMap
-var wayLatLng: LatLng ?= null
-var goalLatLng: LatLng ?= null
-
-
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+    val login : ID by inject()
+    val _nMap : nMap by inject()
+    val pathOverlay : pathOverlay by inject()
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
+
+    //leaderBoardAdapter에서 드로워를 닫을 때 필요해서 전역으로 선언
+    lateinit var drawerLayout: DrawerLayout
 
     //리더보드 레이아웃 매니저
     private lateinit var headerName: TextView
@@ -122,7 +107,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 R.id.menu_about -> {
                     val builder = AlertDialog.Builder(this)
                     val dialogView = layoutInflater.inflate(R.layout.about, null)
-                    val dialog:AlertDialog = builder.create()
+                    //val dialog:AlertDialog = builder.create()
                     builder.setView(dialogView).show()
                 }
                 R.id.menu_update -> {
@@ -158,7 +143,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             override fun onDrawerOpened(drawerView: View){
                 super.onDrawerOpened(drawerView)
                 Log.e("열림","드로워")
-                login(userIdentity)
+                //login(userIdentity)
+                login(login.ID)
             }
 
             override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
@@ -189,10 +175,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(naverMap: NaverMap) {
         val startDelivery: View = findViewById(R.id.fab1)
         val market: View = findViewById(R.id.fab2)
-        val animationDialog = loadingActivity(this)
-        nMap = naverMap
+        //val animationDialog = loadingActivity(this)
+        _nMap.nMap = naverMap
         val locationButtonView = findViewById<LocationButtonView>(R.id.locationBtn)
-        locationButtonView.map = nMap
+        locationButtonView.map = _nMap.nMap
         market.setOnClickListener { //두번째 버튼 눌렀을때 동작
             animation()
         }
@@ -204,11 +190,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             animation()
         }
 
-        nMap.locationSource = locationSource
-        nMap.locationTrackingMode = LocationTrackingMode.Follow
-        nMap.locationOverlay.isVisible = true
+        _nMap.nMap!!.locationSource = locationSource
+        _nMap.nMap!!.locationTrackingMode = LocationTrackingMode.Follow
+        _nMap.nMap!!.locationOverlay.isVisible = true
 
-        nMap.addOnLocationChangeListener { location ->
+        _nMap.nMap!!.addOnLocationChangeListener { location ->
             currentLocation = location
             startPosition = "${location.longitude},${location.latitude}"
             Log.e("현재위치", "${location.latitude},${location.longitude}")
@@ -217,16 +203,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 when {
                     checkError(wayLatLng!!) && !arriveCheck -> {
                         makeText(this, "출발지에 도착하였습니다.", LENGTH_SHORT).show()
-                        markerStartPoint.map = null
+                        _nMap.markerStartPoint.map = null
                         arriveCheck = true
                     }
                     checkError(goalLatLng!!) && arriveCheck -> {
                         makeText(this, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
 //                        var abc:Double=(intent.getStringExtra("resultReward"))
 
-                        updateCredit(userIdentity,resultReward)
-                        markerWayPoint.map = null
-                        markerGoalPoint.map = null
+                        updateCredit(login.ID,resultReward)
+                        _nMap.markerWayPoint.map = null
+                        _nMap.markerGoalPoint.map = null
                         arriveCheck = false
 
                     }
@@ -234,8 +220,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
         locationStartBtn.setOnClickListener {
-            if(nMap.locationTrackingMode == LocationTrackingMode.None){
-                Log.e("Flag", "${nMap.locationTrackingMode}")
+            if(_nMap.nMap!!.locationTrackingMode == LocationTrackingMode.None){
+                Log.e("Flag", "${_nMap.nMap!!.locationTrackingMode}")
                 GlobalScope.async {
                     for (i in 0 until latlngList.size) {
                         currentLocation.latitude = latlngList[i].latitude
@@ -248,8 +234,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                                 latlngList[i].latitude.toString(), latlngList[i].longitude.toString())
                         }
                         delay(2000)
-                        if (nMap.locationTrackingMode == LocationTrackingMode.Follow ||
-                                nMap.locationTrackingMode == LocationTrackingMode.NoFollow) {
+                        if (_nMap.nMap!!.locationTrackingMode == LocationTrackingMode.Follow ||
+                            _nMap.nMap!!.locationTrackingMode == LocationTrackingMode.NoFollow) {
                             progressRate = 0.0
                             drawingLocationUI(LatLng(currentLocation.latitude, currentLocation.longitude))
                             break
@@ -258,13 +244,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
             else{
-                Log.e("Flag", "${nMap.locationTrackingMode}")
-                nMap.locationTrackingMode = LocationTrackingMode.None
+                Log.e("Flag", "${_nMap.nMap!!.locationTrackingMode}")
+                _nMap.nMap!!.locationTrackingMode = LocationTrackingMode.None
             }
         }
     }
     private fun drawingLocationUI(latLng: LatLng) = GlobalScope.launch(Dispatchers.Main){
-        nMap.let {
+        _nMap.nMap!!.let {
             val locationOverlay = it.locationOverlay
             progressRate += 1.0 / latlngList.size
             locationOverlay.isVisible = true
@@ -278,20 +264,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 val distanceStr = String.format("%.1f", distanceDouble) + " Km"
                 Log.e("남은거리", distanceStr)
                 remainDuration.text = distanceStr
-                pathOverlay.progress = progressRate
+                pathOverlay.pathOverlay.progress = progressRate
                 Log.e("progress", "$progressRate")
                 when{
                     checkError(wayLatLng!!) && !arriveCheck -> {
                         makeText(applicationContext, "출발지에 도착하였습니다.", LENGTH_SHORT).show()
-                        markerStartPoint.map = null
-                        markerWayPoint.map = null
+                        _nMap.markerStartPoint.map = null
+                        _nMap.markerWayPoint.map = null
                         arriveCheck = true
                     }
                     checkError(goalLatLng!!) && arriveCheck -> {
                         makeText(applicationContext, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
-                        updateCredit(userIdentity,resultReward)
-                        markerGoalPoint.map = null
-                        pathOverlay.map = null
+                        updateCredit(login.ID,resultReward)
+                        _nMap.markerGoalPoint.map = null
+                        pathOverlay.pathOverlay.map = null
                         arriveCheck = false
                     }}
             },1000)
@@ -523,12 +509,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         })
                         animation.duration = 1500
                         bottomSheet.animation = animation
-
-                        requestList.clear()
-                        positions.clear()
                     }
                     Activity.RESULT_CANCELED -> {
-                        requestList.clear()
                     }
                 }
             }

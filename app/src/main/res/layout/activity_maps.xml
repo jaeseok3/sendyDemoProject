@@ -13,6 +13,7 @@
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
         <androidx.appcompat.widget.Toolbar
+            android:layout_gravity="center"
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
@@ -20,16 +21,16 @@
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:layout_height="match_parent">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="SendyGO"
                     android:textColor="#FFFFFF"
+                    android:layout_gravity="center"
                     style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"/>
             </LinearLayout>
+
         </androidx.appcompat.widget.Toolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -191,6 +192,36 @@
                     android:text="2000"
                     android:textColor="@color/colorPrimaryDark"
                     android:textSize="20sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="("
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="20sp" />
+                <TextView
+                    android:id="@+id/remainDuration_percent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="99"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="20sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="%"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="20sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text=")"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="20sp" />
+
             </LinearLayout>
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -272,26 +303,6 @@
                         android:textSize="20sp" />
                 </LinearLayout>
             </LinearLayout>
-<!--            <TextView-->
-<!--                android:id="@+id/textDust"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="120dp"-->
-<!--                android:gravity="center|start"-->
-<!--                android:layout_margin="8dp"-->
-<!--                android:text="미세먼지 농도"-->
-<!--                android:textColor="@color/colorPrimaryDark"-->
-<!--                android:textSize="22sp"-->
-<!--                android:textStyle="bold" />-->
-<!--            <TextView-->
-<!--                android:id="@+id/textAccident"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="80dp"-->
-<!--                android:layout_below="@id/textDust"-->
-<!--                android:layout_margin="8dp"-->
-<!--                android:text="도로위험지수"-->
-<!--                android:textColor="@color/colorPrimaryDark"-->
-<!--                android:textSize="22sp"-->
-<!--                android:textStyle="bold" />-->
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

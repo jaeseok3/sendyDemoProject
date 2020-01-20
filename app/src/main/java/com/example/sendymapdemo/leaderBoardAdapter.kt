@@ -14,7 +14,6 @@ class leaderBoardAdapter(private val items: ArrayList<userInfo>) : RecyclerView.
         val item = items[position]
         val listener = View.OnClickListener {
             Toast.makeText(it.context, "${item.ID}입니다!", Toast.LENGTH_SHORT).show()
-            drawerLayout.closeDrawers()
         }
         holder.apply {
             bind(listener, item)

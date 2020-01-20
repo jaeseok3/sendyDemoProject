@@ -3,36 +3,37 @@ package com.example.sendymapdemo
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
-import android.widget.Adapter
-import android.widget.BaseAdapter
-import android.widget.ListAdapter
 import android.widget.ListView
 import android.widget.Toast.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.example.sendymapdemo.dataClass.nMap
+import com.example.sendymapdemo.dataClass.pathOverlay
 import com.naver.maps.geometry.LatLng
+import com.naver.maps.map.NaverMap
+import org.koin.android.ext.android.get
+import org.koin.android.ext.android.inject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.lang.Thread.sleep
-import java.lang.ref.WeakReference
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.math.pow
 
 class RequestActivity : AppCompatActivity() {
-    lateinit var mSwipeRefreshLayout: SwipeRefreshLayout
+    var wayLatLng: LatLng?= null
+    var goalLatLng: LatLng?= null
+    val pathOverlay : pathOverlay by inject()
+    val _nMap: nMap by inject()
+    //의뢰정보를 담은 리스트
+    var positions=ArrayList<String>()
+    var requestList = ArrayList<requestInfo>()
     lateinit var requestListView: ListView
     lateinit var adapter: requestListAdapter
     lateinit var startPosition: String
-    lateinit var animationDialog: loadingActivity
     lateinit var context: Context
-
     private fun findPath(currentPoint:String, startPoint:String, goalPoint:String){
         val restClient: RetrofitInterface = Http3RetrofitManager.getRetrofitService(RetrofitInterface::class.java)
         val option = "traoptimal"
@@ -112,7 +113,7 @@ class RequestActivity : AppCompatActivity() {
                     Log.e("선택한 도착지", adapter.getItem(position).destination)
                     Log.e("선택한 도착지_코드", adapter.getItem(position).destinationCode)
                     //새로운 히스토리추가
-                    var newHistory = historyInfo(
+                    val newHistory = historyInfo(
                         adapter.getItem(position).source, adapter.getItem(position).destination,
                         adapter.getItem(position).time, adapter.getItem(position).distance, adapter.getItem(position).reward.toString(),
                         LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
@@ -120,14 +121,15 @@ class RequestActivity : AppCompatActivity() {
                     )
                     InsertHistory(newHistory) //히스토리 리스트에 추가
 
-                    val setPathUI = SetPathUI(requestList[position].responseData, nMap)
+                    val setPathUI = SetPathUI(requestList[position].responseData, _nMap.nMap!!,
+                        _nMap.markerStartPoint,_nMap.markerWayPoint,_nMap.markerGoalPoint, pathOverlay.pathOverlay)
                     setPathUI.setUIPath()
                     val arrWay = requestList[position].sourceCode.split(",")
                     val arrGoal = requestList[position].destinationCode.split(",")
                     wayLatLng = LatLng(arrWay[1].toDouble(), arrWay[0].toDouble())
                     goalLatLng = LatLng(arrGoal[1].toDouble(), arrGoal[0].toDouble())
 
-                    var mainIntent = Intent(this, MapsActivity::class.java)
+                    val mainIntent = Intent(this, MapsActivity::class.java)
                     mainIntent.putExtra("resultSrc", adapter.getItem(position).source)
                     mainIntent.putExtra("resultDst", adapter.getItem(position).destination)
                     mainIntent.putExtra("resultDistance",adapter.getItem(position).distance)
@@ -135,6 +137,8 @@ class RequestActivity : AppCompatActivity() {
                     mainIntent.putExtra("wayLatLng[1]", arrWay[0].toDouble())
                     mainIntent.putExtra("goalLatLng[0]", arrGoal[1].toDouble())
                     mainIntent.putExtra("goalLatLng[1]", arrGoal[0].toDouble())
+                    requestList.clear()
+                    positions.clear()
                     setResult(Activity.RESULT_OK, mainIntent)
                     finish()
                 }

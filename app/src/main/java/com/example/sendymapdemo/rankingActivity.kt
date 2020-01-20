@@ -4,7 +4,9 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.sendymapdemo.dataClass.ID
 import kotlinx.android.synthetic.main.ranking_activity.*
+import org.koin.android.ext.android.inject
 
 //리더보드 어댑터
 lateinit var boardAdapter:leaderBoardAdapter
@@ -13,10 +15,11 @@ lateinit var boardAdapter:leaderBoardAdapter
 var userList = ArrayList<userInfo>()
 
 class rankingActivity : AppCompatActivity(){
+    val Login : ID by inject()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.ranking_activity)
-        updateRanking(userIdentity)
+        updateRanking(Login.ID)
         //리더보드 어댑터 초기화
 //        boardAdapter = leaderBoardAdapter(userList)
         //리더보드 레이아웃 매니저

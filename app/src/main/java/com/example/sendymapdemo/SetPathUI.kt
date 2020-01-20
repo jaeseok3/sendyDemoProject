@@ -3,14 +3,22 @@ package com.example.sendymapdemo
 import android.graphics.Color
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.NaverMap
+import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.overlay.PathOverlay
 
 val latlngList = ArrayList<LatLng>()
 
-class SetPathUI(data: PathData, naverMap: NaverMap) {
+class SetPathUI(data: PathData, naverMap: NaverMap,
+                markerStartPoint: Marker, markerWayPoint: Marker, markerGoalPoint:Marker,
+                pathOverlay: PathOverlay
+) {
     private val pathData: PathData = data
     private val nMap: NaverMap = naverMap
+    private var markerStartPoint = markerStartPoint
+    private var markerWayPoint = markerWayPoint
+    private var markerGoalPoint = markerGoalPoint
+    private var pathOverlay = pathOverlay
 
     fun setUIPath(){
         val pathArr = pathData.route.traoptimal[0].path

@@ -1,6 +1,7 @@
 package com.example.sendymapdemo
 
 import android.util.Log
+import com.example.sendymapdemo.dataClass.ID
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URLEncoder
@@ -19,7 +20,7 @@ fun updateCredit(ID:String,reward:Double){
     }
 }
 fun InsertHistory(newHistory: historyInfo) {
-    val aIdentity:String=URLEncoder.encode(userIdentity,"UTF-8")
+    val aIdentity:String=URLEncoder.encode("","UTF-8")
     val asource:String=URLEncoder.encode(newHistory.source,"UTF-8")
     val adest:String=URLEncoder.encode(newHistory.destination,"UTF-8")
     val adate:String=URLEncoder.encode(newHistory.historyDate,"UTF-8")
