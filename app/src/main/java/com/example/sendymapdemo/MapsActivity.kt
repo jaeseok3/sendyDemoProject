@@ -26,10 +26,10 @@ import android.view.animation.AlphaAnimation
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
-import androidx.lifecycle.ViewModelProviders
 import com.example.sendymapdemo.dataClass.UserData
 import com.example.sendymapdemo.koinModule.ApplicationMain
 import com.example.sendymapdemo.model.repository.UserRepository
+import com.example.sendymapdemo.ui.adapters.leaderBoardAdapter
 import com.naver.maps.map.overlay.PathOverlay
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.widget.LocationButtonView

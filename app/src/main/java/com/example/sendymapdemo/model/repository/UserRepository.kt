@@ -9,7 +9,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class UserRepository(private val application: Application, private val retrofitInterface: RetrofitInterface) {
+class UserRepository(application: Application, private val retrofitInterface: RetrofitInterface) {
 
     private val userDatabase = UserRoomDataBase.getInstance(application)!!
     private val userDao = userDatabase.userDao()
@@ -36,7 +36,11 @@ class UserRepository(private val application: Application, private val retrofitI
             override fun onResponse(call: Call<UserData>, response: Response<UserData>) {
                 if(response.isSuccessful){
                     val serverUserData = response.body()
-                    userDao.insert(serverUserData!!)
+                    val r = Runnable {
+                        userDao.insert(serverUserData!!)
+                    }
+                    val thread = Thread(r)
+                    thread.start()
                 }
             }
         })

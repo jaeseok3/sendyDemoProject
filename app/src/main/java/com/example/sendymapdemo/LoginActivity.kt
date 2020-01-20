@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Window
 import android.widget.Button
 import android.widget.EditText
@@ -41,6 +42,7 @@ class LoginActivity : AppCompatActivity() {
 
                 val intent = Intent(applicationContext,MapsActivity::class.java)
                 startActivity(intent)
+                Log.e("유저정보", "${userRepository.getData(userID)}")
 
                 finish()
             }

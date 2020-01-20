@@ -4,8 +4,8 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.sendymapdemo.dataClass.HistoryData
 import com.example.sendymapdemo.dataClass.UserData
+import com.example.sendymapdemo.ui.adapters.historyListAdapter
 import kotlinx.android.synthetic.main.history_activiry.*
 import org.koin.android.ext.android.inject
 
@@ -13,7 +13,7 @@ import org.koin.android.ext.android.inject
 var historyList = ArrayList<HistoryData>()
 
 class historyActivity : AppCompatActivity(){
-    private lateinit var historyAdapter:historyListAdapter
+    private lateinit var historyAdapter: historyListAdapter
     private lateinit var historylayoutManager: LinearLayoutManager
 
     private val userData: UserData by inject()

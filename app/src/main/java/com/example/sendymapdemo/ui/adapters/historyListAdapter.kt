@@ -1,16 +1,17 @@
-package com.example.sendymapdemo
+package com.example.sendymapdemo.ui.adapters
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.example.sendymapdemo.R
 import com.example.sendymapdemo.dataClass.HistoryData
 import kotlinx.android.synthetic.main.history_item.view.*
 
 class historyListAdapter(private val items: ArrayList<HistoryData>) : RecyclerView.Adapter<historyListAdapter.ViewHolder>() {
     override fun getItemCount() = items.size
-    override fun onBindViewHolder(holder: historyListAdapter.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         println("on bind view holder")
         val item = items[position]
         val listener = View.OnClickListener {it ->
@@ -27,7 +28,7 @@ class historyListAdapter(private val items: ArrayList<HistoryData>) : RecyclerVi
             ViewHolder {
         val inflatedView = LayoutInflater.from(parent.context)
             .inflate(R.layout.history_item, parent, false)
-        return historyListAdapter.ViewHolder(inflatedView)
+        return ViewHolder(inflatedView)
     }
 
     class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {

@@ -1,7 +1,6 @@
 package com.example.sendymapdemo.model.retrofit
 
-import com.example.sendymapdemo.dataClass.PathData
-import com.example.sendymapdemo.dataClass.UserData
+import com.example.sendymapdemo.dataClass.*
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -30,7 +29,7 @@ interface RetrofitInterface {
     ): Call<UserData>
 
     @GET("httpHistoryInsert.php")
-    fun InsertHistory(
+    fun insertHistory(
             @Query("user") userID: String,
             @Query("time") time: String,
             @Query("src") source: String,
@@ -40,4 +39,16 @@ interface RetrofitInterface {
             @Query("htime") htime: String,
             @Query("hdate") hdate: String
     )
+
+    @GET("httpHistory.php")
+    fun getHistory(
+            @Query("user") userID: String
+    ): Call<HistoryDataList>
+
+    @GET("httpLocation2.php")
+    fun getLocationDB(): Call<LocationData>
+
+    @GET("httpConnection.php")
+    fun httpConnect(): Call<AllUserData>
+
 }

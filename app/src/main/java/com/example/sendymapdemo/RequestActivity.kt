@@ -11,7 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.sendymapdemo.dataClass.*
 import com.example.sendymapdemo.model.retrofit.RetrofitInterface
-import com.example.sendymapdemo.model.retrofit.RetrofitNaverAPIManager
+import com.example.sendymapdemo.ui.adapters.RequestListAdapter
 import com.naver.maps.geometry.LatLng
 import org.koin.android.ext.android.inject
 import retrofit2.Call
@@ -29,7 +29,7 @@ class RequestActivity : AppCompatActivity() {
     private var wayLatLng: LatLng ?= null
     private var goalLatLng: LatLng ?= null
     private lateinit var requestListView: ListView
-    private lateinit var adapter: requestListAdapter
+    private lateinit var adapter: RequestListAdapter
     private lateinit var startPosition: String
     private lateinit var context: Context
 
@@ -37,7 +37,7 @@ class RequestActivity : AppCompatActivity() {
     private val retrofitInterface: RetrofitInterface by inject()
 
     private fun findPath(currentPoint:String, startPoint:String, goalPoint:String){
-        val restClient: RetrofitInterface = RetrofitNaverAPIManager.getRetrofitService(RetrofitInterface::class.java)
+        val naverPath:
         val option = "traoptimal"
         val requestPath = restClient.requestPath(currentPoint, goalPoint, startPoint, option, NAVER_API_CLIENT, NAVER_API_SECRET)
 
@@ -66,7 +66,7 @@ class RequestActivity : AppCompatActivity() {
                             response.body()!!)
                     requestList.add(RI)
 
-                    adapter = requestListAdapter(context, requestList)
+                    adapter = RequestListAdapter(context, requestList)
                     requestListView.adapter = adapter
                 }
             }
@@ -114,7 +114,7 @@ class RequestActivity : AppCompatActivity() {
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"))
                     )
-                    retrofitInterface.InsertHistory(userData.ID, newHistory.time, newHistory.source, newHistory.destination, newHistory.distance,
+                    retrofitInterface.insertHistory(userData.ID, newHistory.time, newHistory.source, newHistory.destination, newHistory.distance,
                             newHistory.reward, newHistory.historyTime, newHistory.historyDate)
 
                     val setPathUI = SetPathUI(requestList[position].responseData, nMap)

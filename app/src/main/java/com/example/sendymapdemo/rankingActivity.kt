@@ -5,11 +5,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.sendymapdemo.dataClass.UserData
+import com.example.sendymapdemo.ui.adapters.leaderBoardAdapter
 import kotlinx.android.synthetic.main.ranking_activity.*
 import org.koin.android.ext.android.inject
 
 //리더보드 어댑터
-lateinit var boardAdapter:leaderBoardAdapter
+lateinit var boardAdapter: leaderBoardAdapter
 
 //유저들의 정보를 담은 리스트
 var userList = ArrayList<UserData>()

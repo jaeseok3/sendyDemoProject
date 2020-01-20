@@ -81,5 +81,5 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
     kapt 'androidx.lifecycle:lifecycle-compiler:2.1.0'
 
-    kapt "com.android.databinding:compiler:3.5.3"
+    kapt 'androidx.databinding:databinding-compiler:3.5.3'
 }
