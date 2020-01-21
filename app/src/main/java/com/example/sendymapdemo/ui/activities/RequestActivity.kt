@@ -77,7 +77,7 @@ class RequestActivity : AppCompatActivity() {
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일")))
 
-                    val setPathUI = SetPathUI(requestList[position].responseData, nMap.nMap!!)
+                    val setPathUI = SetPathUI(requestList[position].responseData, nMap)
                     setPathUI.setUIPath()
                     val arrWay = requestList[position].sourceCode.split(",")
                     val arrGoal = requestList[position].destinationCode.split(",")

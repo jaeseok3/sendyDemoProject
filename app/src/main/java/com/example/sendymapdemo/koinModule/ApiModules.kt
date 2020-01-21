@@ -24,9 +24,6 @@ val networkServerModule = module {
     single { provideServerRetrofit(get()) }
 }
 
-val userID = module {
-
-}
 val networkNaverModule = module {
 //    single { provideNaverRetrofit(get()) }
 }
