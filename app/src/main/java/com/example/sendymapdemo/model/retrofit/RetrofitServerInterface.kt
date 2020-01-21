@@ -10,7 +10,7 @@ interface RetrofitServerInterface {
     fun updateCredit(
             @Query("user") userID: String,
             @Query("reward") reward: Double
-    )
+    ): Call<Int>
 
     @GET("login2.php")
     fun getUserInfo(
@@ -27,7 +27,7 @@ interface RetrofitServerInterface {
             @Query("reward") reward: String,
             @Query("htime") htime: String,
             @Query("hdate") hdate: String
-    )
+    ): Call<Int>
 
     @GET("httpHistory.php")
     fun getHistory(

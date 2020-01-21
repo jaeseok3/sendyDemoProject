@@ -10,7 +10,7 @@ import com.example.sendymapdemo.ui.adapters.RequestListAdapter
 import com.example.sendymapdemo.ui.adapters.RequestRecyclerAdapter
 import kotlin.math.pow
 
-class PathDataRepository(private val application: Application, private val retrofitInterface: RetrofitNaverInterface) {
+class PathDataRepository(private val retrofitInterface: RetrofitNaverInterface) {
     private val NAVER_API_CLIENT = "nx5wmexmtw"
     private val NAVER_API_SECRET = "CS9kPn8fkidEzaDL3dv4tmQ6ymHVkXf2cy2doDZl"
     private val requestList = ArrayList<RequestListData>()
@@ -36,10 +36,18 @@ class PathDataRepository(private val application: Application, private val retro
                     goalPoint, startPoint, requestResult)
             requestList.add(requestListItem)
             adapter = RequestRecyclerAdapter(requestList)
-            Log.e("리스트 사이즈", "${requestList.size}")
+            Log.e("리스트 사이즈", "${requestList.size},${requestListItem}")
             adapter.notifyDataSetChanged()
         }catch (e: Exception){
             e.printStackTrace()
         }
+    }
+
+    fun getList(): ArrayList<RequestListData> {
+        return requestList
+    }
+
+    fun clearList(){
+        requestList.clear()
     }
 }

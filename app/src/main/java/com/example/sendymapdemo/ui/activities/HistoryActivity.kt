@@ -31,6 +31,6 @@ class HistoryActivity : AppCompatActivity(){
         historyRecyclerList.adapter = historyRepository.historyAdapter
         historyRecyclerList.layoutManager = historylayoutManager
         historyRecyclerList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
-    }
+}
 
 }

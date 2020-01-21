@@ -22,11 +22,7 @@ class ApplicationMain : Application(){
             androidLogger(level = Level.ERROR)
             modules(listOf(networkServerModule,
                     roomDataBaseModule,
-                    userDataModule,
-                    historyModule,
-                    locationModule,
-                    pathDataModule,
-                    mapsModule))
+                    repositoryModule))
         }
     }
 

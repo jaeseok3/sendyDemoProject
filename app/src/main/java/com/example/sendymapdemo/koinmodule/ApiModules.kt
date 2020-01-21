@@ -26,31 +26,19 @@ val networkServerModule = module {
     single { provideNaverApi(provideNaverRetrofit(get())) }
 }
 
-val historyModule = module {
-    single { HistoryData() }
-    single { HistoryRepository(get()) }
-}
-
-val locationModule = module {
-    single { LocationRepository(get()) }
-}
-
-val pathDataModule = module {
-    single { PathDataRepository(androidApplication(), get()) }
-}
-
-val userDataModule = module {
+val repositoryModule = module {
     single { AllUserData() }
+    single { HistoryData() }
     single { UserData() }
+    single { LocationRepository(get()) }
+    single { PathDataRepository(get()) }
+    single { HistoryRepository(get()) }
     single { UserRepository(androidApplication(), get()) }
+    single { MapsRepository() }
 }
 
 val roomDataBaseModule = module {
     single { Room.databaseBuilder(androidApplication(), UserRoomDataBase::class.java, "userDB").build() }
-}
-
-val mapsModule = module {
-    single { MapsRepository() }
 }
 
 private fun provideNaverRetrofit(okHttpClient: OkHttpClient): Retrofit {

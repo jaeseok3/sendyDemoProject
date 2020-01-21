@@ -51,6 +51,6 @@
             android:layout_height="wrap_content"
             android:divider="@null"
             android:dividerHeight="10dp"
-            android:id="@+id/listview_requestdialog_list"/>
+            android:id="@+id/request_recyclerView"/>
     </LinearLayout>
 </LinearLayout>
