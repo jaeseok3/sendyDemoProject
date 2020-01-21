@@ -1,4 +1,4 @@
-package com.example.sendymapdemo.dataClass
+package com.example.sendymapdemo.dataclass
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

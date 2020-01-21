@@ -9,7 +9,7 @@ import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import com.example.sendymapdemo.R
-import com.example.sendymapdemo.dataClass.RequestListData
+import com.example.sendymapdemo.dataclass.RequestListData
 
 class RequestListAdapter(context: Context, private val dataSource: ArrayList<RequestListData>) : BaseAdapter() {
 

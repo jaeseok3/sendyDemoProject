@@ -1,8 +1,7 @@
 package com.example.sendymapdemo.model.dao
 
-import androidx.lifecycle.LiveData
 import androidx.room.*
-import com.example.sendymapdemo.dataClass.UserData
+import com.example.sendymapdemo.dataclass.UserData
 
 @Dao
 interface UserDao {

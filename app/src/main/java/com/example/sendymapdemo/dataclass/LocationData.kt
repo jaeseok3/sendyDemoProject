@@ -1,4 +1,4 @@
-package com.example.sendymapdemo.dataClass
+package com.example.sendymapdemo.dataclass
 
 data class LocationData(
     val result: List<Result>

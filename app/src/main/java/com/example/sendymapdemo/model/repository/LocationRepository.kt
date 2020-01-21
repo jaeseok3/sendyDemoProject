@@ -1,12 +1,12 @@
 package com.example.sendymapdemo.model.repository
 
-import com.example.sendymapdemo.dataClass.LocationData
-import com.example.sendymapdemo.model.retrofit.RetrofitInterface
+import com.example.sendymapdemo.dataclass.LocationData
+import com.example.sendymapdemo.model.retrofit.RetrofitServerInterface
 
-class LocationRepository (private val retrofitInterface: RetrofitInterface){
+class LocationRepository (private val retrofitInterface: RetrofitServerInterface){
 
-    fun getLocationFromDB(): LocationData? {
+    fun getLocationFromDB(): LocationData {
         val requestLocationData = retrofitInterface.getLocationDB()
-        return requestLocationData.execute().body()
+        return requestLocationData.execute().body()!!
     }
 }

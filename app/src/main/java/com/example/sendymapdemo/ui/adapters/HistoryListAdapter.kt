@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sendymapdemo.R
-import com.example.sendymapdemo.dataClass.HistoryData
+import com.example.sendymapdemo.dataclass.HistoryData
 import kotlinx.android.synthetic.main.history_item.view.*
 
 class HistoryListAdapter(private val items: HistoryData) : RecyclerView.Adapter<HistoryListAdapter.ViewHolder>() {

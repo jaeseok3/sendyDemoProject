@@ -27,15 +27,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
 import com.example.sendymapdemo.*
 import com.example.sendymapdemo.R
-import com.example.sendymapdemo.dataClass.AllUserData
-import com.example.sendymapdemo.dataClass.UserData
-import com.example.sendymapdemo.koinModule.ApplicationMain
-import com.example.sendymapdemo.model.repository.HistoryRepository
-import com.example.sendymapdemo.model.repository.MapsRepository
-import com.example.sendymapdemo.model.repository.UserRepository
-import com.example.sendymapdemo.model.roomDB.UserRoomDataBase
-import com.example.sendymapdemo.ui.adapters.LeaderBoardAdapter
-import com.naver.maps.map.overlay.PathOverlay
+import com.example.sendymapdemo.dataclass.GeoData
+import com.example.sendymapdemo.dataclass.UserData
+import com.example.sendymapdemo.koinmodule.ApplicationMain
+import com.example.sendymapdemo.model.repository.*
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.widget.LocationButtonView
 import kotlinx.android.synthetic.main.activity_main.*
@@ -62,9 +57,10 @@ class MapsActivity : AppCompatActivity(){
     }
 
     private val userRepository: UserRepository by inject()
-    private val allUserData: AllUserData by inject()
     private val nMap: MapsRepository by inject()
     private val historyRepository: HistoryRepository by inject()
+    private val locationRepository: LocationRepository by inject()
+    private val pathDataRepository: PathDataRepository by inject()
 
     //리더보드 레이아웃 매니저
     private lateinit var drawerLayout: DrawerLayout
@@ -195,8 +191,30 @@ class MapsActivity : AppCompatActivity(){
         mapFragment.getMapAsync(nMap)
 
         startDelivery = findViewById(R.id.fab1)
+        startDelivery.setOnClickListener {
+            //첫번째 버튼 클릭했을때
+            val t = Runnable {
+                for(i in 0..4) {
+                    val newGeoInfo = GeoData(locationRepository.getLocationFromDB())
+                    Log.e("출발지", newGeoInfo.src)
+                    Log.e("도착지", newGeoInfo.dst)
+                    try {
+                        pathDataRepository.findPath(startPosition, newGeoInfo.src, newGeoInfo.dst)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+            val thread1 = Thread(t)
+            thread1.start()
+
+            val requestIntent = Intent(this, RequestActivity::class.java)
+            startActivityForResult(requestIntent,100)
+            animation()
+        }
         market = findViewById(R.id.fab2)
-        locationButtonView = findViewById<LocationButtonView>(R.id.locationBtn)
+        locationButtonView = findViewById(R.id.locationBtn)
+        locationButtonView.map = nMap.nMap
 
         nMap.listener = {
             Log.e("메인액티비티","온맵레디")

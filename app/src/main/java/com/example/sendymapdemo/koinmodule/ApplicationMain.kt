@@ -1,4 +1,4 @@
-package com.example.sendymapdemo.koinModule
+package com.example.sendymapdemo.koinmodule
 
 import android.app.Application
 import android.content.Context
@@ -21,7 +21,6 @@ class ApplicationMain : Application(){
             androidContext(this@ApplicationMain)
             androidLogger(level = Level.ERROR)
             modules(listOf(networkServerModule,
-                    networkNaverModule,
                     roomDataBaseModule,
                     userDataModule,
                     historyModule,

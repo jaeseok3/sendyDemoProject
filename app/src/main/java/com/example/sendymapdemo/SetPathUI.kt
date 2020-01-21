@@ -1,7 +1,7 @@
 package com.example.sendymapdemo
 
 import android.graphics.Color
-import com.example.sendymapdemo.dataClass.PathData
+import com.example.sendymapdemo.dataclass.PathData
 import com.example.sendymapdemo.model.repository.MapsRepository
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.overlay.OverlayImage

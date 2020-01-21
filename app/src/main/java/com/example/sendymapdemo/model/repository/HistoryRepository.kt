@@ -1,11 +1,11 @@
 package com.example.sendymapdemo.model.repository
 
 import android.util.Log
-import com.example.sendymapdemo.dataClass.HistoryData
-import com.example.sendymapdemo.model.retrofit.RetrofitInterface
+import com.example.sendymapdemo.dataclass.HistoryData
+import com.example.sendymapdemo.model.retrofit.RetrofitServerInterface
 import com.example.sendymapdemo.ui.adapters.HistoryListAdapter
 
-class HistoryRepository (private val retrofitInterface: RetrofitInterface) {
+class HistoryRepository (private val retrofitInterface: RetrofitServerInterface) {
     lateinit var historyAdapter: HistoryListAdapter
     lateinit var requestResult: HistoryData
 
