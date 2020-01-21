@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import com.example.sendymapdemo.dataClass.UserData
 import com.example.sendymapdemo.model.dao.UserDao
 
-@Database(entities = [UserData::class], version = 1, exportSchema = false)
+@Database(entities = [UserData::class], version = 2, exportSchema = false)
 abstract class UserRoomDataBase : RoomDatabase() {
     abstract fun userDao(): UserDao
 
@@ -18,6 +18,7 @@ abstract class UserRoomDataBase : RoomDatabase() {
             return INSTANCE ?: synchronized(UserRoomDataBase::class) {
                 INSTANCE ?: Room.databaseBuilder(context.applicationContext,
                         UserRoomDataBase::class.java, "userdata.db")
+                        .fallbackToDestructiveMigration()
                         .build().also { INSTANCE = it }
             }
         }

@@ -13,11 +13,10 @@ import retrofit2.Callback
 import retrofit2.Response
 import kotlin.math.pow
 
-class PathDataRepository(application: Application, private val retrofitInterface: RetrofitInterface) {
+class PathDataRepository(private val application: Application, private val retrofitInterface: RetrofitInterface) {
     private val NAVER_API_CLIENT = "nx5wmexmtw"
     private val NAVER_API_SECRET = "CS9kPn8fkidEzaDL3dv4tmQ6ymHVkXf2cy2doDZl"
     private val requestList = ArrayList<RequestListData>()
-    private val application = application
     private lateinit var adapter : RequestListAdapter
     private lateinit var requestListView: ListView
 

@@ -13,9 +13,9 @@ data class PathData(
         val route: Route
 ){
     data class Route(
-            val traoptimal: List<Traoptimal>,
-            val trafast: List<Trafast>,
-            val traavoidcaronly: List<Traavoidcaronly>
+            val traoptimal: List<Traoptimal>
+//            val trafast: List<Trafast>,
+//            val traavoidcaronly: List<Traavoidcaronly>
     )
     data class Traoptimal(
             val guide: List<Guide>,

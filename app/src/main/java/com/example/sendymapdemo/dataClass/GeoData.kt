@@ -6,9 +6,9 @@ class GeoData{
 
     constructor()
 
-    constructor(list:ArrayList<String>){
-        this.src = list[0]
-        this.dst = list[1]
+    constructor(locationData: LocationData){
+        this.src = locationData.result[0].Location
+        this.dst = locationData.result[1].Location
     }
 }
 

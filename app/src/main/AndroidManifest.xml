@@ -17,7 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".LoginActivity"
+        <activity android:name=".ui.activities.LoginActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,14 +25,14 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".rankingActivity"
-            android:parentActivityName=".MapsActivity"
+        <activity android:name=".ui.activities.rankingActivity"
+            android:parentActivityName=".ui.activities.MapsActivity"
             android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity android:name=".RequestActivity"
-            android:parentActivityName=".MapsActivity"
+        <activity android:name=".ui.activities.RequestActivity"
+            android:parentActivityName=".ui.activities.MapsActivity"
             android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity android:name=".historyActivity"
-            android:parentActivityName=".MapsActivity"
+        <activity android:name=".ui.activities.HistoryActivity"
+            android:parentActivityName=".ui.activities.MapsActivity"
             android:theme="@style/AppTheme.NoActionBar"></activity>
 
         <meta-data
@@ -40,7 +40,7 @@
             android:value="nx5wmexmtw" />
 
         <activity
-            android:name=".MapsActivity"
+            android:name=".ui.activities.MapsActivity"
             android:label="@string/title_activity_maps"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">

@@ -1,31 +1,33 @@
-package com.example.sendymapdemo
+package com.example.sendymapdemo.ui.activities
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.sendymapdemo.R
 import com.example.sendymapdemo.dataClass.UserData
-import com.example.sendymapdemo.ui.adapters.historyListAdapter
+import com.example.sendymapdemo.model.repository.HistoryRepository
+import com.example.sendymapdemo.model.repository.UserRepository
+import com.example.sendymapdemo.ui.adapters.HistoryListAdapter
 import kotlinx.android.synthetic.main.history_activiry.*
 import org.koin.android.ext.android.inject
 
-//히스토리 리스트
-var historyList = ArrayList<HistoryData>()
+////히스토리 리스트
+//var historyList = ArrayList<HistoryData>()
 
-class historyActivity : AppCompatActivity(){
-    private lateinit var historyAdapter: historyListAdapter
+class HistoryActivity : AppCompatActivity(){
+    private lateinit var historyAdapter: HistoryListAdapter
     private lateinit var historylayoutManager: LinearLayoutManager
 
-    private val userData: UserData by inject()
+    private val userRepository: UserRepository by inject()
+    private val historyRepository: HistoryRepository by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.history_activiry)
 
-        //어댑터 초기화
-        historyList.clear()
-        GetHistory(userData.ID)
-        historyAdapter = historyListAdapter(historyList)
+        historyRepository.getHistory(userRepository.userID)
+        historyAdapter = HistoryListAdapter(historyRepository.requestResult)
         historyAdapter.notifyDataSetChanged()
         //레이아웃 매니저
         historylayoutManager = LinearLayoutManager(this)

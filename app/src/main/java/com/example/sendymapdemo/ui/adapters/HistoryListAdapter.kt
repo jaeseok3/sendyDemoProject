@@ -9,18 +9,16 @@ import com.example.sendymapdemo.R
 import com.example.sendymapdemo.dataClass.HistoryData
 import kotlinx.android.synthetic.main.history_item.view.*
 
-class historyListAdapter(private val items: ArrayList<HistoryData>) : RecyclerView.Adapter<historyListAdapter.ViewHolder>() {
-    override fun getItemCount() = items.size
+class HistoryListAdapter(private val items: HistoryData) : RecyclerView.Adapter<HistoryListAdapter.ViewHolder>() {
+    override fun getItemCount() = items.result!!.size
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         println("on bind view holder")
-        val item = items[position]
         val listener = View.OnClickListener {it ->
-            Toast.makeText(it.context, "${item.source}입니다!", Toast.LENGTH_SHORT).show()
-
+            Toast.makeText(it.context, "${items.result!![position].Src}입니다!", Toast.LENGTH_SHORT).show()
         }
         holder.apply {
-            bind(listener, item)
-            itemView.tag = item
+            bind(listener, items)
+            itemView.tag = items
         }
     }
 
@@ -33,14 +31,14 @@ class historyListAdapter(private val items: ArrayList<HistoryData>) : RecyclerVi
 
     class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         private var view: View = v
-        fun bind(listener: View.OnClickListener, item: HistoryData) {
-            view.historyDate.text = item.historyDate
-            view.historyTime.text = item.historyTime
-            view.historySrc.text = item.source
-            view.historyDst.text = item.destination
-            view.historyDuration.text = item.distance
-            view.historyTime_amount.text = item.time
-            view.historyReward.text = item.reward.toString()
+        fun bind(listener: View.OnClickListener, items: HistoryData) {
+            view.historyDate.text = items.result!![position].HistoryDate
+            view.historyTime.text = items.result[position].HistoryTime
+            view.historySrc.text = items.result[position].Src
+            view.historyDst.text = items.result[position].Dest
+            view.historyDuration.text = items.result[position].Distance
+            view.historyTime_amount.text = items.result[position].Time
+            view.historyReward.text = items.result[position].Reward
             view.setOnClickListener(listener)
         }
     }

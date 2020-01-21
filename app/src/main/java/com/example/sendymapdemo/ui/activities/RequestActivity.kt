@@ -1,4 +1,4 @@
-package com.example.sendymapdemo
+package com.example.sendymapdemo.ui.activities
 
 import android.app.Activity
 import android.content.Context
@@ -9,21 +9,20 @@ import android.widget.ListView
 import android.widget.Toast.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.example.sendymapdemo.R
+import com.example.sendymapdemo.SetPathUI
 import com.example.sendymapdemo.dataClass.*
-import com.example.sendymapdemo.model.retrofit.RetrofitInterface
+import com.example.sendymapdemo.model.repository.HistoryRepository
+import com.example.sendymapdemo.model.repository.LocationRepository
+import com.example.sendymapdemo.model.repository.PathDataRepository
+import com.example.sendymapdemo.model.repository.UserRepository
 import com.example.sendymapdemo.ui.adapters.RequestListAdapter
 import com.naver.maps.geometry.LatLng
 import org.koin.android.ext.android.inject
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import kotlin.math.pow
 
 class RequestActivity : AppCompatActivity() {
-    private val NAVER_API_CLIENT = "nx5wmexmtw"
-    private val NAVER_API_SECRET = "CS9kPn8fkidEzaDL3dv4tmQ6ymHVkXf2cy2doDZl"
     private var requestList = ArrayList<RequestListData>()
     private var positions = ArrayList<String>()
     private var wayLatLng: LatLng ?= null
@@ -33,45 +32,11 @@ class RequestActivity : AppCompatActivity() {
     private lateinit var startPosition: String
     private lateinit var context: Context
 
-    private val userData: UserData by inject()
-    private val retrofitInterface: RetrofitInterface by inject()
+    private val userRepository: UserRepository by inject()
+    private val pathDataRepository: PathDataRepository by inject()
+    private val locationRepository: LocationRepository by inject()
+    private val historyRepository: HistoryRepository by inject()
 
-    private fun findPath(currentPoint:String, startPoint:String, goalPoint:String){
-        val naverPath:
-        val option = "traoptimal"
-        val requestPath = restClient.requestPath(currentPoint, goalPoint, startPoint, option, NAVER_API_CLIENT, NAVER_API_SECRET)
-
-        requestPath.enqueue(object : Callback<PathData> {
-            override fun onFailure(call: Call<PathData>, t: Throwable) {
-                error(message = t.toString())
-            }
-            override fun onResponse(call: Call<PathData>, response: Response<PathData>) {
-                if(response.isSuccessful){
-                    val time = response.body()!!.route.traoptimal[0].summary.duration / 60000
-                    val distance = response.body()!!.route.traoptimal[0].summary.distance / 1000.toDouble()
-
-                    val distanceStr = String.format("%.1f Km", distance)
-                    val timeStr = "$time" + "Min"
-                    val face =
-                            if (distance <= 20) R.drawable.happy
-                            else if (distance > 20 && distance <= 40) R.drawable.sad
-                            else R.drawable.dead
-                    val reward = time.toDouble().pow(2).toInt()
-                    val RI = RequestListData(face,
-                            getGeoName(wayLatLng.toString()),
-                            getGeoName(goalLatLng.toString()),
-                            timeStr, distanceStr, reward,
-                            goalLatLng.toString(),
-                            wayLatLng.toString(),
-                            response.body()!!)
-                    requestList.add(RI)
-
-                    adapter = RequestListAdapter(context, requestList)
-                    requestListView.adapter = adapter
-                }
-            }
-        })
-    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.request_activity)
@@ -81,13 +46,13 @@ class RequestActivity : AppCompatActivity() {
         context = this
 
         for(i in 0..8 step 2) {
-            val newGeoInfo = GeoData(getLocationDB())
+            val newGeoInfo = GeoData(locationRepository.getLocationFromDB()!!)
             positions.add(newGeoInfo.src)
             Log.e("출발지", newGeoInfo.src)
             positions.add(newGeoInfo.dst)
             Log.e("도착지", newGeoInfo.dst)
             try {
-                findPath(startPosition, positions[i], positions[i + 1])
+                pathDataRepository.findPath(startPosition, positions[i], positions[i + 1])
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -107,15 +72,11 @@ class RequestActivity : AppCompatActivity() {
                     Log.e("선택한 출발지_코드", adapter.getItem(position).sourceCode)
                     Log.e("선택한 도착지", adapter.getItem(position).destination)
                     Log.e("선택한 도착지_코드", adapter.getItem(position).destinationCode)
-                    //새로운 히스토리추가
-                    val newHistory = HistoryData(
-                            adapter.getItem(position).source, adapter.getItem(position).destination,
-                            adapter.getItem(position).time, adapter.getItem(position).distance, adapter.getItem(position).reward.toString(),
+
+                    historyRepository.insertHistory(userRepository.userID, adapter.getItem(position).time, adapter.getItem(position).source,
+                            adapter.getItem(position).destination, adapter.getItem(position).distance, adapter.getItem(position).reward.toString(),
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
-                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"))
-                    )
-                    retrofitInterface.insertHistory(userData.ID, newHistory.time, newHistory.source, newHistory.destination, newHistory.distance,
-                            newHistory.reward, newHistory.historyTime, newHistory.historyDate)
+                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일")))
 
                     val setPathUI = SetPathUI(requestList[position].responseData, nMap)
                     setPathUI.setUIPath()

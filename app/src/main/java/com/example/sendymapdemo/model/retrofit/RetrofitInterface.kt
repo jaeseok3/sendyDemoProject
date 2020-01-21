@@ -24,7 +24,7 @@ interface RetrofitInterface {
     )
 
     @GET("login2.php")
-    fun login(
+    fun getUserInfo(
             @Query("user") userID: String
     ): Call<UserData>
 
@@ -43,7 +43,7 @@ interface RetrofitInterface {
     @GET("httpHistory.php")
     fun getHistory(
             @Query("user") userID: String
-    ): Call<HistoryDataList>
+    ): Call<HistoryData>
 
     @GET("httpLocation2.php")
     fun getLocationDB(): Call<LocationData>

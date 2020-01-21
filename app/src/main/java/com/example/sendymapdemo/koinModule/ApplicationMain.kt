@@ -20,7 +20,13 @@ class ApplicationMain : Application(){
         startKoin {
             androidContext(this@ApplicationMain)
             androidLogger(level = Level.ERROR)
-            modules(listOf(networkModule, userRepositoryModule, roomDataBaseModule, userDataModule))
+            modules(listOf(networkServerModule,
+                    networkNaverModule,
+                    roomDataBaseModule,
+                    userDataModule,
+                    historyModule,
+                    locationModule,
+                    pathDataModule))
         }
     }
 

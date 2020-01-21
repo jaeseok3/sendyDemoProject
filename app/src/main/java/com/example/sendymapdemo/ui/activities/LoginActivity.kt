@@ -1,4 +1,4 @@
-package com.example.sendymapdemo
+package com.example.sendymapdemo.ui.activities
 
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import com.example.sendymapdemo.R
 import com.example.sendymapdemo.model.repository.UserRepository
 import org.koin.android.ext.android.inject
 
@@ -36,13 +37,12 @@ class LoginActivity : AppCompatActivity() {
         mButton.setOnClickListener {
             if(mEditTextSearchKeyword.text.toString().length in 1..10){
                 val userID=mEditTextSearchKeyword.text.toString()
-                Toast.makeText(this,"$userID 님 환영합니다",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,"$userID 님 환영합니다",Toast.LENGTH_LONG).show()
 
                 userRepository.getData(userID)
-
-                val intent = Intent(applicationContext,MapsActivity::class.java)
+                val intent = Intent(applicationContext, MapsActivity::class.java)
+                intent.putExtra("userID", "")
                 startActivity(intent)
-                Log.e("유저정보", "${userRepository.getData(userID)}")
 
                 finish()
             }

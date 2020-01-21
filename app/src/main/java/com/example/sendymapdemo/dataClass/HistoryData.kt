@@ -1,15 +1,17 @@
 package com.example.sendymapdemo.dataClass
 
-data class HistoryDataList(
-        val historyDataList: List<HistoryData>
+data class HistoryData(
+    val result: ArrayList<Result>
 ){
-    data class HistoryData(
-            val source: String,
-            val destination: String,
-            val time:String,
-            val distance:String,
-            val reward:String,
-            val historyTime:String,
-            val historyDate:String
+    data class Result(
+            val Dest: String,
+            val Distance: String,
+            val HistoryDate: String,
+            val HistoryTime: String,
+            val ID: String,
+            val Idx: String,
+            val Reward: String,
+            val Src: String,
+            val Time: String
     )
 }

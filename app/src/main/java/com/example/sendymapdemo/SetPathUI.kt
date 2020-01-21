@@ -2,6 +2,10 @@ package com.example.sendymapdemo
 
 import android.graphics.Color
 import com.example.sendymapdemo.dataClass.PathData
+import com.example.sendymapdemo.ui.activities.markerGoalPoint
+import com.example.sendymapdemo.ui.activities.markerStartPoint
+import com.example.sendymapdemo.ui.activities.markerWayPoint
+import com.example.sendymapdemo.ui.activities.pathOverlay
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.overlay.OverlayImage

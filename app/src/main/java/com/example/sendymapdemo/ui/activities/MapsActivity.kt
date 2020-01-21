@@ -1,4 +1,4 @@
-package com.example.sendymapdemo
+package com.example.sendymapdemo.ui.activities
 
 import android.app.Activity
 import android.graphics.Color
@@ -26,10 +26,14 @@ import android.view.animation.AlphaAnimation
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
+import com.example.sendymapdemo.*
+import com.example.sendymapdemo.R
+import com.example.sendymapdemo.dataClass.AllUserData
 import com.example.sendymapdemo.dataClass.UserData
 import com.example.sendymapdemo.koinModule.ApplicationMain
 import com.example.sendymapdemo.model.repository.UserRepository
-import com.example.sendymapdemo.ui.adapters.leaderBoardAdapter
+import com.example.sendymapdemo.model.roomDB.UserRoomDataBase
+import com.example.sendymapdemo.ui.adapters.LeaderBoardAdapter
 import com.naver.maps.map.overlay.PathOverlay
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.widget.LocationButtonView
@@ -43,6 +47,7 @@ import org.json.JSONObject
 import org.koin.android.ext.android.inject
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.lang.Runnable
 import java.net.URL
 import com.google.android.material.navigation.NavigationView as NavigationView
 
@@ -58,8 +63,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
+
     private val userRepository: UserRepository by inject()
-    private val userData: UserData by inject()
+    private val allUserData: AllUserData by inject()
 
     //리더보드 레이아웃 매니저
     private lateinit var drawerLayout: DrawerLayout
@@ -94,8 +100,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val userID = userRepository.userID
+        var userData: UserData
+        val r = Runnable {
+            userData = userRepository.getFromRoom(userID)
+            Log.e("유저", "$userID,$userData")
+            Runnable {
+                headerName.text = userData.id
+                headerRank.text = userData.rank
+                headerCredit.text = userData.credit
+                headerAccum.text = userData.property
+            }.run()
+        }
+        val thread = Thread(r)
+        thread.start()
+
         //리더보드 어댑터 초기화
-        boardAdapter = leaderBoardAdapter(userList)
+        boardAdapter = LeaderBoardAdapter(allUserData)
 
         //네이게이션 뷰의 헤더에 접근하기 위한 코드
         val navigationHeader = findViewById<NavigationView>(R.id.nav_view)
@@ -104,7 +125,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         navigationHeader.setNavigationItemSelectedListener { menuitem: MenuItem ->
             when (menuitem.itemId) {
                 R.id.menu_history -> {
-                    val historyIntent = Intent(this, historyActivity::class.java)
+                    val historyIntent = Intent(this, HistoryActivity::class.java)
                     startActivity(historyIntent)
                 }
                 R.id.menu_ranking -> {
@@ -120,14 +141,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 R.id.menu_update -> {
 
                 }
-                R.id.menu_logout-> {
-                    val logout = Intent(this,LoginActivity::class.java)
+                R.id.menu_logout -> {
+                    val logout = Intent(this, LoginActivity::class.java)
                     startActivity(logout)
                 }
             }
             drawerLayout.closeDrawer(GravityCompat.START)
             true
         }
+
         headerName = headerView.findViewById(R.id.userID)
         headerDesc = headerView.findViewById(R.id.userDescription)
         headerRank = headerView.findViewById(R.id.userRank)
@@ -150,7 +172,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             override fun onDrawerOpened(drawerView: View){
                 super.onDrawerOpened(drawerView)
                 Log.e("열림","드로워")
-                userRepository.getData(userData.ID)
             }
 
             override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
@@ -212,7 +233,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     checkError(goalLatLng!!) && arriveCheck -> {
                         makeText(this, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
 
-                        userRepository.updateCredit(userData.ID, resultReward)
+//                        userRepository.updateCredit(userData.id, resultReward)
 
                         markerWayPoint.map = null
                         markerGoalPoint.map = null
@@ -279,7 +300,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
                     checkError(goalLatLng!!) && arriveCheck -> {
                         makeText(applicationContext, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
-                        userRepository.updateCredit(userData.ID, resultReward)
+//                        userRepository.updateCredit(userData.id, resultReward)
                         markerGoalPoint.map = null
                         pathOverlay.map = null
                         arriveCheck = false
