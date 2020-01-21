@@ -26,7 +26,8 @@ class ApplicationMain : Application(){
                     userDataModule,
                     historyModule,
                     locationModule,
-                    pathDataModule))
+                    pathDataModule,
+                    mapsModule))
         }
     }
 

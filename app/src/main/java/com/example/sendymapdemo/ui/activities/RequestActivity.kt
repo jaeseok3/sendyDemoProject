@@ -12,12 +12,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.sendymapdemo.R
 import com.example.sendymapdemo.SetPathUI
 import com.example.sendymapdemo.dataClass.*
-import com.example.sendymapdemo.model.repository.HistoryRepository
-import com.example.sendymapdemo.model.repository.LocationRepository
-import com.example.sendymapdemo.model.repository.PathDataRepository
-import com.example.sendymapdemo.model.repository.UserRepository
+import com.example.sendymapdemo.model.repository.*
 import com.example.sendymapdemo.ui.adapters.RequestListAdapter
 import com.naver.maps.geometry.LatLng
+import com.naver.maps.map.NaverMap
 import org.koin.android.ext.android.inject
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -32,6 +30,7 @@ class RequestActivity : AppCompatActivity() {
     private lateinit var startPosition: String
     private lateinit var context: Context
 
+    private val nMap: MapsRepository by inject()
     private val userRepository: UserRepository by inject()
     private val pathDataRepository: PathDataRepository by inject()
     private val locationRepository: LocationRepository by inject()
@@ -78,7 +77,7 @@ class RequestActivity : AppCompatActivity() {
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일")))
 
-                    val setPathUI = SetPathUI(requestList[position].responseData, nMap)
+                    val setPathUI = SetPathUI(requestList[position].responseData, nMap.nMap!!)
                     setPathUI.setUIPath()
                     val arrWay = requestList[position].sourceCode.split(",")
                     val arrGoal = requestList[position].destinationCode.split(",")

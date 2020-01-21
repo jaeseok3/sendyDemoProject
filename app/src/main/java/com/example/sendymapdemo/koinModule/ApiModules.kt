@@ -4,10 +4,7 @@ import androidx.room.Room
 import com.example.sendymapdemo.dataClass.AllUserData
 import com.example.sendymapdemo.dataClass.HistoryData
 import com.example.sendymapdemo.dataClass.UserData
-import com.example.sendymapdemo.model.repository.HistoryRepository
-import com.example.sendymapdemo.model.repository.LocationRepository
-import com.example.sendymapdemo.model.repository.PathDataRepository
-import com.example.sendymapdemo.model.repository.UserRepository
+import com.example.sendymapdemo.model.repository.*
 import com.example.sendymapdemo.model.retrofit.AuthInterceptor
 import com.example.sendymapdemo.model.retrofit.RetrofitInterface
 import com.example.sendymapdemo.model.roomDB.UserRoomDataBase
@@ -55,6 +52,10 @@ val userDataModule = module {
 
 val roomDataBaseModule = module {
     single { Room.databaseBuilder(androidApplication(), UserRoomDataBase::class.java, "userDB").build() }
+}
+
+val mapsModule = module {
+    single { MapsRepository() }
 }
 
 private fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
