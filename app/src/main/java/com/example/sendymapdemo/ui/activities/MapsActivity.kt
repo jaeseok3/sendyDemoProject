@@ -1,4 +1,4 @@
-package com.example.sendymapdemo
+package com.example.sendymapdemo.ui.activities
 
 import android.app.Activity
 import android.graphics.Color
@@ -12,7 +12,6 @@ import android.widget.Toast.LENGTH_SHORT
 import android.widget.Toast.makeText
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
-import com.naver.maps.map.overlay.Marker
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -26,9 +25,16 @@ import android.view.animation.AlphaAnimation
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
-import com.example.sendymapdemo.dataClass.ID
-import com.example.sendymapdemo.dataClass.nMap
-import com.example.sendymapdemo.dataClass.pathOverlay
+import com.example.sendymapdemo.*
+import com.example.sendymapdemo.R
+import com.example.sendymapdemo.dataClass.AllUserData
+import com.example.sendymapdemo.dataClass.UserData
+import com.example.sendymapdemo.koinModule.ApplicationMain
+import com.example.sendymapdemo.model.repository.HistoryRepository
+import com.example.sendymapdemo.model.repository.MapsRepository
+import com.example.sendymapdemo.model.repository.UserRepository
+import com.example.sendymapdemo.model.roomDB.UserRoomDataBase
+import com.example.sendymapdemo.ui.adapters.LeaderBoardAdapter
 import com.naver.maps.map.overlay.PathOverlay
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.widget.LocationButtonView
@@ -39,25 +45,29 @@ import kotlinx.android.synthetic.main.activity_maps.requestSrc
 import kotlinx.coroutines.*
 import org.json.JSONArray
 import org.json.JSONObject
-import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.lang.Runnable
 import java.net.URL
 import com.google.android.material.navigation.NavigationView as NavigationView
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
-    val login : ID by inject()
-    val _nMap : nMap by inject()
-    val pathOverlay : pathOverlay by inject()
+class MapsActivity : AppCompatActivity(){
+    lateinit var startDelivery: View
+    lateinit var market: View
+    lateinit var locationButtonView: LocationButtonView
+
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
 
-    //leaderBoardAdapter에서 드로워를 닫을 때 필요해서 전역으로 선언
-    lateinit var drawerLayout: DrawerLayout
+    private val userRepository: UserRepository by inject()
+    private val allUserData: AllUserData by inject()
+    private val nMap: MapsRepository by inject()
+    private val historyRepository: HistoryRepository by inject()
 
     //리더보드 레이아웃 매니저
+    private lateinit var drawerLayout: DrawerLayout
     private lateinit var headerName: TextView
     private lateinit var headerDesc: TextView
     private lateinit var headerRank: TextView
@@ -80,15 +90,29 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var resultDistance: String
     var progressRate = 0.0
     var resultReward:Double = 0.0
+
     override fun onBackPressed() {
         onDestroy()
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //리더보드 어댑터 초기화
-        boardAdapter = leaderBoardAdapter(userList)
+        val userID = userRepository.userID
+        var userData: UserData
+        val r = Runnable {
+            userData = userRepository.getFromRoom(userID)
+            Log.e("유저", "$userID,$userData")
+            Runnable {
+                headerName.text = userData.id
+                headerRank.text = userData.rank
+                headerCredit.text = userData.credit
+                headerAccum.text = userData.property
+            }.run()
+        }
+        val thread = Thread(r)
+        thread.start()
 
         //네이게이션 뷰의 헤더에 접근하기 위한 코드
         val navigationHeader = findViewById<NavigationView>(R.id.nav_view)
@@ -97,30 +121,33 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         navigationHeader.setNavigationItemSelectedListener { menuitem: MenuItem ->
             when (menuitem.itemId) {
                 R.id.menu_history -> {
-                    val historyIntent = Intent(this, historyActivity::class.java)
+                    historyRepository.getHistory(userRepository.userID)
+                    val historyIntent = Intent(this, HistoryActivity::class.java)
                     startActivity(historyIntent)
                 }
                 R.id.menu_ranking -> {
+                    userRepository.getAllUsers()
                     val rankIntent = Intent(this, rankingActivity::class.java)
                     startActivity(rankIntent)
                 }
                 R.id.menu_about -> {
                     val builder = AlertDialog.Builder(this)
                     val dialogView = layoutInflater.inflate(R.layout.about, null)
-                    //val dialog:AlertDialog = builder.create()
+                    val dialog:AlertDialog = builder.create()
                     builder.setView(dialogView).show()
                 }
                 R.id.menu_update -> {
 
                 }
-                R.id.menu_logout-> {
-                    val logout = Intent(this,LoginActivity::class.java)
+                R.id.menu_logout -> {
+                    val logout = Intent(this, LoginActivity::class.java)
                     startActivity(logout)
                 }
             }
             drawerLayout.closeDrawer(GravityCompat.START)
             true
         }
+
         headerName = headerView.findViewById(R.id.userID)
         headerDesc = headerView.findViewById(R.id.userDescription)
         headerRank = headerView.findViewById(R.id.userRank)
@@ -143,8 +170,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             override fun onDrawerOpened(drawerView: View){
                 super.onDrawerOpened(drawerView)
                 Log.e("열림","드로워")
-                //login(userIdentity)
-                login(login.ID)
             }
 
             override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
@@ -152,16 +177,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 Log.e("열리는 중","드로워")
             }
         }
+
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
-        val userID=intent.getStringExtra("ID")
-        login(userID!!)
-
 
         locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
 
-        fabOpen = AnimationUtils.loadAnimation(App.instance.Context(), R.anim.fab_open)
-        fabClose = AnimationUtils.loadAnimation(App.instance.Context(), R.anim.fab_close)
+        fabOpen = AnimationUtils.loadAnimation(ApplicationMain.instance.Context(), R.anim.fab_open)
+        fabClose = AnimationUtils.loadAnimation(ApplicationMain.instance.Context(), R.anim.fab_close)
 
         val fragmentManager = supportFragmentManager
         val mapFragment = fragmentManager.findFragmentById(R.id.map) as MapFragment?
@@ -169,88 +192,76 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         .also {
                             fragmentManager.beginTransaction().add(R.id.map, map).commit()
                         })
-        mapFragment.getMapAsync(this)
-    }
+        mapFragment.getMapAsync(nMap)
 
-    override fun onMapReady(naverMap: NaverMap) {
-        val startDelivery: View = findViewById(R.id.fab1)
-        val market: View = findViewById(R.id.fab2)
-        //val animationDialog = loadingActivity(this)
-        _nMap.nMap = naverMap
-        val locationButtonView = findViewById<LocationButtonView>(R.id.locationBtn)
-        locationButtonView.map = _nMap.nMap
-        market.setOnClickListener { //두번째 버튼 눌렀을때 동작
-            animation()
-        }
-        startDelivery.setOnClickListener {
-            //첫번째 버튼 클릭했을때
-            val requestIntent = Intent(this, RequestActivity::class.java)
-            requestIntent.putExtra("startPoint", startPosition)
-            startActivityForResult(requestIntent,100)
-            animation()
-        }
+        startDelivery = findViewById(R.id.fab1)
+        market = findViewById(R.id.fab2)
+        locationButtonView = findViewById<LocationButtonView>(R.id.locationBtn)
 
-        _nMap.nMap!!.locationSource = locationSource
-        _nMap.nMap!!.locationTrackingMode = LocationTrackingMode.Follow
-        _nMap.nMap!!.locationOverlay.isVisible = true
-
-        _nMap.nMap!!.addOnLocationChangeListener { location ->
-            currentLocation = location
-            startPosition = "${location.longitude},${location.latitude}"
-            Log.e("현재위치", "${location.latitude},${location.longitude}")
-            if(goalLatLng != null && wayLatLng != null){
-                Log.e("e", "${goalLatLng},${wayLatLng},${arriveCheck}")
-                when {
-                    checkError(wayLatLng!!) && !arriveCheck -> {
-                        makeText(this, "출발지에 도착하였습니다.", LENGTH_SHORT).show()
-                        _nMap.markerStartPoint.map = null
-                        arriveCheck = true
-                    }
-                    checkError(goalLatLng!!) && arriveCheck -> {
-                        makeText(this, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
+        nMap.listener = {
+            Log.e("메인액티비티","온맵레디")
+            //nMap.nMap = naverMap
+            nMap.nMap!!.locationSource = locationSource
+            nMap.nMap!!.locationTrackingMode = LocationTrackingMode.Follow
+            nMap.nMap!!.locationOverlay.isVisible = true
+            nMap.nMap!!.addOnLocationChangeListener { location ->
+                currentLocation = location
+                startPosition = "${location.longitude},${location.latitude}"
+                Log.e("현재위치", "${location.latitude},${location.longitude}")
+                if(goalLatLng != null && wayLatLng != null){
+                    Log.e("e", "${goalLatLng},${wayLatLng},${arriveCheck}")
+                    when {
+                        checkError(wayLatLng!!) && !arriveCheck -> {
+                            makeText(this, "출발지에 도착하였습니다.", LENGTH_SHORT).show()
+                            nMap.markerStartPoint.map = null
+                            arriveCheck = true
+                        }
+                        checkError(goalLatLng!!) && arriveCheck -> {
+                            makeText(this, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
 //                        var abc:Double=(intent.getStringExtra("resultReward"))
 
-                        updateCredit(login.ID,resultReward)
-                        _nMap.markerWayPoint.map = null
-                        _nMap.markerGoalPoint.map = null
-                        arriveCheck = false
+//                            updateCredit(login.ID,resultReward)
+                            nMap.markerWayPoint.map = null
+                            nMap.markerGoalPoint.map = null
+                            arriveCheck = false
 
-                    }
-                }
-            }
-        }
-        locationStartBtn.setOnClickListener {
-            if(_nMap.nMap!!.locationTrackingMode == LocationTrackingMode.None){
-                Log.e("Flag", "${_nMap.nMap!!.locationTrackingMode}")
-                GlobalScope.async {
-                    for (i in 0 until latlngList.size) {
-                        currentLocation.latitude = latlngList[i].latitude
-                        currentLocation.longitude = latlngList[i].longitude
-
-                        Log.e("위치변경", "${currentLocation.latitude}, ${currentLocation.longitude}")
-                        runBlocking {
-                            drawingLocationUI(LatLng(latlngList[i].latitude, latlngList[i].longitude))
-                            getDangerGrade(latlngList[i].latitude.toString(), latlngList[i].longitude.toString(),
-                                latlngList[i].latitude.toString(), latlngList[i].longitude.toString())
-                        }
-                        delay(2000)
-                        if (_nMap.nMap!!.locationTrackingMode == LocationTrackingMode.Follow ||
-                            _nMap.nMap!!.locationTrackingMode == LocationTrackingMode.NoFollow) {
-                            progressRate = 0.0
-                            drawingLocationUI(LatLng(currentLocation.latitude, currentLocation.longitude))
-                            break
                         }
                     }
                 }
             }
-            else{
-                Log.e("Flag", "${_nMap.nMap!!.locationTrackingMode}")
-                _nMap.nMap!!.locationTrackingMode = LocationTrackingMode.None
+            locationStartBtn.setOnClickListener {
+                if(nMap.nMap!!.locationTrackingMode == LocationTrackingMode.None){
+                    Log.e("Flag", "${nMap.nMap!!.locationTrackingMode}")
+                    GlobalScope.async {
+                        for (i in 0 until latlngList.size) {
+                            currentLocation.latitude = latlngList[i].latitude
+                            currentLocation.longitude = latlngList[i].longitude
+
+                            Log.e("위치변경", "${currentLocation.latitude}, ${currentLocation.longitude}")
+                            runBlocking {
+                                drawingLocationUI(LatLng(latlngList[i].latitude, latlngList[i].longitude))
+                                getDangerGrade(latlngList[i].latitude.toString(), latlngList[i].longitude.toString(),
+                                    latlngList[i].latitude.toString(), latlngList[i].longitude.toString())
+                            }
+                            delay(2000)
+                            if (nMap.nMap!!.locationTrackingMode == LocationTrackingMode.Follow ||
+                                nMap.nMap!!.locationTrackingMode == LocationTrackingMode.NoFollow) {
+                                progressRate = 0.0
+                                drawingLocationUI(LatLng(currentLocation.latitude, currentLocation.longitude))
+                                break
+                            }
+                        }
+                    }
+                }
+                else{
+                    Log.e("Flag", "${nMap.nMap!!.locationTrackingMode}")
+                    nMap.nMap!!.locationTrackingMode = LocationTrackingMode.None
+                }
             }
         }
     }
     private fun drawingLocationUI(latLng: LatLng) = GlobalScope.launch(Dispatchers.Main){
-        _nMap.nMap!!.let {
+        nMap.nMap!!.let {
             val locationOverlay = it.locationOverlay
             progressRate += 1.0 / latlngList.size
             locationOverlay.isVisible = true
@@ -264,20 +275,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 val distanceStr = String.format("%.1f", distanceDouble) + " Km"
                 Log.e("남은거리", distanceStr)
                 remainDuration.text = distanceStr
-                pathOverlay.pathOverlay.progress = progressRate
+                nMap.pathOverlay.progress = progressRate
                 Log.e("progress", "$progressRate")
                 when{
                     checkError(wayLatLng!!) && !arriveCheck -> {
                         makeText(applicationContext, "출발지에 도착하였습니다.", LENGTH_SHORT).show()
-                        _nMap.markerStartPoint.map = null
-                        _nMap.markerWayPoint.map = null
+                        nMap.markerStartPoint.map = null
+                        nMap.markerWayPoint.map = null
                         arriveCheck = true
                     }
                     checkError(goalLatLng!!) && arriveCheck -> {
                         makeText(applicationContext, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
-                        updateCredit(login.ID,resultReward)
-                        _nMap.markerGoalPoint.map = null
-                        pathOverlay.pathOverlay.map = null
+//                        userRepository.updateCredit(userData.id, resultReward)
+                        nMap.markerGoalPoint.map = null
+                        nMap.pathOverlay.map = null
                         arriveCheck = false
                     }}
             },1000)
@@ -510,45 +521,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         animation.duration = 1500
                         bottomSheet.animation = animation
                     }
-                    Activity.RESULT_CANCELED -> {
-                    }
                 }
             }
         }
-    }
-
-    fun login(test1:String){ //Login 후 사용자의 정보를 들고오는 함수
-        val UserInfo = ArrayList<String>()
-        val test = "http://15.164.103.195/login.php?user=$test1"
-        val task = URLConnector(test)
-        task.start()
-        try {
-            task.join()
-        } catch (e: InterruptedException) {
-            e.printStackTrace()
-        }
-
-        val result: String? = task.getResult()
-        val JO = JSONObject(result)
-        val Jrank = JO.getString("rank")
-
-        println(Jrank)
-        val JA: JSONArray = JO.getJSONArray("result")
-
-        for(i in 0 until JA.length()){
-            val jo = JA.getJSONObject(i)
-            UserInfo.add(jo.getString("ID"))
-            UserInfo.add(jo.getString("Credit"))
-            UserInfo.add(jo.getString("Property"))
-            UserInfo.add(jo.getString("Car"))
-        }
-        headerName.text = UserInfo.get(0)
-        headerRank.text = Jrank
-        headerCredit.text = UserInfo.get(2)
-        headerAccum.text = UserInfo.get(1)
-        while(task.isAlive){}
-        UserInfo.clear()
-        httpConnect()
     }
 }
 

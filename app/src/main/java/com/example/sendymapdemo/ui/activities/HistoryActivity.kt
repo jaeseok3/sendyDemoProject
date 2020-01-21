@@ -1,39 +1,39 @@
-package com.example.sendymapdemo
+package com.example.sendymapdemo.ui.activities
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.sendymapdemo.dataClass.ID
+import com.example.sendymapdemo.R
+import com.example.sendymapdemo.dataClass.UserData
+import com.example.sendymapdemo.model.repository.HistoryRepository
+import com.example.sendymapdemo.model.repository.UserRepository
+import com.example.sendymapdemo.ui.adapters.HistoryListAdapter
 import kotlinx.android.synthetic.main.history_activiry.*
 import org.koin.android.ext.android.inject
 
+////히스토리 리스트
+//var historyList = ArrayList<HistoryData>()
 
-lateinit var historyAdapter:historyListAdapter
-lateinit var historylayoutManager: LinearLayoutManager
+class HistoryActivity : AppCompatActivity(){
 
-//히스토리 리스트
-var historyList = ArrayList<historyInfo>()
-class historyActivity : AppCompatActivity(){
-    val Login : ID by inject()
+    private lateinit var historylayoutManager: LinearLayoutManager
+
+    private val historyRepository: HistoryRepository by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.history_activiry)
+    }
 
-        //어댑터 초기화
-        historyList.clear()
-        GetHistory(Login.ID)
-        historyAdapter = historyListAdapter(historyList)
-        historyAdapter.notifyDataSetChanged()
+    override fun onResume() {
+        super.onResume()
         //레이아웃 매니저
         historylayoutManager = LinearLayoutManager(this)
 
-        historyRecyclerList.adapter = historyAdapter
+        historyRecyclerList.adapter = historyRepository.historyAdapter
         historyRecyclerList.layoutManager = historylayoutManager
         historyRecyclerList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
-//        historyAdapter= historyListAdapter(historyList)
-
     }
 
 }

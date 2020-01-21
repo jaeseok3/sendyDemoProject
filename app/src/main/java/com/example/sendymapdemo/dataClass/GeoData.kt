@@ -1,40 +1,16 @@
-package com.example.sendymapdemo
+package com.example.sendymapdemo.dataClass
 
-import java.util.Objects.toString
-
-class geoInfo{
-//    해운대("35.158627, 129.160341"),
-//    동래역("35.204779, 129.077123"),
-//    부산대("35.233355, 129.079417"),
-//    노포역("35.284732, 129.095416"),
-//    용두산공원("35.100518, 129.032824"),
-//    자갈치시장("35.096679, 129.030499"),
-//    하단역("35.106189, 128.966725"),
-//    서면CGV("35.154149, 129.060120"),
-//    광안리("35.153169, 129.118709"),
-//    사상("35.163218, 128.984343"),
-//    BIFC("35.147221, 129.065825"),
-//    신세계("35.168738, 129.129736"),
-//    다대포("35.047147, 128.962934"),
-//    덕천역("35.210384, 129.005241"),
-//    사직야구장("35.194023, 129.061529"),
-//    수영역("35.167711, 129.114564"),
-//    연산역("35.186123, 129.081460"),
-//    양산역("35.338783, 129.026452"),
-//    부산역("35.114848, 129.041513"),
-//    경성대("35.137587, 129.100567");
+class GeoData{
     lateinit var src:String
     lateinit var dst:String
 
     constructor()
 
-    constructor(list:ArrayList<String>){
-        this.src = list[0]
-        this.dst = list[1]
+    constructor(locationData: LocationData){
+        this.src = locationData.result[0].Location
+        this.dst = locationData.result[1].Location
     }
 }
-
-
 
 fun getGeoName(geoInfo:String):String{
     when(geoInfo){

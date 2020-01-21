@@ -1,4 +1,4 @@
-package com.example.sendymapdemo
+package com.example.sendymapdemo.ui.adapters
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -8,9 +8,10 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
+import com.example.sendymapdemo.R
+import com.example.sendymapdemo.dataClass.RequestListData
 
-class requestListAdapter(context: Context,
-                         private val dataSource: ArrayList<requestInfo>) : BaseAdapter() {
+class RequestListAdapter(context: Context, private val dataSource: ArrayList<RequestListData>) : BaseAdapter() {
 
     private val inflater: LayoutInflater
             = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -20,7 +21,7 @@ class requestListAdapter(context: Context,
     }
 
     //2
-    override fun getItem(position: Int): requestInfo {
+    override fun getItem(position: Int): RequestListData {
         return dataSource[position]
     }
 
@@ -35,21 +36,20 @@ class requestListAdapter(context: Context,
         // Get view for row item
         val rowView = inflater.inflate(R.layout.request_listview_item, parent, false)
 
-        var requestImg: ImageView = rowView.findViewById(R.id.requestFeeling)
-        var requestSrc: TextView = rowView.findViewById(R.id.requestSrc)
-        var requestDst: TextView = rowView.findViewById(R.id.requestDst)
-        var requestTime: TextView = rowView.findViewById(R.id.requestTime)
-        var requestDuration: TextView = rowView.findViewById(R.id.requestDuration)
-        var requestReward: TextView = rowView.findViewById(R.id.requestReward)
+        val requestImg: ImageView = rowView.findViewById(R.id.requestFeeling)
+        val requestSrc: TextView = rowView.findViewById(R.id.requestSrc)
+        val requestDst: TextView = rowView.findViewById(R.id.requestDst)
+        val requestTime: TextView = rowView.findViewById(R.id.requestTime)
+        val requestDuration: TextView = rowView.findViewById(R.id.requestDuration)
+        val requestReward: TextView = rowView.findViewById(R.id.requestReward)
 
-        var item = getItem(position)
+        val item = getItem(position)
         requestImg.setImageResource(item.image)
         requestSrc.setText(item.source)
         requestDst.setText(item.destination)
         requestTime.setText(item.time)
         requestDuration.setText(item.distance)
         requestReward.setText(item.reward.toString())
-
 
         return rowView
     }

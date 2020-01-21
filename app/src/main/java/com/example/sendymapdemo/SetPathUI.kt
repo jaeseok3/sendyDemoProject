@@ -1,24 +1,15 @@
 package com.example.sendymapdemo
 
 import android.graphics.Color
+import com.example.sendymapdemo.dataClass.PathData
+import com.example.sendymapdemo.model.repository.MapsRepository
 import com.naver.maps.geometry.LatLng
-import com.naver.maps.map.NaverMap
-import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
-import com.naver.maps.map.overlay.PathOverlay
 
 val latlngList = ArrayList<LatLng>()
 
-class SetPathUI(data: PathData, naverMap: NaverMap,
-                markerStartPoint: Marker, markerWayPoint: Marker, markerGoalPoint:Marker,
-                pathOverlay: PathOverlay
-) {
+class SetPathUI(data: PathData, private val nMap: MapsRepository) {
     private val pathData: PathData = data
-    private val nMap: NaverMap = naverMap
-    private var markerStartPoint = markerStartPoint
-    private var markerWayPoint = markerWayPoint
-    private var markerGoalPoint = markerGoalPoint
-    private var pathOverlay = pathOverlay
 
     fun setUIPath(){
         val pathArr = pathData.route.traoptimal[0].path
@@ -35,22 +26,22 @@ class SetPathUI(data: PathData, naverMap: NaverMap,
             latlngList.add(pathLatLng)
         }
 
-        pathOverlay.coords = latlngList
-        pathOverlay.width = 30
-        pathOverlay.color = Color.BLUE
-        pathOverlay.patternImage = OverlayImage.fromResource(R.drawable.path_pattern)
-        pathOverlay.patternInterval = 50
-        pathOverlay.passedColor = Color.GRAY
-        markerStartPoint.position = LatLng(startLat, startLng)
-        markerWayPoint.position = LatLng(wayPointLat, wayPointLng)
-        markerGoalPoint.position = LatLng(goalLat, goalLng)
-        markerStartPoint.iconTintColor = Color.BLUE
-        markerWayPoint.iconTintColor = Color.GREEN
-        markerGoalPoint.iconTintColor = Color.RED
-        markerStartPoint.map = nMap
-        markerWayPoint.map = nMap
-        markerGoalPoint.map = nMap
-        pathOverlay.map = nMap
+        nMap.pathOverlay.coords = latlngList
+        nMap.pathOverlay.width = 30
+        nMap.pathOverlay.color = Color.BLUE
+        nMap.pathOverlay.patternImage = OverlayImage.fromResource(R.drawable.path_pattern)
+        nMap.pathOverlay.patternInterval = 50
+        nMap.pathOverlay.passedColor = Color.GRAY
+        nMap.markerStartPoint.position = LatLng(startLat, startLng)
+        nMap.markerWayPoint.position = LatLng(wayPointLat, wayPointLng)
+        nMap.markerGoalPoint.position = LatLng(goalLat, goalLng)
+        nMap.markerStartPoint.iconTintColor = Color.BLUE
+        nMap.markerWayPoint.iconTintColor = Color.GREEN
+        nMap.markerGoalPoint.iconTintColor = Color.RED
+        nMap.markerStartPoint.map = nMap.nMap!!
+        nMap.markerWayPoint.map = nMap.nMap!!
+        nMap.markerGoalPoint.map = nMap.nMap!!
+        nMap.pathOverlay.map = nMap.nMap!!
     }
 
     private fun parsingPath(rawPathData: String): LatLng{
