@@ -31,6 +31,7 @@ import com.example.sendymapdemo.R
 import com.example.sendymapdemo.dataClass.AllUserData
 import com.example.sendymapdemo.dataClass.UserData
 import com.example.sendymapdemo.koinModule.ApplicationMain
+import com.example.sendymapdemo.model.repository.HistoryRepository
 import com.example.sendymapdemo.model.repository.MapsRepository
 import com.example.sendymapdemo.model.repository.UserRepository
 import com.example.sendymapdemo.model.roomDB.UserRoomDataBase
