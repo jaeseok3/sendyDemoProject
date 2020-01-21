@@ -11,7 +11,7 @@ class HistoryRepository (private val retrofitInterface: RetrofitInterface) {
         val r = Runnable {
             val requestHistory = retrofitInterface.getHistory(userID)
             requestResult = requestHistory.execute().body()!!
-            Log.e("request", "${requestResult.result.size}")
+            Log.e("request", "${requestResult.result!!.size}")
         }
         val thread = Thread(r)
         thread.start()
