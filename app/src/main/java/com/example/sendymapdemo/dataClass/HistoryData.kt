@@ -1,7 +1,7 @@
 package com.example.sendymapdemo.dataClass
 
 data class HistoryData(
-    val result: ArrayList<Result>
+    val result: ArrayList<Result> ?= null
 ){
     data class Result(
             val Dest: String,

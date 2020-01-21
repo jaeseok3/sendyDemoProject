@@ -31,6 +31,7 @@ import com.example.sendymapdemo.R
 import com.example.sendymapdemo.dataClass.AllUserData
 import com.example.sendymapdemo.dataClass.UserData
 import com.example.sendymapdemo.koinModule.ApplicationMain
+import com.example.sendymapdemo.model.repository.HistoryRepository
 import com.example.sendymapdemo.model.repository.UserRepository
 import com.example.sendymapdemo.model.roomDB.UserRoomDataBase
 import com.example.sendymapdemo.ui.adapters.LeaderBoardAdapter
@@ -66,6 +67,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private val userRepository: UserRepository by inject()
     private val allUserData: AllUserData by inject()
+    private val historyRepository: HistoryRepository by inject()
 
     //리더보드 레이아웃 매니저
     private lateinit var drawerLayout: DrawerLayout
@@ -115,9 +117,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val thread = Thread(r)
         thread.start()
 
-        //리더보드 어댑터 초기화
-        boardAdapter = LeaderBoardAdapter(allUserData)
-
         //네이게이션 뷰의 헤더에 접근하기 위한 코드
         val navigationHeader = findViewById<NavigationView>(R.id.nav_view)
         val headerView = navigationHeader.getHeaderView(0)
@@ -125,10 +124,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         navigationHeader.setNavigationItemSelectedListener { menuitem: MenuItem ->
             when (menuitem.itemId) {
                 R.id.menu_history -> {
+                    historyRepository.getHistory(userRepository.userID)
                     val historyIntent = Intent(this, HistoryActivity::class.java)
                     startActivity(historyIntent)
                 }
                 R.id.menu_ranking -> {
+                    userRepository.getAllUsers()
                     val rankIntent = Intent(this, rankingActivity::class.java)
                     startActivity(rankIntent)
                 }

@@ -16,27 +16,24 @@ import org.koin.android.ext.android.inject
 //var historyList = ArrayList<HistoryData>()
 
 class HistoryActivity : AppCompatActivity(){
-    private lateinit var historyAdapter: HistoryListAdapter
+
     private lateinit var historylayoutManager: LinearLayoutManager
 
-    private val userRepository: UserRepository by inject()
     private val historyRepository: HistoryRepository by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.history_activiry)
+    }
 
-        historyRepository.getHistory(userRepository.userID)
-        historyAdapter = HistoryListAdapter(historyRepository.requestResult)
-        historyAdapter.notifyDataSetChanged()
+    override fun onResume() {
+        super.onResume()
         //레이아웃 매니저
         historylayoutManager = LinearLayoutManager(this)
 
-        historyRecyclerList.adapter = historyAdapter
+        historyRecyclerList.adapter = historyRepository.historyAdapter
         historyRecyclerList.layoutManager = historylayoutManager
         historyRecyclerList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
-//        historyAdapter= historyListAdapter(historyList)
-
     }
 
 }

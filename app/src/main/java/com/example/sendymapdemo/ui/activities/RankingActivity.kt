@@ -12,24 +12,21 @@ import com.example.sendymapdemo.ui.adapters.LeaderBoardAdapter
 import kotlinx.android.synthetic.main.ranking_activity.*
 import org.koin.android.ext.android.inject
 
-//리더보드 어댑터
-lateinit var boardAdapter: LeaderBoardAdapter
-
 class rankingActivity : AppCompatActivity(){
-    private val userRepository: UserRepository by inject()
+
+    val userRepository: UserRepository by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.ranking_activity)
+    }
 
-        userRepository.getData(userRepository.userID)
-        //리더보드 어댑터 초기화
-        boardAdapter = LeaderBoardAdapter(userRepository.getAllUsers())
-        //리더보드 레이아웃 매니저
-        boardAdapter.notifyDataSetChanged()
+    override fun onResume() {
+        super.onResume()
+
         val layoutManager = LinearLayoutManager(this)
 
-        recyclerList.adapter = boardAdapter
+        recyclerList.adapter = userRepository.boardAdapter
         recyclerList.layoutManager = layoutManager
         recyclerList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
     }

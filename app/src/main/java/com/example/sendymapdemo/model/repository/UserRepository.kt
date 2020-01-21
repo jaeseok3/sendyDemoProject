@@ -2,20 +2,19 @@ package com.example.sendymapdemo.model.repository
 
 import android.app.Application
 import android.util.Log
-import androidx.lifecycle.LiveData
 import com.example.sendymapdemo.dataClass.AllUserData
 import com.example.sendymapdemo.dataClass.UserData
 import com.example.sendymapdemo.model.retrofit.RetrofitInterface
 import com.example.sendymapdemo.model.roomDB.UserRoomDataBase
+import com.example.sendymapdemo.ui.adapters.LeaderBoardAdapter
 import io.reactivex.Observable
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class UserRepository(application: Application, private val retrofitInterface: RetrofitInterface) {
     private val userDatabase = UserRoomDataBase.getInstance(application)!!
     private val userDao = userDatabase.userDao()
+    lateinit var allUserData: AllUserData
     lateinit var userID: String
+    lateinit var boardAdapter: LeaderBoardAdapter
 
     fun updateRoom(userData: UserData): Observable<Unit> {
         return Observable.fromCallable { userDao.update(userData) }
@@ -34,10 +33,17 @@ class UserRepository(application: Application, private val retrofitInterface: Re
         userDao.updateCredit(userID, credit)
     }
 
-    fun getAllUsers(): AllUserData {
+    fun getAllUsers() {
         val requestAllUser = retrofitInterface.httpConnect()
-
-        return requestAllUser.execute().body()!!
+        val r = Runnable {
+            allUserData = requestAllUser.execute().body()!!
+            //리더보드 어댑터 초기화
+            boardAdapter = LeaderBoardAdapter(allUserData)
+            //리더보드 레이아웃 매니저
+            boardAdapter.notifyDataSetChanged()
+        }
+        val thread = Thread(r)
+        thread.start()
     }
 
     fun getData(userID: String) {
