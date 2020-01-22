@@ -9,9 +9,11 @@ import com.example.sendymapdemo.model.retrofit.AuthInterceptor
 import com.example.sendymapdemo.model.retrofit.RetrofitNaverInterface
 import com.example.sendymapdemo.model.retrofit.RetrofitServerInterface
 import com.example.sendymapdemo.model.roomdb.UserRoomDataBase
+import com.example.sendymapdemo.viewmodel.RequestViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidApplication
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -31,10 +33,14 @@ val repositoryModule = module {
     single { HistoryData() }
     single { UserData() }
     single { LocationRepository(get()) }
-    single { PathDataRepository(get()) }
+    single { RequestRepository(provideServerApi(provideServerRetrofit(get())), provideNaverApi(provideNaverRetrofit(get()))) }
     single { HistoryRepository(get()) }
     single { UserRepository(androidApplication(), get()) }
     single { MapsRepository() }
+}
+
+val viewModelModule = module {
+    viewModel { RequestViewModel(get()) }
 }
 
 val roomDataBaseModule = module {

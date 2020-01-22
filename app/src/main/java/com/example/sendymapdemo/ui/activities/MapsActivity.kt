@@ -14,7 +14,6 @@ import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import android.content.Intent
@@ -32,7 +31,6 @@ import com.example.sendymapdemo.dataclass.UserData
 import com.example.sendymapdemo.koinmodule.ApplicationMain
 import com.example.sendymapdemo.model.repository.*
 import com.naver.maps.map.util.FusedLocationSource
-import com.naver.maps.map.widget.LocationButtonView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_maps.*
 import kotlinx.android.synthetic.main.activity_maps.requestDst
@@ -45,7 +43,6 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.lang.Runnable
 import java.net.URL
-import com.google.android.material.navigation.NavigationView as NavigationView
 
 class MapsActivity : AppCompatActivity(){
     companion object {
@@ -55,8 +52,6 @@ class MapsActivity : AppCompatActivity(){
     private val userRepository: UserRepository by inject()
     private val nMap: MapsRepository by inject()
     private val historyRepository: HistoryRepository by inject()
-    private val locationRepository: LocationRepository by inject()
-    private val pathDataRepository: PathDataRepository by inject()
 
     //리더보드 레이아웃 매니저
     private lateinit var drawerLayout: DrawerLayout
@@ -183,21 +178,9 @@ class MapsActivity : AppCompatActivity(){
 
         startDelivery.setOnClickListener {
             //첫번째 버튼 클릭했을때
-            val findPathThread = Thread( Runnable {
-                for(i in 0..4) {
-                    val newGeoInfo = GeoData(locationRepository.getLocationFromDB())
-                    Log.e("출발지", newGeoInfo.src)
-                    Log.e("도착지", newGeoInfo.dst)
-                    try {
-                        pathDataRepository.findPath(startPosition, newGeoInfo.src, newGeoInfo.dst)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-                val requestIntent = Intent(this, RequestActivity::class.java)
-                startActivityForResult(requestIntent,100)
-            })
-            findPathThread.start()
+            val requestIntent = Intent(this, RequestActivity::class.java)
+            requestIntent.putExtra("startPoint",startPosition)
+            startActivityForResult(requestIntent,100)
 
             animation()
         }

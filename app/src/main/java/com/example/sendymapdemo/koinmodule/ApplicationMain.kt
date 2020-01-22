@@ -22,7 +22,8 @@ class ApplicationMain : Application(){
             androidLogger(level = Level.ERROR)
             modules(listOf(networkServerModule,
                     roomDataBaseModule,
-                    repositoryModule))
+                    repositoryModule,
+                    viewModelModule))
         }
     }
 
