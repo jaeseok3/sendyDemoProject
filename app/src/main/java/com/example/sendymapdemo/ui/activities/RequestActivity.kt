@@ -1,5 +1,6 @@
 package com.example.sendymapdemo.ui.activities
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -71,6 +72,8 @@ class RequestActivity : AppCompatActivity() {
                             val arrWay = currentList[position].sourceCode.split(",")
                             val arrGoal = currentList[position].destinationCode.split(",")
 
+                            val intent = Intent(this@RequestActivity, MapsActivity::class.java)
+
                             intent.putExtra("resultSrc", currentList[position].source)
                             intent.putExtra("resultDst", currentList[position].destination)
                             intent.putExtra("resultDistance", currentList[position].distance)
@@ -79,9 +82,9 @@ class RequestActivity : AppCompatActivity() {
                             intent.putExtra("goalLatLng[0]", arrGoal[1].toDouble())
                             intent.putExtra("goalLatLng[1]", arrGoal[0].toDouble())
 
-                            val intent = Intent(this@RequestActivity, MapsActivity::class.java)
-                            startActivity(intent)
+                            setResult(Activity.RESULT_OK, intent)
                             pathDataRepository.clearList()
+                            finish()
                         }
                         .setCancelable(false).show()
             }
@@ -90,6 +93,7 @@ class RequestActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         super.onBackPressed()
+        setResult(Activity.RESULT_CANCELED)
         pathDataRepository.clearList()
         finish()
     }
