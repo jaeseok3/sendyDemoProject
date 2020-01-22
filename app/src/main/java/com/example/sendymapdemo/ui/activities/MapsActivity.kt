@@ -147,10 +147,8 @@ class MapsActivity : AppCompatActivity(){
 
         configureBottomNav()
 
-        val toolbar : Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
         //사이드바 토글 생성
-//        var toggle:ActionBarDrawerToggle
         val toggle:ActionBarDrawerToggle = object : ActionBarDrawerToggle(this,  drawerLayout,toolbar,0,0){
             override fun onDrawerClosed(view:View){
                 super.onDrawerClosed(view)
@@ -167,7 +165,6 @@ class MapsActivity : AppCompatActivity(){
                 Log.e("열리는 중","드로워")
             }
         }
-
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
 
@@ -178,7 +175,7 @@ class MapsActivity : AppCompatActivity(){
 
         val fragmentManager = supportFragmentManager
         val mapFragment = fragmentManager.findFragmentById(R.id.map) as MapFragment?
-                ?: MapFragment.newInstance((NaverMapOptions().locationButtonEnabled(false))
+                ?: MapFragment.newInstance((NaverMapOptions().locationButtonEnabled(true))
                         .also {
                             fragmentManager.beginTransaction().add(R.id.map, map).commit()
                         })
@@ -209,7 +206,6 @@ class MapsActivity : AppCompatActivity(){
 
         nMap.listener = {
             Log.e("메인액티비티","온맵레디")
-            //nMap.nMap = naverMap
             nMap.nMap!!.locationSource = locationSource
             nMap.nMap!!.locationTrackingMode = LocationTrackingMode.Follow
             nMap.nMap!!.locationOverlay.isVisible = true
