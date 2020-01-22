@@ -1,27 +1,16 @@
 package com.example.sendymapdemo.model.retrofit
 
-import com.example.sendymapdemo.dataClass.*
+import com.example.sendymapdemo.dataclass.*
 import retrofit2.Call
 import retrofit2.http.GET
-import retrofit2.http.Header
 import retrofit2.http.Query
 
-interface RetrofitInterface {
-    @GET("/map-direction/v1/driving")
-    fun requestPath(
-            @Query("start") startPosition: String,
-            @Query("goal") goalPosition: String,
-            @Query("waypoints") wayPointPosition: String,
-            @Query("options") options: String,
-            @Header("X-NCP-APIGW-API-KEY-ID") apiID: String,
-            @Header("X-NCP-APIGW-API-KEY") apiSecret: String
-    ): Call<PathData>
-
+interface RetrofitServerInterface {
     @GET("httpUpdateCredit.php")
     fun updateCredit(
             @Query("user") userID: String,
             @Query("reward") reward: Double
-    )
+    ): Call<Int>
 
     @GET("login2.php")
     fun getUserInfo(
@@ -38,7 +27,7 @@ interface RetrofitInterface {
             @Query("reward") reward: String,
             @Query("htime") htime: String,
             @Query("hdate") hdate: String
-    )
+    ): Call<Int>
 
     @GET("httpHistory.php")
     fun getHistory(

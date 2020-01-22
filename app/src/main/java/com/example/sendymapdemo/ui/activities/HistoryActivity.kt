@@ -5,10 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.sendymapdemo.R
-import com.example.sendymapdemo.dataClass.UserData
 import com.example.sendymapdemo.model.repository.HistoryRepository
-import com.example.sendymapdemo.model.repository.UserRepository
-import com.example.sendymapdemo.ui.adapters.HistoryListAdapter
 import kotlinx.android.synthetic.main.history_activiry.*
 import org.koin.android.ext.android.inject
 
@@ -34,6 +31,6 @@ class HistoryActivity : AppCompatActivity(){
         historyRecyclerList.adapter = historyRepository.historyAdapter
         historyRecyclerList.layoutManager = historylayoutManager
         historyRecyclerList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
-    }
+}
 
 }

@@ -45,12 +45,12 @@
             android:text="의뢰를 선택하세요"
             android:textSize="18sp"
             android:textStyle="bold"/>
-        <ListView
+        <androidx.recyclerview.widget.RecyclerView
             android:layout_gravity="center"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:divider="@null"
             android:dividerHeight="10dp"
-            android:id="@+id/listview_requestdialog_list"/>
+            android:id="@+id/request_recyclerView"/>
     </LinearLayout>
 </LinearLayout>

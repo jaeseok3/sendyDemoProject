@@ -27,15 +27,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
 import com.example.sendymapdemo.*
 import com.example.sendymapdemo.R
-import com.example.sendymapdemo.dataClass.AllUserData
-import com.example.sendymapdemo.dataClass.UserData
-import com.example.sendymapdemo.koinModule.ApplicationMain
-import com.example.sendymapdemo.model.repository.HistoryRepository
-import com.example.sendymapdemo.model.repository.MapsRepository
-import com.example.sendymapdemo.model.repository.UserRepository
-import com.example.sendymapdemo.model.roomDB.UserRoomDataBase
-import com.example.sendymapdemo.ui.adapters.LeaderBoardAdapter
-import com.naver.maps.map.overlay.PathOverlay
+import com.example.sendymapdemo.dataclass.GeoData
+import com.example.sendymapdemo.dataclass.UserData
+import com.example.sendymapdemo.koinmodule.ApplicationMain
+import com.example.sendymapdemo.model.repository.*
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.widget.LocationButtonView
 import kotlinx.android.synthetic.main.activity_main.*
@@ -53,18 +48,15 @@ import java.net.URL
 import com.google.android.material.navigation.NavigationView as NavigationView
 
 class MapsActivity : AppCompatActivity(){
-    lateinit var startDelivery: View
-    lateinit var market: View
-    lateinit var locationButtonView: LocationButtonView
-
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
 
     private val userRepository: UserRepository by inject()
-    private val allUserData: AllUserData by inject()
     private val nMap: MapsRepository by inject()
     private val historyRepository: HistoryRepository by inject()
+    private val locationRepository: LocationRepository by inject()
+    private val pathDataRepository: PathDataRepository by inject()
 
     //리더보드 레이아웃 매니저
     private lateinit var drawerLayout: DrawerLayout
@@ -115,10 +107,9 @@ class MapsActivity : AppCompatActivity(){
         thread.start()
 
         //네이게이션 뷰의 헤더에 접근하기 위한 코드
-        val navigationHeader = findViewById<NavigationView>(R.id.nav_view)
-        val headerView = navigationHeader.getHeaderView(0)
+        val headerView = nav_view.getHeaderView(0)
         drawerLayout = findViewById(R.id.drawer_layout)
-        navigationHeader.setNavigationItemSelectedListener { menuitem: MenuItem ->
+        nav_view.setNavigationItemSelectedListener { menuitem: MenuItem ->
             when (menuitem.itemId) {
                 R.id.menu_history -> {
                     historyRepository.getHistory(userRepository.userID)
@@ -133,7 +124,6 @@ class MapsActivity : AppCompatActivity(){
                 R.id.menu_about -> {
                     val builder = AlertDialog.Builder(this)
                     val dialogView = layoutInflater.inflate(R.layout.about, null)
-                    val dialog:AlertDialog = builder.create()
                     builder.setView(dialogView).show()
                 }
                 R.id.menu_update -> {
@@ -194,9 +184,28 @@ class MapsActivity : AppCompatActivity(){
                         })
         mapFragment.getMapAsync(nMap)
 
-        startDelivery = findViewById(R.id.fab1)
-        market = findViewById(R.id.fab2)
-        locationButtonView = findViewById<LocationButtonView>(R.id.locationBtn)
+        startDelivery.setOnClickListener {
+            //첫번째 버튼 클릭했을때
+            val findPathThread = Thread( Runnable {
+                for(i in 0..4) {
+                    val newGeoInfo = GeoData(locationRepository.getLocationFromDB())
+                    Log.e("출발지", newGeoInfo.src)
+                    Log.e("도착지", newGeoInfo.dst)
+                    try {
+                        pathDataRepository.findPath(startPosition, newGeoInfo.src, newGeoInfo.dst)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+                val requestIntent = Intent(this, RequestActivity::class.java)
+                startActivityForResult(requestIntent,100)
+            })
+            findPathThread.start()
+
+            animation()
+        }
+
+        locationBtn.map = nMap.nMap
 
         nMap.listener = {
             Log.e("메인액티비티","온맵레디")
@@ -295,21 +304,18 @@ class MapsActivity : AppCompatActivity(){
         }
     }
     private fun animation(){
-        val currentLocation: View = findViewById(R.id.fab1)
-        val selectLocation: View = findViewById(R.id.fab2)
-
         if(isFabOpen){
-            currentLocation.startAnimation(fabClose)
-            selectLocation.startAnimation(fabClose)
-            currentLocation.isClickable = false
-            selectLocation.isClickable = false
+            startDelivery.startAnimation(fabClose)
+            market.startAnimation(fabClose)
+            startDelivery.isClickable = false
+            market.isClickable = false
             isFabOpen = false
         }
         else{
-            currentLocation.startAnimation(fabOpen)
-            selectLocation.startAnimation(fabOpen)
-            currentLocation.isClickable = true
-            selectLocation.isClickable = true
+            startDelivery.startAnimation(fabOpen)
+            market.startAnimation(fabOpen)
+            startDelivery.isClickable = true
+            market.isClickable = true
             isFabOpen = true
         }
     }
@@ -365,7 +371,7 @@ class MapsActivity : AppCompatActivity(){
         return ((currentLat <= goalLat + 0.0001 && currentLat >= goalLat - 0.0001) ||
                 (currentLng <= goalLng + 0.0001 && currentLng >= goalLng - 0.0001))
     }
-   private fun configureBottomNav(){
+    private fun configureBottomNav(){
         //하단 슬라이딩 바
         val originalScaleX = fab.scaleX
         val originalScaleY = fab.scaleY
@@ -482,11 +488,6 @@ class MapsActivity : AppCompatActivity(){
                 return original * (1-fraction)
             }
         })
-    } //configureBottomNav()
-    //fab버튼 클릭 리스너를 따로 구현 -> onMapReady안에서 구현한 클릭리스너가 작동하지 않음 -> activity_maps.xml에 명시
-    fun fabClickListener(view: View){
-        view.bringToFront()
-        animation()
     }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -524,6 +525,10 @@ class MapsActivity : AppCompatActivity(){
                 }
             }
         }
+    }
+    fun fabClickListener(view: View){
+        view.bringToFront()
+        animation()
     }
 }
 

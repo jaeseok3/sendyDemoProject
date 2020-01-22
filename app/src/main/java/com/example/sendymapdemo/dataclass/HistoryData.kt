@@ -1,4 +1,4 @@
-package com.example.sendymapdemo.dataClass
+package com.example.sendymapdemo.dataclass
 
 data class HistoryData(
     val result: ArrayList<Result> ?= null

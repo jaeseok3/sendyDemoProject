@@ -1,11 +1,14 @@
 package com.example.sendymapdemo.model.repository
 
 import android.util.Log
-import com.example.sendymapdemo.dataClass.HistoryData
-import com.example.sendymapdemo.model.retrofit.RetrofitInterface
+import android.widget.Toast
+import android.widget.Toast.LENGTH_LONG
+import android.widget.Toast.makeText
+import com.example.sendymapdemo.dataclass.HistoryData
+import com.example.sendymapdemo.model.retrofit.RetrofitServerInterface
 import com.example.sendymapdemo.ui.adapters.HistoryListAdapter
 
-class HistoryRepository (private val retrofitInterface: RetrofitInterface) {
+class HistoryRepository (private val retrofitInterface: RetrofitServerInterface) {
     lateinit var historyAdapter: HistoryListAdapter
     lateinit var requestResult: HistoryData
 
@@ -22,6 +25,10 @@ class HistoryRepository (private val retrofitInterface: RetrofitInterface) {
     }
 
     fun insertHistory(userID: String, time: String, source: String, destination: String, distance: String, reward: String, htime: String, hdate: String) {
-        retrofitInterface.insertHistory(userID, time, source, destination, distance, reward, htime, hdate)
+        val resultRequest = retrofitInterface.insertHistory(userID, time, source, destination, distance, reward, htime, hdate)
+        val thread = Thread(Runnable {
+            resultRequest.execute()
+        })
+        thread.start()
     }
 }

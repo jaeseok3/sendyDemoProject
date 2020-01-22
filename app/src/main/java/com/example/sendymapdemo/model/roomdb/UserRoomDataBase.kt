@@ -1,10 +1,10 @@
-package com.example.sendymapdemo.model.roomDB
+package com.example.sendymapdemo.model.roomdb
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.sendymapdemo.dataClass.UserData
+import com.example.sendymapdemo.dataclass.UserData
 import com.example.sendymapdemo.model.dao.UserDao
 
 @Database(entities = [UserData::class], version = 2, exportSchema = false)

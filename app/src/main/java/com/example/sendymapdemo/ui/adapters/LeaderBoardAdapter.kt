@@ -6,8 +6,8 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sendymapdemo.R
-import com.example.sendymapdemo.dataClass.AllUserData
-import com.example.sendymapdemo.dataClass.UserData
+import com.example.sendymapdemo.dataclass.AllUserData
+import com.example.sendymapdemo.dataclass.UserData
 import kotlinx.android.synthetic.main.navigation_recyclerview_item.view.*
 
 class LeaderBoardAdapter(private val items: AllUserData) : RecyclerView.Adapter<LeaderBoardAdapter.ViewHolder>() {
