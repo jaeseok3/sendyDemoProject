@@ -178,19 +178,19 @@ class MapsActivity : AppCompatActivity(){
             nMap.nMap!!.locationOverlay.isVisible = true
             nMap.nMap!!.addOnLocationChangeListener { location ->
                 currentLocation = location
+                val currentLatLng = LatLng(location.latitude, location.longitude)
                 startPosition = "${location.longitude},${location.latitude}"
                 Log.e("현재위치", "${location.latitude},${location.longitude}")
                 if(goalLatLng != null && wayLatLng != null){
                     Log.e("e", "${goalLatLng},${wayLatLng},${arriveCheck}")
                     when {
-                        checkError(wayLatLng!!) && !arriveCheck -> {
+                        checkError(currentLatLng, wayLatLng!!) && !arriveCheck -> {
                             makeText(this, "출발지에 도착하였습니다.", LENGTH_SHORT).show()
                             nMap.markerStartPoint.map = null
                             arriveCheck = true
                         }
-                        checkError(goalLatLng!!) && arriveCheck -> {
+                        checkError(currentLatLng, goalLatLng!!) && arriveCheck -> {
                             makeText(this, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
-//                        var abc:Double=(intent.getStringExtra("resultReward"))
                             mapsViewModel.insertHistory(mapsViewModel.getUserID(),
                                 fullTime,
                                 resultSrc,
@@ -199,7 +199,7 @@ class MapsActivity : AppCompatActivity(){
                                 resultReward.toString(),
                                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
                                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일")))
-//                            updateCredit(login.ID,resultReward)
+                            mapsViewModel.updateCredit(mapsViewModel.getUserID(), resultReward)
                             nMap.markerWayPoint.map = null
                             nMap.markerGoalPoint.map = null
                             arriveCheck = false
@@ -244,7 +244,7 @@ class MapsActivity : AppCompatActivity(){
             }
         }
     }
-    private fun drawingLocationUI(latLng: LatLng) = GlobalScope.launch(Dispatchers.Main){
+    private fun drawingLocationUI(latLng: LatLng) = Thread(Runnable{
         val nMap = mapsViewModel.getNaverMapRepository()
         val latlngList = mapsViewModel.getLatLngList()
         nMap.nMap!!.let {
@@ -264,22 +264,30 @@ class MapsActivity : AppCompatActivity(){
                 nMap.pathOverlay.progress = progressRate
                 Log.e("progress", "$progressRate")
                 when{
-                    checkError(wayLatLng!!) && !arriveCheck -> {
+                    checkError(latLng, wayLatLng!!) && !arriveCheck -> {
                         makeText(applicationContext, "출발지에 도착하였습니다.", LENGTH_SHORT).show()
                         nMap.markerStartPoint.map = null
                         nMap.markerWayPoint.map = null
                         arriveCheck = true
                     }
-                    checkError(goalLatLng!!) && arriveCheck -> {
+                    checkError(latLng, goalLatLng!!) && arriveCheck -> {
                         makeText(applicationContext, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
-//                        userRepository.updateCredit(userData.id, resultReward)
+                        mapsViewModel.insertHistory(mapsViewModel.getUserID(),
+                                fullTime,
+                                resultSrc,
+                                resultDst,
+                                resultDistance,
+                                resultReward.toString(),
+                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
+                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일")))
+                        mapsViewModel.updateCredit(mapsViewModel.getUserID(), resultReward)
                         nMap.markerGoalPoint.map = null
                         nMap.pathOverlay.map = null
                         arriveCheck = false
                     }}
             },1000)
         }
-    }
+    }).start()
     private fun animation(){
         if(isFabOpen){
             startDelivery.startAnimation(fabClose)
@@ -296,10 +304,9 @@ class MapsActivity : AppCompatActivity(){
             isFabOpen = true
         }
     }
-
-    private fun checkError(goalLatLng: LatLng): Boolean {
-        val currentLat = currentLocation.latitude
-        val currentLng = currentLocation.longitude
+    private fun checkError(location: LatLng, goalLatLng: LatLng): Boolean {
+        val currentLat = location.latitude
+        val currentLng = location.longitude
         val goalLat = goalLatLng.latitude
         val goalLng = goalLatLng.longitude
         return ((currentLat <= goalLat + 0.0001 && currentLat >= goalLat - 0.0001) ||

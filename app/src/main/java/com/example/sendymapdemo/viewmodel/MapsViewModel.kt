@@ -25,6 +25,10 @@ class MapsViewModel (private val dangerRepository: DangerRepository, private val
         return requestRepository.latlngList
     }
 
+    fun updateCredit(userID: String, credit: Double) {
+        userRepository.updateCredit(userID, credit)
+    }
+
     fun getFromRoom(userID: String): UserData {
         return userRepository.getFromRoom(userID)
     }
