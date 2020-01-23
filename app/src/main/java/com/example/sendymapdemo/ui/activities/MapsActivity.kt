@@ -35,6 +35,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_maps.*
 import kotlinx.android.synthetic.main.activity_maps.requestDst
 import kotlinx.android.synthetic.main.activity_maps.requestSrc
+import kotlinx.android.synthetic.main.nav_header.view.*
 import kotlinx.coroutines.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -43,6 +44,8 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.lang.Runnable
 import java.net.URL
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class MapsActivity : AppCompatActivity(){
     companion object {
@@ -52,16 +55,13 @@ class MapsActivity : AppCompatActivity(){
     private val userRepository: UserRepository by inject()
     private val nMap: MapsRepository by inject()
     private val historyRepository: HistoryRepository by inject()
+    private val requestRepository: RequestRepository by inject()
 
-    //리더보드 레이아웃 매니저
     private lateinit var drawerLayout: DrawerLayout
-    private lateinit var headerName: TextView
-    private lateinit var headerDesc: TextView
-    private lateinit var headerRank: TextView
-    private lateinit var headerCredit: TextView
-    private lateinit var headerAccum: TextView
-    private lateinit var headerPhoto:ImageView
 
+    private lateinit var resultSrc : String
+    private lateinit var resultDst : String
+    private lateinit var fullTime : String
     var wayLatLng: LatLng ?= null
     var goalLatLng: LatLng ?= null
     private lateinit var locationSource: LocationSource
@@ -85,21 +85,6 @@ class MapsActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        val userID = userRepository.userID
-        var userData: UserData
-        val r = Runnable {
-            userData = userRepository.getFromRoom(userID)
-            Log.e("유저", "$userID,$userData")
-            Runnable {
-                headerName.text = userData.id
-                headerRank.text = userData.rank
-                headerCredit.text = userData.credit
-                headerAccum.text = userData.property
-            }.run()
-        }
-        val thread = Thread(r)
-        thread.start()
 
         //네이게이션 뷰의 헤더에 접근하기 위한 코드
         val headerView = nav_view.getHeaderView(0)
@@ -132,13 +117,20 @@ class MapsActivity : AppCompatActivity(){
             drawerLayout.closeDrawer(GravityCompat.START)
             true
         }
-
-        headerName = headerView.findViewById(R.id.userID)
-        headerDesc = headerView.findViewById(R.id.userDescription)
-        headerRank = headerView.findViewById(R.id.userRank)
-        headerCredit = headerView.findViewById(R.id.userCredit)
-        headerAccum = headerView.findViewById(R.id.userAccum)
-        headerPhoto = headerView.findViewById(R.id.ivUserProfilePhoto)
+        val userID = userRepository.userID
+        var userData: UserData
+        val r = Runnable {
+            userData = userRepository.getFromRoom(userID)
+            Log.e("유저", "$userID,$userData")
+            Runnable {
+                headerView.userID.text = userData.id
+                headerView.userRank.text = userData.rank
+                headerView.userCredit.text = userData.credit
+                headerView.userAccum.text = userData.property
+            }.run()
+        }
+        val thread = Thread(r)
+        thread.start()
 
         configureBottomNav()
 
@@ -207,7 +199,14 @@ class MapsActivity : AppCompatActivity(){
                         checkError(goalLatLng!!) && arriveCheck -> {
                             makeText(this, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
 //                        var abc:Double=(intent.getStringExtra("resultReward"))
-
+                            historyRepository.insertHistory(userRepository.userID,
+                                fullTime,
+                                resultSrc,
+                                resultDst,
+                                resultDistance,
+                                resultReward.toString(),
+                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
+                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일")))
 //                            updateCredit(login.ID,resultReward)
                             nMap.markerWayPoint.map = null
                             nMap.markerGoalPoint.map = null
@@ -221,15 +220,15 @@ class MapsActivity : AppCompatActivity(){
                 if(nMap.nMap!!.locationTrackingMode == LocationTrackingMode.None){
                     Log.e("Flag", "${nMap.nMap!!.locationTrackingMode}")
                     GlobalScope.async {
-                        for (i in 0 until latlngList.size) {
-                            currentLocation.latitude = latlngList[i].latitude
-                            currentLocation.longitude = latlngList[i].longitude
+                        for (i in 0 until requestRepository.latlngList.size) {
+                            currentLocation.latitude = requestRepository.latlngList[i].latitude
+                            currentLocation.longitude = requestRepository.latlngList[i].longitude
 
                             Log.e("위치변경", "${currentLocation.latitude}, ${currentLocation.longitude}")
                             runBlocking {
-                                drawingLocationUI(LatLng(latlngList[i].latitude, latlngList[i].longitude))
-                                getDangerGrade(latlngList[i].latitude.toString(), latlngList[i].longitude.toString(),
-                                    latlngList[i].latitude.toString(), latlngList[i].longitude.toString())
+                                drawingLocationUI(LatLng(requestRepository.latlngList[i].latitude, requestRepository.latlngList[i].longitude))
+                                getDangerGrade(requestRepository.latlngList[i].latitude.toString(), requestRepository.latlngList[i].longitude.toString(),
+                                    requestRepository.latlngList[i].latitude.toString(), requestRepository.latlngList[i].longitude.toString())
                             }
                             delay(2000)
                             if (nMap.nMap!!.locationTrackingMode == LocationTrackingMode.Follow ||
@@ -251,7 +250,7 @@ class MapsActivity : AppCompatActivity(){
     private fun drawingLocationUI(latLng: LatLng) = GlobalScope.launch(Dispatchers.Main){
         nMap.nMap!!.let {
             val locationOverlay = it.locationOverlay
-            progressRate += 1.0 / latlngList.size
+            progressRate += 1.0 / requestRepository.latlngList.size
             locationOverlay.isVisible = true
             locationOverlay.position = latLng
             Log.e("위치변경", "${locationOverlay.position}")
@@ -298,6 +297,7 @@ class MapsActivity : AppCompatActivity(){
             isFabOpen = true
         }
     }
+
     private fun getDangerGrade(startLat:String, startLng:String, endLat:String, endLng:String) {
         lateinit var temp : String
         class getDangerGrade : AsyncTask<Void, Void, Void>(){
@@ -311,7 +311,6 @@ class MapsActivity : AppCompatActivity(){
                 val read = BufferedReader(InputStreamReader(stream,"UTF-8"))
                 temp  = read.readLine()
                 Log.e("파싱 진행중", temp)
-
                 return null
             }
 
@@ -474,12 +473,13 @@ class MapsActivity : AppCompatActivity(){
             100 -> {
                 when(resultCode){
                     Activity.RESULT_OK ->{
-                        val resultSrc = data!!.getStringExtra("resultSrc")
-                        val resultDst = data.getStringExtra("resultDst")
+                        resultSrc = data!!.getStringExtra("resultSrc")!!
+                        resultDst = data.getStringExtra("resultDst")!!
                         resultDistance = data.getStringExtra("resultDistance")!!
                         wayLatLng=LatLng(data.getDoubleExtra("wayLatLng[0]",0.0),data.getDoubleExtra("wayLatLng[1]",0.0))
                         goalLatLng=LatLng(data.getDoubleExtra("goalLatLng[0]",0.0),data.getDoubleExtra("goalLatLng[1]",0.0))
                         resultReward=data.getDoubleExtra("resultReward",0.0)
+                        fullTime=data.getStringExtra("fullTime")!!
 
                         requestSrc.text = resultSrc
                         requestDst.text = resultDst

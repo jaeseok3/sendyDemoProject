@@ -32,7 +32,6 @@ val repositoryModule = module {
     single { AllUserData() }
     single { HistoryData() }
     single { UserData() }
-    single { LocationRepository(get()) }
     single { RequestRepository(provideServerApi(provideServerRetrofit(get())), provideNaverApi(provideNaverRetrofit(get()))) }
     single { HistoryRepository(get()) }
     single { UserRepository(androidApplication(), get()) }
@@ -40,7 +39,7 @@ val repositoryModule = module {
 }
 
 val viewModelModule = module {
-    viewModel { RequestViewModel(get()) }
+    viewModel { RequestViewModel(get(),get()) }
 }
 
 val roomDataBaseModule = module {

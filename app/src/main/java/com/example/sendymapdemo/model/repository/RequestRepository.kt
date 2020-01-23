@@ -3,13 +3,11 @@ package com.example.sendymapdemo.model.repository
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.example.sendymapdemo.R
-import com.example.sendymapdemo.dataclass.GeoData
-import com.example.sendymapdemo.dataclass.LocationData
-import com.example.sendymapdemo.dataclass.RequestListData
-import com.example.sendymapdemo.dataclass.getGeoName
+import com.example.sendymapdemo.dataclass.*
 import com.example.sendymapdemo.model.retrofit.RetrofitNaverInterface
 import com.example.sendymapdemo.model.retrofit.RetrofitServerInterface
 import com.example.sendymapdemo.ui.adapters.RequestRecyclerAdapter
+import com.naver.maps.geometry.LatLng
 import kotlin.math.pow
 
 class RequestRepository(private val retrofitServerInterface: RetrofitServerInterface,
@@ -17,6 +15,8 @@ class RequestRepository(private val retrofitServerInterface: RetrofitServerInter
     val NAVER_API_CLIENT = "nx5wmexmtw"
     val NAVER_API_SECRET = "CS9kPn8fkidEzaDL3dv4tmQ6ymHVkXf2cy2doDZl"
     var requestList = ArrayList<RequestListData>()
+    lateinit var pathData:PathData
+    var latlngList = ArrayList<LatLng>()
 
     fun findPath(currentPoint: String) : ArrayList<RequestListData>{
         val option = "traoptimal"
@@ -25,6 +25,7 @@ class RequestRepository(private val retrofitServerInterface: RetrofitServerInter
             val newGeoInfo = GeoData(getLocationFromDB())
             val requestUserData = retrofitNaverInterface.requestPath(currentPoint, newGeoInfo.dst, newGeoInfo.src, option, NAVER_API_CLIENT, NAVER_API_SECRET)
             val requestResult = requestUserData.execute().body()!!
+            pathData = requestResult
             val time = requestResult.route.traoptimal[0].summary.duration / 60000
             val distance = requestResult.route.traoptimal[0].summary.distance / 1000.toDouble()
             val distanceStr = String.format("%.1f Km", distance)
