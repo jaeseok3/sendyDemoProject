@@ -6,15 +6,14 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sendymapdemo.R
-import com.example.sendymapdemo.dataclass.AllUserData
 import com.example.sendymapdemo.dataclass.UserData
 import kotlinx.android.synthetic.main.navigation_recyclerview_item.view.*
 
-class LeaderBoardAdapter(private val items: AllUserData) : RecyclerView.Adapter<LeaderBoardAdapter.ViewHolder>() {
-    override fun getItemCount() = items.result!!.size
+class LeaderBoardAdapter(private val items: List<UserData>) : RecyclerView.Adapter<LeaderBoardAdapter.ViewHolder>() {
+    override fun getItemCount() = items.size
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         println("on bind view holder")
-        val item = items.result!![position]
+        val item = items[position]
         val listener = View.OnClickListener {
             Toast.makeText(it.context, "${item.id}입니다!", Toast.LENGTH_SHORT).show()
         }

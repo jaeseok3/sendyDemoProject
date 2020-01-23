@@ -29,15 +29,14 @@ interface RetrofitServerInterface {
             @Query("hdate") hdate: String
     ): Call<Int>
 
-    @GET("httpHistory.php")
+    @GET("httpHistory2.php")
     fun getHistory(
             @Query("user") userID: String
-    ): Call<HistoryData>
+    ): Call<List<HistoryData>>
 
     @GET("httpLocation2.php")
     fun getLocationDB(): Call<LocationData>
 
     @GET("httpConnection.php")
-    fun httpConnect(): Call<AllUserData>
-
+    fun httpConnect(): Call<List<UserData>>
 }

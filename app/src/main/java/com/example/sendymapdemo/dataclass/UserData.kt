@@ -4,10 +4,6 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-data class AllUserData(
-        val result: ArrayList<UserData> ?= null
-)
-
 @Entity(tableName = "userdata")
 data class UserData(
         @ColumnInfo(name = "car", defaultValue = "default")

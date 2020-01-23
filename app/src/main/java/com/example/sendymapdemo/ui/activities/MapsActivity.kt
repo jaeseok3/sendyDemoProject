@@ -26,7 +26,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
 import com.example.sendymapdemo.*
 import com.example.sendymapdemo.R
-import com.example.sendymapdemo.dataclass.GeoData
 import com.example.sendymapdemo.dataclass.UserData
 import com.example.sendymapdemo.koinmodule.ApplicationMain
 import com.example.sendymapdemo.model.repository.*
@@ -106,14 +105,12 @@ class MapsActivity : AppCompatActivity(){
         drawerLayout = findViewById(R.id.drawer_layout)
         nav_view.setNavigationItemSelectedListener { menuitem: MenuItem ->
             when (menuitem.itemId) {
-                R.id.menu_history -> {
-                    historyRepository.getHistory(userRepository.userID)
+                menu_history -> {
                     val historyIntent = Intent(this, HistoryActivity::class.java)
                     startActivity(historyIntent)
                 }
                 R.id.menu_ranking -> {
-                    userRepository.getAllUsers()
-                    val rankIntent = Intent(this, rankingActivity::class.java)
+                    val rankIntent = Intent(this, RankingActivity::class.java)
                     startActivity(rankIntent)
                 }
                 R.id.menu_about -> {
@@ -302,7 +299,7 @@ class MapsActivity : AppCompatActivity(){
         lateinit var temp : String
         class getDangerGrade : AsyncTask<Void, Void, Void>(){
             override fun doInBackground(vararg params: Void?): Void? {
-                val stream = URL("http://apis.data.go.kr/B552061/roadDgdgrLink/getRestRoadDgdgrLink?serviceKey=%2BwvPpNobnpO%2BxNDsB3NdwZqjZYg4C8JqEy7NhZxXof%2F2Owy9Vu2eYP1pZVtIw%2FcPEVTx8nKQ1ph%2F4ppRNxKBLA%3D%3D&" +
+                val stream = URL("?serviceKey=%2BwvPpNobnpO%2BxNDsB3NdwZqjZYg4C8JqEy7NhZxXof%2F2Owy9Vu2eYP1pZVtIw%2FcPEVTx8nKQ1ph%2F4ppRNxKBLA%3D%3D&" +
                         "searchLineString=LineString("+
                         startLng + " " +
                         startLat + ", " +

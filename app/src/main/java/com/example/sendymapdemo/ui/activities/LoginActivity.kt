@@ -11,9 +11,12 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.example.sendymapdemo.R
 import com.example.sendymapdemo.model.repository.UserRepository
+import com.example.sendymapdemo.viewmodel.LoginViewModel
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class LoginActivity : AppCompatActivity() {
+    private val loginViewModel by viewModel<LoginViewModel>()
     override fun onBackPressed() {
         super.onBackPressed()
         finishAffinity()
@@ -22,8 +25,6 @@ class LoginActivity : AppCompatActivity() {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-
-        val userRepository: UserRepository by inject()
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
         {
@@ -38,7 +39,7 @@ class LoginActivity : AppCompatActivity() {
                 val userID=mEditTextSearchKeyword.text.toString()
                 Toast.makeText(this,"$userID 님 환영합니다",Toast.LENGTH_LONG).show()
 
-                userRepository.getData(userID)
+                loginViewModel.getData(userID)
                 val intent = Intent(applicationContext, MapsActivity::class.java)
                 intent.putExtra("userID", "")
                 startActivity(intent)

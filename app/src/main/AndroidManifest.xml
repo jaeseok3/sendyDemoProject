@@ -25,7 +25,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.activities.rankingActivity"
+        <activity android:name=".ui.activities.RankingActivity"
             android:parentActivityName=".ui.activities.MapsActivity"
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity android:name=".ui.activities.RequestActivity"

@@ -14,13 +14,12 @@ import kotlin.math.pow
 
 class RequestRepository(private val retrofitServerInterface: RetrofitServerInterface,
                         private val retrofitNaverInterface: RetrofitNaverInterface) {
-    val NAVER_API_CLIENT = "nx5wmexmtw"
-    val NAVER_API_SECRET = "CS9kPn8fkidEzaDL3dv4tmQ6ymHVkXf2cy2doDZl"
-    var requestList = ArrayList<RequestListData>()
+    private val NAVER_API_CLIENT = "nx5wmexmtw"
+    private val NAVER_API_SECRET = "CS9kPn8fkidEzaDL3dv4tmQ6ymHVkXf2cy2doDZl"
+    private var requestList = ArrayList<RequestListData>()
 
     fun findPath(currentPoint: String) : ArrayList<RequestListData>{
         val option = "traoptimal"
-//        val requestUserData = retrofitNaverInterface.requestPath(currentPoint, goalPoint, startPoint, option, NAVER_API_CLIENT, NAVER_API_SECRET)
         try {
             val newGeoInfo = GeoData(getLocationFromDB())
             val requestUserData = retrofitNaverInterface.requestPath(currentPoint, newGeoInfo.dst, newGeoInfo.src, option, NAVER_API_CLIENT, NAVER_API_SECRET)
@@ -39,14 +38,13 @@ class RequestRepository(private val retrofitServerInterface: RetrofitServerInter
                     getGeoName(newGeoInfo.src), getGeoName(newGeoInfo.dst), timeStr, distanceStr, reward,
                     newGeoInfo.dst, newGeoInfo.src, requestResult)
             requestList.add(requestListItem)
-            //adapter = RequestRecyclerAdapter(requestList)
             Log.e("리스트 사이즈", "${requestList.size},${requestListItem}")
-            //adapter.notifyDataSetChanged()
         }catch (e: Exception){
             e.printStackTrace()
         }
         return requestList
     }
+
     fun getLocationFromDB(): LocationData {
         val requestLocationData = retrofitServerInterface.getLocationDB()
         return requestLocationData.execute().body()!!

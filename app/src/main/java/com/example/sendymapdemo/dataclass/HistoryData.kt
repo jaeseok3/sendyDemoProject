@@ -1,17 +1,13 @@
 package com.example.sendymapdemo.dataclass
 
 data class HistoryData(
-    val result: ArrayList<Result> ?= null
-){
-    data class Result(
-            val Dest: String,
-            val Distance: String,
-            val HistoryDate: String,
-            val HistoryTime: String,
-            val ID: String,
-            val Idx: String,
-            val Reward: String,
-            val Src: String,
-            val Time: String
-    )
-}
+            val Dest: String = "default",
+            val Distance: String = "default",
+            val HistoryDate: String = "default",
+            val HistoryTime: String = "default",
+            val ID: String = "default",
+            val Idx: String = "default",
+            val Reward: String = "default",
+            val Src: String = "default",
+            val Time: String = "default"
+)

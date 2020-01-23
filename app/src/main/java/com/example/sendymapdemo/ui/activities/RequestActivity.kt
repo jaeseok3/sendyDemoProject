@@ -39,7 +39,7 @@ class RequestActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.request_activity)
 
-        val intent = getIntent()
+        val intent = intent
         //liveDataRequestListViewModel = ViewModelProviders.of(this).get(RequestViewModel::class.java)
         //equestViewModel.setStartPoint(intent.getStringExtra("startPoint")!!)
         //adapter = RequestRecyclerAdapter(ArrayList())
@@ -53,10 +53,6 @@ class RequestActivity : AppCompatActivity() {
             recyclerViewSetup()
         }
         requestViewModel.requests?.observe(this, requestListObserver)
-    }
-
-    override fun onResume() {
-        super.onResume()
     }
 
     override fun onBackPressed() {

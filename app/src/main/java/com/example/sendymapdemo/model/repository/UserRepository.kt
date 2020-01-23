@@ -2,7 +2,6 @@ package com.example.sendymapdemo.model.repository
 
 import android.app.Application
 import android.util.Log
-import com.example.sendymapdemo.dataclass.AllUserData
 import com.example.sendymapdemo.dataclass.UserData
 import com.example.sendymapdemo.model.retrofit.RetrofitServerInterface
 import com.example.sendymapdemo.model.roomdb.UserRoomDataBase
@@ -12,17 +11,9 @@ import io.reactivex.Observable
 class UserRepository(application: Application, private val retrofitInterface: RetrofitServerInterface) {
     private val userDatabase = UserRoomDataBase.getInstance(application)!!
     private val userDao = userDatabase.userDao()
-    lateinit var allUserData: AllUserData
+    lateinit var allUserDataList: List<UserData>
     lateinit var userID: String
     lateinit var boardAdapter: LeaderBoardAdapter
-
-    fun updateRoom(userData: UserData): Observable<Unit> {
-        return Observable.fromCallable { userDao.update(userData) }
-    }
-
-    fun insertRoom(userData: UserData): Observable<Unit> {
-        return Observable.fromCallable { userDao.insert(userData) }
-    }
 
     fun getFromRoom(userID: String): UserData {
         return userDao.getData(userID)
@@ -33,17 +24,10 @@ class UserRepository(application: Application, private val retrofitInterface: Re
         userDao.updateCredit(userID, credit)
     }
 
-    fun getAllUsers() {
+    fun getAllUsers(): List<UserData> {
         val requestAllUser = retrofitInterface.httpConnect()
-        val r = Runnable {
-            allUserData = requestAllUser.execute().body()!!
-            //리더보드 어댑터 초기화
-            boardAdapter = LeaderBoardAdapter(allUserData)
-            //리더보드 레이아웃 매니저
-            boardAdapter.notifyDataSetChanged()
-        }
-        val thread = Thread(r)
-        thread.start()
+        allUserDataList = requestAllUser.execute().body()!!
+        return allUserDataList
     }
 
     fun getData(userID: String) {
