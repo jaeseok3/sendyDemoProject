@@ -1,9 +1,6 @@
 package com.example.sendymapdemo.model.repository
 
 import android.util.Log
-import android.widget.Toast
-import android.widget.Toast.LENGTH_LONG
-import android.widget.Toast.makeText
 import com.example.sendymapdemo.dataclass.HistoryData
 import com.example.sendymapdemo.dataclass.UserData
 import com.example.sendymapdemo.model.retrofit.RetrofitServerInterface

@@ -1,7 +1,7 @@
 package com.example.sendymapdemo.ui.activities
 
 import android.app.Activity
-import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -12,27 +12,21 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.sendymapdemo.R
-import com.example.sendymapdemo.SetPathUI
+import com.example.sendymapdemo.dataclass.PathData
 import com.example.sendymapdemo.dataclass.RequestListData
-import com.example.sendymapdemo.model.repository.*
 import com.example.sendymapdemo.ui.adapters.RequestRecyclerAdapter
 import com.example.sendymapdemo.viewmodel.RequestViewModel
+import com.naver.maps.geometry.LatLng
+import com.naver.maps.map.overlay.OverlayImage
 import kotlinx.android.synthetic.main.request_activity.*
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 class RequestActivity : AppCompatActivity() {
     private lateinit var adapter: RequestRecyclerAdapter
     private lateinit var requestLayoutManager: LinearLayoutManager
 
     private val requestViewModel by viewModel<RequestViewModel>()
-
-    private val nMap: MapsRepository by inject()
-    private val userRepository: UserRepository by inject()
-    private val historyRepository: HistoryRepository by inject()
-
+    private lateinit var pathData: PathData
     private var newRequestList : ArrayList<RequestListData>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,7 +46,7 @@ class RequestActivity : AppCompatActivity() {
             newRequestList = it
             recyclerViewSetup()
         }
-        requestViewModel.requests?.observe(this, requestListObserver)
+        requestViewModel.requests.observe(this, requestListObserver)
     }
 
     override fun onBackPressed() {
@@ -85,24 +79,16 @@ class RequestActivity : AppCompatActivity() {
                             Log.e("선택한 도착지", newRequestList!![position].destination)
                             Log.e("선택한 도착지_코드", newRequestList!![position].destinationCode)
 
-                            historyRepository.insertHistory(userRepository.userID, newRequestList!![position].time,
-                                newRequestList!![position].source,
-                                newRequestList!![position].destination,
-                                newRequestList!![position].distance,
-                                newRequestList!![position].reward.toString(),
-                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
-                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일")))
+                            pathData = newRequestList!![position].responseData
+                            setUIPath()
 
-                            val setPathUI = SetPathUI(newRequestList!![position].responseData, nMap)
-                            setPathUI.setUIPath()
                             val arrWay = newRequestList!![position].sourceCode.split(",")
                             val arrGoal = newRequestList!![position].destinationCode.split(",")
-
-                            val intent = Intent(this@RequestActivity, MapsActivity::class.java)
 
                             intent.putExtra("resultSrc", newRequestList!![position].source)
                             intent.putExtra("resultDst", newRequestList!![position].destination)
                             intent.putExtra("resultDistance", newRequestList!![position].distance)
+                            intent.putExtra("fullTime",newRequestList!![position].time)
                             intent.putExtra("wayLatLng[0]", arrWay[1].toDouble())
                             intent.putExtra("wayLatLng[1]", arrWay[0].toDouble())
                             intent.putExtra("goalLatLng[0]", arrGoal[1].toDouble())
@@ -116,6 +102,46 @@ class RequestActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+    fun setUIPath(){
+        val pathArr = pathData.route.traoptimal[0].path
+        val startLng = pathData.route.traoptimal[0].summary.start.location[0]
+        val startLat = pathData.route.traoptimal[0].summary.start.location[1]
+        val wayPointLng = pathData.route.traoptimal[0].summary.waypoints[0].location[0]
+        val wayPointLat = pathData.route.traoptimal[0].summary.waypoints[0].location[1]
+        val goalLng = pathData.route.traoptimal[0].summary.goal.location[0]
+        val goalLat = pathData.route.traoptimal[0].summary.goal.location[1]
 
+        for(i in pathArr.indices){
+            val path = pathArr[i].toString()
+            val pathLatLng = parsingPath(path)
+            requestViewModel.latlngList.add(pathLatLng)
+            requestViewModel.setLatlng()
+        }
+
+        requestViewModel.nMap.pathOverlay.coords = requestViewModel.latlngList
+        requestViewModel.nMap.pathOverlay.width = 30
+        requestViewModel.nMap.pathOverlay.color = Color.BLUE
+        requestViewModel.nMap.pathOverlay.patternImage = OverlayImage.fromResource(R.drawable.path_pattern)
+        requestViewModel.nMap.pathOverlay.patternInterval = 50
+        requestViewModel.nMap.pathOverlay.passedColor = Color.GRAY
+        requestViewModel.nMap.markerStartPoint.position = LatLng(startLat, startLng)
+        requestViewModel.nMap.markerWayPoint.position = LatLng(wayPointLat, wayPointLng)
+        requestViewModel.nMap.markerGoalPoint.position = LatLng(goalLat, goalLng)
+        requestViewModel.nMap.markerStartPoint.iconTintColor = Color.BLUE
+        requestViewModel.nMap.markerWayPoint.iconTintColor = Color.GREEN
+        requestViewModel.nMap.markerGoalPoint.iconTintColor = Color.RED
+        requestViewModel.nMap.markerStartPoint.map = requestViewModel.nMap.nMap!!
+        requestViewModel.nMap.markerWayPoint.map = requestViewModel.nMap.nMap!!
+        requestViewModel.nMap.markerGoalPoint.map = requestViewModel.nMap.nMap!!
+        requestViewModel.nMap.pathOverlay.map = requestViewModel.nMap.nMap!!
+    }
+
+    private fun parsingPath(rawPathData: String): LatLng {
+        val arr = rawPathData.split(",")
+        val lng: Double = arr[0].substring(1).toDouble()
+        val lat: Double = arr[1].substring(0, arr[1].indexOf("]")).toDouble()
+
+        return LatLng(lat, lng)
     }
 }

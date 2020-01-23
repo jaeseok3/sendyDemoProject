@@ -3,10 +3,22 @@ package com.example.sendymapdemo.viewmodel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.sendymapdemo.dataclass.RequestListData
+import com.example.sendymapdemo.model.repository.MapsRepository
 import com.example.sendymapdemo.model.repository.RequestRepository
+import com.naver.maps.geometry.LatLng
 
 class RequestViewModel(private var requestRepository: RequestRepository) : ViewModel() {
     var requests:MutableLiveData<ArrayList<RequestListData>>? = MutableLiveData()
+    var latlngList = requestRepository.latlngList
+    var start : String = ""
+
+    fun setStartPoint(s : String){
+        start = s
+    }
+
+    fun setLatlng(){
+        requestRepository.latlngList = latlngList
+    }
 
     fun startFindPath(startPosition: String){
         val findPathThread = Thread( Runnable {
@@ -25,5 +37,4 @@ class RequestViewModel(private var requestRepository: RequestRepository) : ViewM
     fun clear(){
         requestRepository.clearList()
     }
-
 }
