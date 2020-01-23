@@ -9,10 +9,7 @@ import com.example.sendymapdemo.model.retrofit.RetrofitApiInterface
 import com.example.sendymapdemo.model.retrofit.RetrofitNaverInterface
 import com.example.sendymapdemo.model.retrofit.RetrofitServerInterface
 import com.example.sendymapdemo.model.roomdb.UserRoomDataBase
-import com.example.sendymapdemo.viewmodel.HistoryViewModel
-import com.example.sendymapdemo.viewmodel.LoginViewModel
-import com.example.sendymapdemo.viewmodel.RankingViewModel
-import com.example.sendymapdemo.viewmodel.RequestViewModel
+import com.example.sendymapdemo.viewmodel.*
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidApplication
@@ -40,6 +37,7 @@ val repositoryModule = module {
     single { HistoryRepository(get()) }
     single { UserRepository(androidApplication(), get()) }
     single { MapsRepository() }
+    single { DangerRepository(get()) }
 }
 
 val viewModelModule = module {
@@ -47,6 +45,7 @@ val viewModelModule = module {
     viewModel { HistoryViewModel(get(),get()) }
     viewModel { LoginViewModel(get()) }
     viewModel { RankingViewModel(get()) }
+    viewModel { MapsViewModel(get(), get(), get(), get(), get()) }
 }
 
 val roomDataBaseModule = module {
@@ -75,8 +74,9 @@ private fun provideAPIRetrofit(okHttpClient: OkHttpClient): Retrofit {
 }
 
 private fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
-    return OkHttpClient().newBuilder().addInterceptor(authInterceptor).
-            addInterceptor(HttpLoggingInterceptor()).build()
+    return OkHttpClient().newBuilder().addInterceptor(authInterceptor)
+            .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+            .build()
 }
 
 private fun provideAPI(retrofit: Retrofit): RetrofitApiInterface =

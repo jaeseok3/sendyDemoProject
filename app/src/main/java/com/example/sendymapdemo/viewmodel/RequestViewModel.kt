@@ -7,8 +7,8 @@ import com.example.sendymapdemo.model.repository.MapsRepository
 import com.example.sendymapdemo.model.repository.RequestRepository
 import com.naver.maps.geometry.LatLng
 
-class RequestViewModel(private var requestRepository: RequestRepository) : ViewModel() {
-    var requests:MutableLiveData<ArrayList<RequestListData>>? = MutableLiveData()
+class RequestViewModel(private var requestRepository: RequestRepository, var mapsRepository: MapsRepository) : ViewModel() {
+    var requests:MutableLiveData<ArrayList<RequestListData>> = MutableLiveData()
     var latlngList = requestRepository.latlngList
     var start : String = ""
 
@@ -25,7 +25,7 @@ class RequestViewModel(private var requestRepository: RequestRepository) : ViewM
             for(i in 0..4) {
                 try {
                     val requestList = requestRepository.findPath(startPosition)
-                    requests!!.postValue(requestList)
+                    requests.postValue(requestList)
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }

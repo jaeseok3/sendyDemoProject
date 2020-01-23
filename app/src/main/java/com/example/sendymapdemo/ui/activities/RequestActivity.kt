@@ -26,6 +26,7 @@ class RequestActivity : AppCompatActivity() {
     private lateinit var requestLayoutManager: LinearLayoutManager
 
     private val requestViewModel by viewModel<RequestViewModel>()
+
     private lateinit var pathData: PathData
     private var newRequestList : ArrayList<RequestListData>? = null
 
@@ -34,9 +35,6 @@ class RequestActivity : AppCompatActivity() {
         setContentView(R.layout.request_activity)
 
         val intent = intent
-        //liveDataRequestListViewModel = ViewModelProviders.of(this).get(RequestViewModel::class.java)
-        //equestViewModel.setStartPoint(intent.getStringExtra("startPoint")!!)
-        //adapter = RequestRecyclerAdapter(ArrayList())
         requestViewModel.startFindPath(intent.getStringExtra("startPoint")!!)
         subscribe()
     }
@@ -119,22 +117,22 @@ class RequestActivity : AppCompatActivity() {
             requestViewModel.setLatlng()
         }
 
-        requestViewModel.nMap.pathOverlay.coords = requestViewModel.latlngList
-        requestViewModel.nMap.pathOverlay.width = 30
-        requestViewModel.nMap.pathOverlay.color = Color.BLUE
-        requestViewModel.nMap.pathOverlay.patternImage = OverlayImage.fromResource(R.drawable.path_pattern)
-        requestViewModel.nMap.pathOverlay.patternInterval = 50
-        requestViewModel.nMap.pathOverlay.passedColor = Color.GRAY
-        requestViewModel.nMap.markerStartPoint.position = LatLng(startLat, startLng)
-        requestViewModel.nMap.markerWayPoint.position = LatLng(wayPointLat, wayPointLng)
-        requestViewModel.nMap.markerGoalPoint.position = LatLng(goalLat, goalLng)
-        requestViewModel.nMap.markerStartPoint.iconTintColor = Color.BLUE
-        requestViewModel.nMap.markerWayPoint.iconTintColor = Color.GREEN
-        requestViewModel.nMap.markerGoalPoint.iconTintColor = Color.RED
-        requestViewModel.nMap.markerStartPoint.map = requestViewModel.nMap.nMap!!
-        requestViewModel.nMap.markerWayPoint.map = requestViewModel.nMap.nMap!!
-        requestViewModel.nMap.markerGoalPoint.map = requestViewModel.nMap.nMap!!
-        requestViewModel.nMap.pathOverlay.map = requestViewModel.nMap.nMap!!
+        requestViewModel.mapsRepository.pathOverlay.coords = requestViewModel.latlngList
+        requestViewModel.mapsRepository.pathOverlay.width = 30
+        requestViewModel.mapsRepository.pathOverlay.color = Color.BLUE
+        requestViewModel.mapsRepository.pathOverlay.patternImage = OverlayImage.fromResource(R.drawable.path_pattern)
+        requestViewModel.mapsRepository.pathOverlay.patternInterval = 50
+        requestViewModel.mapsRepository.pathOverlay.passedColor = Color.GRAY
+        requestViewModel.mapsRepository.markerStartPoint.position = LatLng(startLat, startLng)
+        requestViewModel.mapsRepository.markerWayPoint.position = LatLng(wayPointLat, wayPointLng)
+        requestViewModel.mapsRepository.markerGoalPoint.position = LatLng(goalLat, goalLng)
+        requestViewModel.mapsRepository.markerStartPoint.iconTintColor = Color.BLUE
+        requestViewModel.mapsRepository.markerWayPoint.iconTintColor = Color.GREEN
+        requestViewModel.mapsRepository.markerGoalPoint.iconTintColor = Color.RED
+        requestViewModel.mapsRepository.markerStartPoint.map = requestViewModel.mapsRepository.nMap!!
+        requestViewModel.mapsRepository.markerWayPoint.map = requestViewModel.mapsRepository.nMap!!
+        requestViewModel.mapsRepository.markerGoalPoint.map = requestViewModel.mapsRepository.nMap!!
+        requestViewModel.mapsRepository.pathOverlay.map = requestViewModel.mapsRepository.nMap!!
     }
 
     private fun parsingPath(rawPathData: String): LatLng {

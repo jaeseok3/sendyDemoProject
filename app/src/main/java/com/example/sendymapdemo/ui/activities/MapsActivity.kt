@@ -17,18 +17,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import android.content.Intent
-import android.os.AsyncTask
 import android.os.Handler
 import android.view.MenuItem
 import android.view.animation.AlphaAnimation
-import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
-import com.example.sendymapdemo.*
+import androidx.lifecycle.Observer
 import com.example.sendymapdemo.R
 import com.example.sendymapdemo.dataclass.UserData
 import com.example.sendymapdemo.koinmodule.ApplicationMain
-import com.example.sendymapdemo.model.repository.*
+import com.example.sendymapdemo.viewmodel.MapsViewModel
 import com.naver.maps.map.util.FusedLocationSource
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_maps.*
@@ -36,13 +34,9 @@ import kotlinx.android.synthetic.main.activity_maps.requestDst
 import kotlinx.android.synthetic.main.activity_maps.requestSrc
 import kotlinx.android.synthetic.main.nav_header.view.*
 import kotlinx.coroutines.*
-import org.json.JSONArray
-import org.json.JSONObject
-import org.koin.android.ext.android.inject
-import java.io.BufferedReader
-import java.io.InputStreamReader
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.lang.Runnable
-import java.net.URL
+import java.lang.Thread.sleep
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -51,10 +45,7 @@ class MapsActivity : AppCompatActivity(){
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
 
-    private val userRepository: UserRepository by inject()
-    private val nMap: MapsRepository by inject()
-    private val historyRepository: HistoryRepository by inject()
-    private val requestRepository: RequestRepository by inject()
+    private val mapsViewModel by viewModel<MapsViewModel>()
 
     private lateinit var drawerLayout: DrawerLayout
 
@@ -87,10 +78,14 @@ class MapsActivity : AppCompatActivity(){
 
         //네이게이션 뷰의 헤더에 접근하기 위한 코드
         val headerView = nav_view.getHeaderView(0)
+
+        val nMap = mapsViewModel.getNaverMapRepository()
+        val latlngList = mapsViewModel.getLatLngList()
+
         drawerLayout = findViewById(R.id.drawer_layout)
         nav_view.setNavigationItemSelectedListener { menuitem: MenuItem ->
             when (menuitem.itemId) {
-                menu_history -> {
+                R.id.menu_history -> {
                     val historyIntent = Intent(this, HistoryActivity::class.java)
                     startActivity(historyIntent)
                 }
@@ -114,10 +109,10 @@ class MapsActivity : AppCompatActivity(){
             drawerLayout.closeDrawer(GravityCompat.START)
             true
         }
-        val userID = userRepository.userID
+        val userID = mapsViewModel.getUserID()
         var userData: UserData
         val r = Runnable {
-            userData = userRepository.getFromRoom(userID)
+            userData = mapsViewModel.getFromRoom(userID)
             Log.e("유저", "$userID,$userData")
             Runnable {
                 headerView.userID.text = userData.id
@@ -196,7 +191,7 @@ class MapsActivity : AppCompatActivity(){
                         checkError(goalLatLng!!) && arriveCheck -> {
                             makeText(this, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
 //                        var abc:Double=(intent.getStringExtra("resultReward"))
-                            historyRepository.insertHistory(userRepository.userID,
+                            mapsViewModel.insertHistory(mapsViewModel.getUserID(),
                                 fullTime,
                                 resultSrc,
                                 resultDst,
@@ -216,38 +211,45 @@ class MapsActivity : AppCompatActivity(){
             locationStartBtn.setOnClickListener {
                 if(nMap.nMap!!.locationTrackingMode == LocationTrackingMode.None){
                     Log.e("Flag", "${nMap.nMap!!.locationTrackingMode}")
-                    GlobalScope.async {
-                        for (i in 0 until requestRepository.latlngList.size) {
-                            currentLocation.latitude = requestRepository.latlngList[i].latitude
-                            currentLocation.longitude = requestRepository.latlngList[i].longitude
+                    Thread(Runnable {
+                        for (i in 0 until latlngList.size) {
+                            currentLocation.latitude = latlngList[i].latitude
+                            currentLocation.longitude = latlngList[i].longitude
 
                             Log.e("위치변경", "${currentLocation.latitude}, ${currentLocation.longitude}")
-                            runBlocking {
-                                drawingLocationUI(LatLng(requestRepository.latlngList[i].latitude, requestRepository.latlngList[i].longitude))
-                                getDangerGrade(requestRepository.latlngList[i].latitude.toString(), requestRepository.latlngList[i].longitude.toString(),
-                                    requestRepository.latlngList[i].latitude.toString(), requestRepository.latlngList[i].longitude.toString())
-                            }
-                            delay(2000)
+                            drawingLocationUI(LatLng(latlngList[i].latitude, latlngList[i].longitude))
+                            mapsViewModel.getDangerGrade(latlngList[i].latitude.toString(),
+                                    latlngList[i].longitude.toString(),
+                                    latlngList[i].latitude.toString(),
+                                    latlngList[i].longitude.toString())
+                            sleep(2000)
+
                             if (nMap.nMap!!.locationTrackingMode == LocationTrackingMode.Follow ||
-                                nMap.nMap!!.locationTrackingMode == LocationTrackingMode.NoFollow) {
+                                    nMap.nMap!!.locationTrackingMode == LocationTrackingMode.NoFollow) {
                                 progressRate = 0.0
                                 drawingLocationUI(LatLng(currentLocation.latitude, currentLocation.longitude))
                                 break
                             }
                         }
-                    }
+                    }).start()
                 }
                 else{
                     Log.e("Flag", "${nMap.nMap!!.locationTrackingMode}")
                     nMap.nMap!!.locationTrackingMode = LocationTrackingMode.None
                 }
+                val dangerGradeObserver = Observer<String> {
+                    dangerInfo.text = it
+                }
+                mapsViewModel.dangerGrade!!.observe(this, dangerGradeObserver)
             }
         }
     }
     private fun drawingLocationUI(latLng: LatLng) = GlobalScope.launch(Dispatchers.Main){
+        val nMap = mapsViewModel.getNaverMapRepository()
+        val latlngList = mapsViewModel.getLatLngList()
         nMap.nMap!!.let {
             val locationOverlay = it.locationOverlay
-            progressRate += 1.0 / requestRepository.latlngList.size
+            progressRate += 1.0 / latlngList.size
             locationOverlay.isVisible = true
             locationOverlay.position = latLng
             Log.e("위치변경", "${locationOverlay.position}")
@@ -295,49 +297,6 @@ class MapsActivity : AppCompatActivity(){
         }
     }
 
-    private fun getDangerGrade(startLat:String, startLng:String, endLat:String, endLng:String) {
-        lateinit var temp : String
-        class getDangerGrade : AsyncTask<Void, Void, Void>(){
-            override fun doInBackground(vararg params: Void?): Void? {
-                val stream = URL("?serviceKey=%2BwvPpNobnpO%2BxNDsB3NdwZqjZYg4C8JqEy7NhZxXof%2F2Owy9Vu2eYP1pZVtIw%2FcPEVTx8nKQ1ph%2F4ppRNxKBLA%3D%3D&" +
-                        "searchLineString=LineString("+
-                        startLng + " " +
-                        startLat + ", " +
-                        endLng + " " +
-                        endLat + ")&vhctyCd=1&type=json&numOfRows=10&pageNo=1").openStream()
-                val read = BufferedReader(InputStreamReader(stream,"UTF-8"))
-                temp  = read.readLine()
-                Log.e("파싱 진행중", temp)
-                return null
-            }
-
-            override fun onPostExecute(result: Void?) {
-                var grade : String
-                super.onPostExecute(result)
-                val json = JSONObject(temp)
-                if(json.get("resultCode") != "10") {
-                    val chiefObject = (json["items"] as JSONObject)
-                    val upperArray : JSONArray = chiefObject.getJSONArray("item")
-                    val upperObject = upperArray.getJSONObject(0)
-                    grade = upperObject.getString("anals_grd")
-                    grade =  when(grade){
-                        "01" -> "1등급"
-                        "02" -> "2등급"
-                        "03" -> "3등급"
-                        "04" -> "4등급"
-                        "05" -> "5등급"
-                        else -> "none"
-                    }
-                }
-                else
-                    grade = "none"
-                dangerInfo.text = grade
-                Log.e("파싱결과",grade)
-
-            }
-        }
-        getDangerGrade().execute()
-    }
     private fun checkError(goalLatLng: LatLng): Boolean {
         val currentLat = currentLocation.latitude
         val currentLng = currentLocation.longitude
