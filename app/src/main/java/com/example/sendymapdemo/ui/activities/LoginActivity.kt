@@ -32,8 +32,8 @@ class LoginActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
         }
 
-        login_btn.setOnClickListener {
-            val userID= sendy_go_user_id.text.toString()
+        login.setOnClickListener {
+            val userID= useredit.text.toString()
             if(userID.length in 1..10){
                 Toast.makeText(this,"$userID 님 환영합니다",Toast.LENGTH_LONG).show()
 

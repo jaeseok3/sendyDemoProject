@@ -33,11 +33,11 @@ class HistoryListAdapter(private val items: List<HistoryData>) : RecyclerView.Ad
         private var view: View = v
         fun bind(listener: View.OnClickListener, items: List<HistoryData>) {
             view.historyDate.text = items[position].HistoryDate
-            view.historyTime.text = items[position].HistoryTime
+//            view.historyTime.text = items[position].HistoryTime
             view.historySrc.text = items[position].Src
             view.historyDst.text = items[position].Dest
-            view.historyDuration.text = items[position].Distance
-            view.historyTime_amount.text = items[position].Time
+//            view.historyDuration.text = items[position].Distance
+//            view.historyTime_amount.text = items[position].Time
             view.historyReward.text = items[position].Reward
             view.setOnClickListener(listener)
         }

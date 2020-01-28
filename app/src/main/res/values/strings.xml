@@ -3,5 +3,7 @@
 <string name="title_activity_maps">Map</string>
     <string name="drawer_open">open</string>
     <string name="drawer_close">close</string>
-    <string name="enter_id">아이디를 입력하세요.</string>
+    <string name="loginText">로그인</string>
+    <string name="login_sendygo">Sendy Go</string>
+    <string name="login_input_id">아이디를 입력하세요.</string>
 </resources>
