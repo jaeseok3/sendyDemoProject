@@ -38,22 +38,20 @@ class MapsViewModel (private val dangerRepository: DangerRepository, private val
     }
 
     fun getDangerGrade(startLat:String, startLng:String, endLat:String, endLng:String){
-        val lineString = "LineString%($startLng $startLat, $endLng $endLat%)"
+        val lineString = "LineString($startLng $startLat, $endLng $endLat)"
         var grade = ""
         Thread(Runnable {
             try{
                 val requestDangerGrade = dangerRepository.getDangerGrade(lineString)
                 grade = if(requestDangerGrade.resultCode != "10") {
                     when(requestDangerGrade.items.item[0].anals_grd){
-                        "01" -> "1등급"
-                        "02" -> "2등급"
-                        "03" -> "3등급"
-                        "04" -> "4등급"
-                        "05" -> "5등급"
-                        else -> "none"
+                        "01","02" -> "안전"
+                        "03","04" -> "주의"
+                        "05" -> "위험"
+                        else -> "측정불가"
                     }
                 } else {
-                    "측정불가지역"
+                    "측정불가"
                 }
             }catch (e: Exception){
                 e.printStackTrace()

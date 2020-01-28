@@ -1,84 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/bg_login">
+
+    <TextView
+        android:id="@+id/sendy_go_textview"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:textStyle="bold"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="40dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="28sp"
+        android:textColor="#212121"
+        android:text="Sendy Go"/>
+
+    <TextView
+        app:layout_constraintLeft_toRightOf="@id/sendy_go_textview"
+        app:layout_constraintTop_toTopOf="parent"
+        android:textStyle="bold"
+        android:layout_marginTop="40dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="28sp"
+        android:textColor="#2e58ec"
+        android:text="."/>
+
+    <TextView
+        android:id="@+id/sendy_go_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/sendy_go_textview"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="24dp"
+        android:textSize="14sp"
+        android:textColor="#727272"
+        android:textStyle="normal"
+        android:text="경로를 선택하고, 운송을 시작하세요."/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:id="@+id/sendy_go_user_box"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sendy_go_info"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/text_radius"/>
+
+    <EditText
+        android:background="#ffffff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/sendy_go_user_id"
+        app:layout_constraintLeft_toRightOf="@+id/login_img"
+        app:layout_constraintTop_toTopOf="@+id/sendy_go_user_box"
+        app:layout_constraintBottom_toBottomOf="@+id/sendy_go_user_box"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:hint="아이디를 입력하세요."
+        android:textColor="#000000"
+        android:textSize="16sp"
+        android:textColorHint="#b7b7b7"
+        android:textStyle="normal"/>
 
     <ImageView
-        android:layout_width="300dp"
-        android:layout_height="150dp"
-        android:src="@drawable/ib"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="50dp"
-        android:id="@+id/imgvw" />
+        android:id="@+id/login_img"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintTop_toTopOf="@+id/sendy_go_user_box"
+        app:layout_constraintLeft_toLeftOf="@+id/sendy_go_user_box"
+        android:src="@drawable/ic_id_24"/>
 
-    <LinearLayout
+    <Button
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="450dp"
-        android:layout_marginLeft="25dp"
-        android:layout_marginRight="25dp">
+        android:layout_height="56dp"
+        android:id="@+id/login_btn"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintTop_toBottomOf="@+id/sendy_go_user_box"
+        android:background="@drawable/button_radius"
+        android:text="로그인"
+        android:textColor="#ffffff"
+        android:textSize="16sp"
+        android:textStyle="normal"/>
 
-        <Button
-            android:id="@+id/logiin"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginRight="10dp"
-            android:layout_weight="1"
-            android:background="@drawable/border"
-            android:gravity="center"
-            android:padding="15dp"
-            android:text="Login"
-            android:textColor="#fff"
-            android:textStyle="bold" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:paddingLeft="25dp"
-        android:paddingRight="25dp"
-        android:layout_marginTop="280dp"
-        android:id="@+id/lnrlyout">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="16dp">
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:paddingTop="15dp"
-                    android:src="@drawable/user"
-                    android:layout_gravity="center"/>
-                <EditText
-                    android:id="@+id/usrusr"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Username"
-                    android:textColorHint="#fff"
-                    android:layout_marginLeft="15dp"
-                    android:background="#00000000"
-                    android:letterSpacing="0.1"
-                    android:textSize="16dp"
-                    android:paddingTop="15dp"
-                    android:textColor="#fff"
-                    android:inputType="text" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0.5dp"
-                android:background="#5fff">
-
-            </LinearLayout>
-        </LinearLayout>
-    </LinearLayout>
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -15,4 +15,10 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="SendyGo">
+        <item name="android:textSize">28sp</item>
+        <item name="android:textColor">#2e58ec</item>
+        <item name="android:font"></item>
+    </style>
+
 </resources>

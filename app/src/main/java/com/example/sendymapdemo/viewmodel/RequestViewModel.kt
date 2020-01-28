@@ -12,10 +12,6 @@ class RequestViewModel(private var requestRepository: RequestRepository, var map
     var latlngList = requestRepository.latlngList
     var start : String = ""
 
-    fun setStartPoint(s : String){
-        start = s
-    }
-
     fun setLatlng(){
         requestRepository.latlngList = latlngList
     }

@@ -101,6 +101,7 @@ class RequestActivity : AppCompatActivity() {
             }
         }
     }
+
     fun setUIPath(){
         val pathArr = pathData.route.traoptimal[0].path
         val startLng = pathData.route.traoptimal[0].summary.start.location[0]

@@ -1,6 +1,8 @@
 package com.example.sendymapdemo.model.retrofit
 
 import com.example.sendymapdemo.dataclass.PathData
+import io.reactivex.Observable
+import io.reactivex.Single
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Header

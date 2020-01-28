@@ -169,13 +169,12 @@ class MapsActivity : AppCompatActivity(){
             animation()
         }
 
-        locationBtn.map = nMap.nMap
-
         nMap.listener = {
             Log.e("메인액티비티","온맵레디")
             nMap.nMap!!.locationSource = locationSource
             nMap.nMap!!.locationTrackingMode = LocationTrackingMode.Follow
             nMap.nMap!!.locationOverlay.isVisible = true
+            nMap.nMap!!.uiSettings.isLocationButtonEnabled = true
             nMap.nMap!!.addOnLocationChangeListener { location ->
                 currentLocation = location
                 val currentLatLng = LatLng(location.latitude, location.longitude)

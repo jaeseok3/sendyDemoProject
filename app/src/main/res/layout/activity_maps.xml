@@ -35,7 +35,6 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
@@ -52,13 +51,6 @@
         app:navermap_longitude="129.0750222"
         app:navermap_zoom="13"
         tools:context=".ui.activities.MapsActivity">
-        <com.naver.maps.map.widget.LocationButtonView
-            android:id="@+id/locationBtn"
-            android:layout_width = "wrap_content"
-            android:layout_height = "wrap_content"
-            android:layout_gravity = "right|top"
-            android:layout_marginTop = "60dp"
-            android:layout_marginRight = "10dp"/>
     </fragment>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

@@ -12,6 +12,7 @@ import androidx.core.app.ActivityCompat
 import com.example.sendymapdemo.R
 import com.example.sendymapdemo.model.repository.UserRepository
 import com.example.sendymapdemo.viewmodel.LoginViewModel
+import kotlinx.android.synthetic.main.activity_login.*
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -31,17 +32,13 @@ class LoginActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
         }
 
-        val mEditTextSearchKeyword = findViewById<EditText>(R.id.usrusr)
-        val mButton:Button = findViewById(R.id.logiin)
-
-        mButton.setOnClickListener {
-            if(mEditTextSearchKeyword.text.toString().length in 1..10){
-                val userID=mEditTextSearchKeyword.text.toString()
+        login_btn.setOnClickListener {
+            val userID= sendy_go_user_id.text.toString()
+            if(userID.length in 1..10){
                 Toast.makeText(this,"$userID 님 환영합니다",Toast.LENGTH_LONG).show()
 
                 loginViewModel.getData(userID)
                 val intent = Intent(applicationContext, MapsActivity::class.java)
-                intent.putExtra("userID", "")
                 startActivity(intent)
 
                 finish()

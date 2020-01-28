@@ -1,6 +1,8 @@
 package com.example.sendymapdemo.model.retrofit
 
 import com.example.sendymapdemo.dataclass.*
+import io.reactivex.Observable
+import io.reactivex.Single
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -32,7 +34,7 @@ interface RetrofitServerInterface {
     @GET("httpHistory2.php")
     fun getHistory(
             @Query("user") userID: String
-    ): Call<List<HistoryData>>
+    ): Observable<List<HistoryData>>
 
     @GET("httpLocation2.php")
     fun getLocationDB(): Call<LocationData>

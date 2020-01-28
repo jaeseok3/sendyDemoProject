@@ -8,6 +8,7 @@ import com.example.sendymapdemo.model.retrofit.RetrofitNaverInterface
 import com.example.sendymapdemo.model.retrofit.RetrofitServerInterface
 import com.example.sendymapdemo.ui.adapters.RequestRecyclerAdapter
 import com.naver.maps.geometry.LatLng
+import io.reactivex.Observable
 import kotlin.math.pow
 
 class RequestRepository(private val retrofitServerInterface: RetrofitServerInterface,
@@ -19,35 +20,38 @@ class RequestRepository(private val retrofitServerInterface: RetrofitServerInter
     lateinit var pathData:PathData
     var latlngList = ArrayList<LatLng>()
 
-    fun findPath(currentPoint: String) : ArrayList<RequestListData>{
+    fun findPath(currentPoint: String): ArrayList<RequestListData> {
         val option = "traoptimal"
-        try {
-            val newGeoInfo = GeoData(getLocationFromDB())
-            val requestUserData = retrofitNaverInterface.requestPath(currentPoint, newGeoInfo.dst, newGeoInfo.src, option, NAVER_API_CLIENT, NAVER_API_SECRET)
-            val requestResult = requestUserData.execute().body()!!
-            pathData = requestResult
-            val time = requestResult.route.traoptimal[0].summary.duration / 60000
-            val distance = requestResult.route.traoptimal[0].summary.distance / 1000.toDouble()
-            val distanceStr = String.format("%.1f Km", distance)
-            val timeStr = "$time" + "Min"
 
-            val face =
-                    if(distance <= 20) R.drawable.happy
-                    else if(distance > 20 && distance <= 40) R.drawable.sad
-                    else R.drawable.dead
-            val reward = time.toDouble().pow(2).toInt()
-            val requestListItem = RequestListData(face,
-                    getGeoName(newGeoInfo.src), getGeoName(newGeoInfo.dst), timeStr, distanceStr, reward,
-                    newGeoInfo.dst, newGeoInfo.src, requestResult)
-            requestList.add(requestListItem)
-            Log.e("리스트 사이즈", "${requestList.size},${requestListItem}")
-        }catch (e: Exception){
-            e.printStackTrace()
-        }
+        Thread(Runnable {
+            try {
+                val newGeoInfo = GeoData(getLocationFromDB())
+                val requestUserData = retrofitNaverInterface.requestPath(currentPoint, newGeoInfo.dst, newGeoInfo.src, option,
+                        NAVER_API_CLIENT, NAVER_API_SECRET)
+                val requestResult = requestUserData.execute().body()!!
+                pathData = requestResult
+                val time = requestResult.route.traoptimal[0].summary.duration / 60000
+                val distance = requestResult.route.traoptimal[0].summary.distance / 1000.toDouble()
+                val distanceStr = String.format("%.1f Km", distance)
+                val timeStr = "$time" + "Min"
+
+                val face =
+                        if(distance <= 20) R.drawable.happy
+                        else if(distance > 20 && distance <= 40) R.drawable.sad
+                        else R.drawable.dead
+                val reward = time.toDouble().pow(2).toInt()
+                val requestListItem = RequestListData(face,
+                        getGeoName(newGeoInfo.src), getGeoName(newGeoInfo.dst), timeStr, distanceStr, reward,
+                        newGeoInfo.dst, newGeoInfo.src, requestResult)
+                requestList.add(requestListItem)
+                Log.e("리스트 사이즈", "${requestList.size},${requestListItem}")
+            }catch (e: Exception){
+                e.printStackTrace()
+            }
+        })
         return requestList
     }
-
-    fun getLocationFromDB(): LocationData {
+    private fun getLocationFromDB(): LocationData {
         val requestLocationData = retrofitServerInterface.getLocationDB()
         return requestLocationData.execute().body()!!
     }
