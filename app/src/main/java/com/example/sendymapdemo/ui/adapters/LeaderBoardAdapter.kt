@@ -7,7 +7,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sendymapdemo.R
 import com.example.sendymapdemo.dataclass.UserData
-import kotlinx.android.synthetic.main.navigation_recyclerview_item.view.*
+import kotlinx.android.synthetic.main.ranking_item.view.*
 
 class LeaderBoardAdapter(private val items: List<UserData>) : RecyclerView.Adapter<LeaderBoardAdapter.ViewHolder>() {
     override fun getItemCount() = items.size
@@ -26,7 +26,7 @@ class LeaderBoardAdapter(private val items: List<UserData>) : RecyclerView.Adapt
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int):
             ViewHolder {
         val inflatedView = LayoutInflater.from(parent.context)
-            .inflate(R.layout.navigation_recyclerview_item, parent, false)
+            .inflate(R.layout.ranking_item, parent, false)
         return ViewHolder(inflatedView)
     }
 

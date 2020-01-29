@@ -28,8 +28,7 @@
         android:layout_height="wrap_content"
         android:textSize="28sp"
         android:textColor="#2e58ec"
-        android:text="."
-        />
+        android:text="." />
 
     <TextView
         android:id="@+id/text2"
