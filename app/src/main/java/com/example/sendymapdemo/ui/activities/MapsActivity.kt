@@ -1,6 +1,7 @@
 package com.example.sendymapdemo.ui.activities
 
 import android.app.AlertDialog
+import android.app.Dialog
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
@@ -17,8 +18,10 @@ import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.service.autofill.CustomDescription
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.animation.AlphaAnimation
@@ -101,11 +104,17 @@ class MapsActivity : AppCompatActivity(){
 
         //네이게이션 뷰의 헤더에 접근하기 위한 코드
         val headerView = new_nav_view.getHeaderView(0)
-
+        headerView.historyButton.setOnClickListener {
+            val historyIntent = Intent(this, HistoryActivity::class.java)
+            startActivity(historyIntent)
+        }
+        headerView.rankingButton.setOnClickListener {
+            val rankingIntent = Intent(this, RankingActivity::class.java)
+            startActivity(rankingIntent)
+        }
         val nMap = mapsViewModel.getNaverMapRepository()
         val latlngList = mapsViewModel.getLatLngList()
 
-//        drawerLayout = findViewById(R.id.new_drawer_layout)
 //        nav_view.setNavigationItemSelectedListener { menuitem: MenuItem ->
 //            when (menuitem.itemId) {
 //                R.id.menu_history -> {
@@ -132,6 +141,10 @@ class MapsActivity : AppCompatActivity(){
 //            drawerLayout.closeDrawer(GravityCompat.START)
 //            true
 //        }
+        sideNavButton.setOnClickListener {
+            new_drawer_layout.openDrawer(Gravity.LEFT)
+        }
+
         val userID = mapsViewModel.getUserID()
         var userData: UserData
         val r = Runnable {
@@ -345,6 +358,9 @@ class MapsActivity : AppCompatActivity(){
         bottomSheet_after.visibility = View.GONE
         bottomSheetBehavior_before.state = BottomSheetBehavior.STATE_COLLAPSED
         bottomSheetBehavior_after.state = BottomSheetBehavior.STATE_COLLAPSED
+        draw_up_and_refresh.setOnClickListener {
+            bottomSheetBehavior_before.state = BottomSheetBehavior.STATE_EXPANDED
+        }
         bottomSheetBehavior_before.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {
@@ -356,10 +372,18 @@ class MapsActivity : AppCompatActivity(){
                             isRequested++
                         }
                         draw_up_and_refresh.setImageResource(R.drawable.ic_refresh_24)
+                        draw_up_and_refresh.setOnClickListener {
+                            makeText(this@MapsActivity,"의뢰 목록을 새로고침합니다.",Toast.LENGTH_SHORT)
+                            requestViewModel.clear()
+                            requestViewModel.startFindPath(startPosition!!)
+                        }
                     }
                     BottomSheetBehavior.STATE_COLLAPSED -> {
                         //textFull.visibility = View.GONE
                         draw_up_and_refresh.setImageResource(R.drawable.ic_up_24)
+                        draw_up_and_refresh.setOnClickListener {
+                            bottomSheetBehavior_before.state = BottomSheetBehavior.STATE_EXPANDED
+                        }
                     }
                     BottomSheetBehavior.STATE_DRAGGING -> {
                     }
@@ -396,11 +420,15 @@ class MapsActivity : AppCompatActivity(){
                 if(newRequestList!!.size == 5){
                     adapter.itemClick = object : RequestRecyclerAdapter.OnItemClickListener {
                         override fun onItemClickListener(view: View, position: Int) {
-                            val builder = AlertDialog.Builder(this@MapsActivity)
+                            //val builder = AlertDialog.Builder(this@MapsActivity)
+                            val f = Dialog(this@MapsActivity)
                             val dialogView = layoutInflater.inflate(R.layout.request_dialog, null)
-                            builder.setView(dialogView)
-                            val yesorno = builder.create()
-                            yesorno.show()
+                            f.setContentView(dialogView)
+                            //builder.setView(dialogView)
+                            //val yesorno = builder.create()
+                            //yesorno.show()
+                            f.window!!.setBackgroundDrawableResource(R.drawable.bg_dialog_radius)
+                            f.show()
                             dialogView.clockImage.setImageResource(newRequestList!![position].image)
                             dialogView.srcText.text = newRequestList!![position].source
                             dialogView.dstText.text = newRequestList!![position].destination
@@ -422,13 +450,15 @@ class MapsActivity : AppCompatActivity(){
 
                                 requestViewModel.clear()
                                 isRequested = 0
-                                yesorno.dismiss()
+                                //yesorno.dismiss()
+                                f.dismiss()
                                 bottomSheetBehavior_before.state = BottomSheetBehavior.STATE_COLLAPSED
                                 bottomSheet_before.visibility = View.GONE
                                 bottomSheet_after.visibility = View.VISIBLE
                             }
                             dialogView.request_cancle_button.setOnClickListener{
-                                yesorno.dismiss()
+                                //yesorno.dismiss()
+                                f.dismiss()
                             }
                             //val currentList = requestRepository.getList()
 //                            val oDialog = AlertDialog.Builder(view.context, android.R.style.Theme_DeviceDefault_Light_Dialog)
@@ -635,6 +665,10 @@ class MapsActivity : AppCompatActivity(){
 //        animation()
 //    }
         )
+    }
+    fun showHistory(){
+
+
     }
 }
 

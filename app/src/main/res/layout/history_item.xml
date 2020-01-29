@@ -6,81 +6,78 @@
     android:layout_height="80dp"
     android:background="@drawable/shape"
     android:layout_marginBottom="8dp">
+    <TextView
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:id="@+id/historyDate"
+        android:layout_width="70dp"
+        android:layout_height="19dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginTop="45dp"
+        android:layout_marginStart="16dp"
+        android:text="2020-01-10"
+        android:textColor="#727272"
+        android:textSize="13sp" />
+
+    <TextView
+        android:id="@+id/historySrc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="출발지"
+        android:textColor="#212121"
+        android:textSize="16sp" />
+
+    <ImageView
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        app:layout_constraintStart_toEndOf="@id/historySrc"
+        app:layout_constraintEnd_toStartOf="@id/historyDst"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="4dp"
+        android:id="@+id/historyImg"
+        android:src="@drawable/ic_double_arrow_16"
+        />
+
+    <TextView
+        android:id="@+id/historyDst"
+        app:layout_constraintStart_toEndOf="@id/historyImg"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:gravity="center"
+        android:text="목적지"
+        android:textColor="#212121"
+        android:textSize="16sp" />
 
 
-            <TextView
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                android:id="@+id/historyDate"
-                android:layout_width="70dp"
-                android:layout_height="19dp"
-                android:layout_marginBottom="16dp"
-                android:layout_marginTop="45dp"
-                android:layout_marginStart="16dp"
-                android:text="2020-01-10"
-                android:textColor="#727272"
-                android:textSize="13sp" />
+    <ImageView
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/historyReward"
+        android:layout_marginBottom="40dp"
+        android:layout_marginEnd="3dp"
+        android:src="@drawable/ic_credit_16"
+        />
 
-                <TextView
-                    android:id="@+id/historySrc"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
-                    android:text="출발지"
-                    android:textColor="#212121"
-                    android:textSize="16sp" />
+    <TextView
+        android:id="@+id/historyReward"
+        app:layout_constraintBottom_toBottomOf="parent"
 
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    app:layout_constraintStart_toEndOf="@id/historySrc"
-                    app:layout_constraintEnd_toStartOf="@id/historyDst"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginStart="4dp"
-                    android:id="@+id/historyImg"
-                    android:src="@drawable/ic_double_arrow_16"
-                     />
-
-                <TextView
-                    android:id="@+id/historyDst"
-                    app:layout_constraintStart_toEndOf="@id/historyImg"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:layout_marginTop="16dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:gravity="center"
-                    android:text="목적지"
-                    android:textColor="#212121"
-                    android:textSize="16sp" />
-
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/historyReward"
-                    android:layout_marginBottom="40dp"
-                    android:layout_marginEnd="3dp"
-                    android:text="c"
-                    android:textColor="#ffa611"
-                     />
-
-                <TextView
-                    android:id="@+id/historyReward"
-                    app:layout_constraintBottom_toBottomOf="parent"
-
-                    app:layout_constraintEnd_toEndOf="parent"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="40dp"
-                    android:layout_marginEnd="16dp"
-                    android:text="50000"
-                    android:textColor="@color/darkBlue"
-                    android:textSize="12sp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="40dp"
+        android:layout_marginEnd="16dp"
+        android:text="50000"
+        android:textColor="#ffa611"
+        android:textSize="12sp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

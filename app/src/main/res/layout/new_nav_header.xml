@@ -21,11 +21,12 @@
         android:id="@+id/userName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="24sp"
+        android:textSize="28sp"
         android:textColor="#212121"
         android:text="GerrardMan88"
         app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginLeft="24dp"
+        android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@+id/profilePhoto"
         android:layout_marginTop="8dp"/>
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -170,7 +171,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/greyBoxThree" />
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="50dp"
         app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginStart="24dp"
@@ -196,11 +197,37 @@
             android:textStyle="bold"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="50dp"
         app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginStart="24dp"
         app:layout_constraintTop_toBottomOf="@+id/historyButton"
+        android:layout_marginTop="16dp"
+        android:id="@+id/rankingButton">
+        <ImageView
+            android:id="@+id/championImg"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:src="@drawable/ic_champion"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="#212121"
+            android:text="순위 조회"
+            app:layout_constraintLeft_toRightOf="@+id/championImg"
+            android:layout_marginStart="16dp"
+            app:layout_constraintTop_toTopOf="@+id/championImg"
+            android:textStyle="bold"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginStart="24dp"
+        app:layout_constraintTop_toBottomOf="@+id/rankingButton"
         android:layout_marginTop="16dp"
         android:id="@+id/aboutButton">
         <ImageView
