@@ -6,7 +6,7 @@
     android:background="@drawable/bg_login">
 
     <TextView
-        android:id="@+id/text1"
+        android:id="@+id/sendy_go_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -14,13 +14,12 @@
         android:textColor="#212121"
         android:textSize="28sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/text2"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:text="@string/login_sendygo" />
 
     <TextView
-        app:layout_constraintLeft_toRightOf="@id/text1"
+        app:layout_constraintLeft_toRightOf="@id/sendy_go_title"
         app:layout_constraintTop_toTopOf="parent"
         android:textStyle="bold"
         android:layout_marginTop="40dp"
@@ -31,16 +30,15 @@
         android:text="." />
 
     <TextView
-        android:id="@+id/text2"
+        android:id="@+id/sendy_go_sub_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
         android:textColor="#727272"
         android:textSize="14sp"
-        app:layout_constraintBottom_toTopOf="@+id/usrusr"
+        app:layout_constraintTop_toBottomOf="@+id/sendy_go_title"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text1"
         android:text="경로를 선택하고, 운송을 시작하세요." />
 
     <Button
@@ -56,10 +54,10 @@
         android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/usrusr" />
+        app:layout_constraintTop_toBottomOf="@+id/login_box" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/usrusr"
+        android:id="@+id/login_box"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_marginStart="24dp"
@@ -70,7 +68,7 @@
         app:layout_constraintBottom_toTopOf="@+id/login"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text2">
+        app:layout_constraintTop_toBottomOf="@+id/sendy_go_sub_title">
 
         <ImageView
             android:id="@+id/loginImage"
@@ -84,18 +82,22 @@
 
         <EditText
             android:id="@+id/useredit"
-            android:layout_width="141dp"
-            android:layout_height="24dp"
-            android:background="#00000000"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#ffffff"
             android:inputType="text"
             android:textColorHint="#b7b7b7"
             android:hint="@string/login_input_id"
             android:textColor="@color/black"
             android:textSize="16sp"
+            app:layout_constraintLeft_toRightOf="@+id/loginImage"
             android:layout_marginStart="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/loginImage"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginEnd="48dp"
             app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="16dp"
             android:autofillHints="@string/login_input_id" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
