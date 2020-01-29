@@ -1,6 +1,8 @@
 package com.example.sendymapdemo.ui.activities
 
 import android.app.AlertDialog
+import android.app.Dialog
+import android.content.Intent
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
@@ -14,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import android.os.Handler
+import android.view.Gravity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -76,6 +79,18 @@ class MapsActivity : AppCompatActivity(){
         val headerView = new_nav_view.getHeaderView(0)
 
         val nMap = mapsViewModel.getMapsRepository()
+        headerView.historyButton.setOnClickListener {
+            val historyIntent = Intent(this, HistoryActivity::class.java)
+            startActivity(historyIntent)
+        }
+        headerView.rankingButton.setOnClickListener {
+            val rankingIntent = Intent(this, RankingActivity::class.java)
+            startActivity(rankingIntent)
+        }
+
+        sideNavButton.setOnClickListener {
+            new_drawer_layout.openDrawer(Gravity.LEFT)
+        }
 
         val userID = mapsViewModel.getUserID()
         var userData: UserData
@@ -110,7 +125,6 @@ class MapsActivity : AppCompatActivity(){
             nMap.nMap!!.uiSettings.isZoomControlEnabled = false
             nMap.nMap!!.locationTrackingMode = LocationTrackingMode.Follow
             nMap.nMap!!.locationOverlay.isVisible = true
-
             nMap.nMap!!.addOnLocationChangeListener { location ->
                 currentLocation = location
                 val currentLatLng = LatLng(location.latitude, location.longitude)
@@ -241,6 +255,9 @@ class MapsActivity : AppCompatActivity(){
         bottomSheet_after.visibility = View.GONE
         bottomSheetBehavior_before.state = BottomSheetBehavior.STATE_COLLAPSED
         bottomSheetBehavior_after.state = BottomSheetBehavior.STATE_COLLAPSED
+        draw_up_and_refresh.setOnClickListener {
+            bottomSheetBehavior_before.state = BottomSheetBehavior.STATE_EXPANDED
+        }
         bottomSheetBehavior_before.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {
@@ -252,10 +269,18 @@ class MapsActivity : AppCompatActivity(){
                             isRequested++
                         }
                         draw_up_and_refresh.setImageResource(R.drawable.ic_refresh_24)
+                        draw_up_and_refresh.setOnClickListener {
+                            makeText(this@MapsActivity,"의뢰 목록을 새로고침합니다.", LENGTH_SHORT)
+                            mapsViewModel.clear()
+                            mapsViewModel.startFindPath(startPosition!!)
+                        }
                     }
                     BottomSheetBehavior.STATE_COLLAPSED -> {
                         //textFull.visibility = View.GONE
                         draw_up_and_refresh.setImageResource(R.drawable.ic_up_24)
+                        draw_up_and_refresh.setOnClickListener {
+                            bottomSheetBehavior_before.state = BottomSheetBehavior.STATE_EXPANDED
+                        }
                     }
                     BottomSheetBehavior.STATE_DRAGGING -> {
                     }
@@ -291,11 +316,15 @@ class MapsActivity : AppCompatActivity(){
                 if(newRequestList!!.size == 5){
                     adapter.itemClick = object : RequestRecyclerAdapter.OnItemClickListener {
                         override fun onItemClickListener(view: View, position: Int) {
-                            val builder = AlertDialog.Builder(this@MapsActivity)
+                            //val builder = AlertDialog.Builder(this@MapsActivity)
+                            val f = Dialog(this@MapsActivity)
                             val dialogView = layoutInflater.inflate(R.layout.request_dialog, null)
-                            builder.setView(dialogView)
-                            val yesorno = builder.create()
-                            yesorno.show()
+                            f.setContentView(dialogView)
+                            //builder.setView(dialogView)
+                            //val yesorno = builder.create()
+                            //yesorno.show()
+                            f.window!!.setBackgroundDrawableResource(R.drawable.bg_dialog_radius)
+                            f.show()
                             dialogView.clockImage.setImageResource(newRequestList!![position].image)
                             dialogView.srcText.text = newRequestList!![position].source
                             dialogView.dstText.text = newRequestList!![position].destination
@@ -317,13 +346,15 @@ class MapsActivity : AppCompatActivity(){
 
                                 mapsViewModel.clear()
                                 isRequested = 0
-                                yesorno.dismiss()
+                                //yesorno.dismiss()
+                                f.dismiss()
                                 bottomSheetBehavior_before.state = BottomSheetBehavior.STATE_COLLAPSED
                                 bottomSheet_before.visibility = View.GONE
                                 bottomSheet_after.visibility = View.VISIBLE
                             }
                             dialogView.request_cancle_button.setOnClickListener{
-                                yesorno.dismiss()
+                                //yesorno.dismiss()
+                                f.dismiss()
                             }
                         }
                     }

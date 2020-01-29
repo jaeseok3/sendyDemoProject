@@ -41,7 +41,5 @@ class HistoryActivity : AppCompatActivity(){
 
         historyRecyclerList.adapter = adapter
         historyRecyclerList.layoutManager = historylayoutManager
-        historyRecyclerList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
-        adapter.notifyDataSetChanged()
     }
 }

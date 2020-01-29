@@ -19,7 +19,7 @@
         android:usesCleartextTraffic="true"
         android:allowClearUserData="true"
 
-        android:hardwareAccelerated="false">
+        android:hardwareAccelerated="true">
         <activity android:name=".ui.activities.LoginActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>

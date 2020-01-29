@@ -16,6 +16,7 @@
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/new_nav_view"
+        android:background="@color/white"
         android:layout_width="330dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"

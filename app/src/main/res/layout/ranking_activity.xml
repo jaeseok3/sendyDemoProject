@@ -46,7 +46,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:gravity="center"
-                    android:text="Ranking"
+                    android:text="순위 조회"
                     android:textColor="#212121"
                     style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"/>
             </androidx.constraintlayout.widget.ConstraintLayout>

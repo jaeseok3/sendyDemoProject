@@ -21,9 +21,10 @@
                 android:textSize="20sp" />
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="60dp"
                 android:layout_height="wrap_content"
-                android:text="Ranking"
+                android:text="순위"
+                android:gravity="center"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 android:layout_marginStart="36dp"
@@ -77,7 +78,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginRight="36dp"
                 android:layout_marginTop="10dp"
-                android:text="Accum"
+                android:text= "크레딧"
                 android:textColor="#212121"
                 android:textSize="16sp"
                 android:layout_marginBottom="10dp"/>

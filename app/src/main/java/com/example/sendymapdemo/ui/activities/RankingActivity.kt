@@ -41,7 +41,6 @@ class RankingActivity : AppCompatActivity(){
 
         leaderBoard_recyclerList.adapter = adapter
         leaderBoard_recyclerList.layoutManager = leaderBoardLayoutManager
-        leaderBoard_recyclerList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
         adapter.notifyDataSetChanged()
     }
 }
