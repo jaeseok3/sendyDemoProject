@@ -22,8 +22,6 @@ class RequestRepository(private val retrofitServerInterface: RetrofitServerInter
 
     fun findPath(currentPoint: String): ArrayList<RequestListData> {
         val option = "traoptimal"
-
-        Thread(Runnable {
             try {
                 val newGeoInfo = GeoData(getLocationFromDB())
                 val requestUserData = retrofitNaverInterface.requestPath(currentPoint, newGeoInfo.dst, newGeoInfo.src, option,
@@ -33,12 +31,12 @@ class RequestRepository(private val retrofitServerInterface: RetrofitServerInter
                 val time = requestResult.route.traoptimal[0].summary.duration / 60000
                 val distance = requestResult.route.traoptimal[0].summary.distance / 1000.toDouble()
                 val distanceStr = String.format("%.1f Km", distance)
-                val timeStr = "$time" + "Min"
+                val timeStr = "$time" + "분"
 
                 val face =
-                        if(distance <= 20) R.drawable.happy
-                        else if(distance > 20 && distance <= 40) R.drawable.sad
-                        else R.drawable.dead
+                        if(distance <= 20) R.drawable.ic_time_short
+                        else if(distance > 20 && distance <= 40) R.drawable.ic_time_medium
+                        else R.drawable.ic_time_long
                 val reward = time.toDouble().pow(2).toInt()
                 val requestListItem = RequestListData(face,
                         getGeoName(newGeoInfo.src), getGeoName(newGeoInfo.dst), timeStr, distanceStr, reward,
@@ -48,7 +46,6 @@ class RequestRepository(private val retrofitServerInterface: RetrofitServerInter
             }catch (e: Exception){
                 e.printStackTrace()
             }
-        })
         return requestList
     }
     private fun getLocationFromDB(): LocationData {
