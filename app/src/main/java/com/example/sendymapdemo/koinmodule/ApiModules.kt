@@ -42,7 +42,6 @@ val repositoryModule = module {
 }
 
 val viewModelModule = module {
-    viewModel { RequestViewModel(get(),get()) }
     viewModel { HistoryViewModel(get(),get()) }
     viewModel { LoginViewModel(get()) }
     viewModel { RankingViewModel(get()) }

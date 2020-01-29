@@ -1,18 +1,11 @@
 package com.example.sendymapdemo.ui.adapters
 
-import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import android.widget.Toast.makeText
-import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sendymapdemo.R
 import com.example.sendymapdemo.dataclass.RequestListData
-import com.example.sendymapdemo.ui.activities.MapsActivity
 import kotlinx.android.synthetic.main.new_request_item.view.*
 
 class RequestRecyclerAdapter (private val dataSource: ArrayList<RequestListData>): RecyclerView.Adapter<RequestRecyclerAdapter.ViewHolder>() {

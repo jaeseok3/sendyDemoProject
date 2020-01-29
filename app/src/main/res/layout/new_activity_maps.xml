@@ -20,20 +20,10 @@
         android:id="@+id/locationBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/locationStartBtn"
+        app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="24dp"
         app:layout_constraintRight_toRightOf="@+id/map"
         android:layout_marginEnd="24dp"/>
-
-    <Button
-        android:id="@+id/locationStartBtn"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_width="120dp"
-        android:layout_height="48dp"
-        android:text="자동 주행"
-        android:textColor="#ffffff"
-        android:background="@drawable/location_button_radius"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/sideNavButton"
@@ -59,7 +49,7 @@
             android:layout_width="match_parent"
             android:layout_height="600dp"
             app:behavior_hideable="false"
-            app:behavior_peekHeight="150dp"
+            app:behavior_peekHeight="145dp"
             app:cardBackgroundColor="@color/white"
             app:cardCornerRadius="32dp"
             app:cardUseCompatPadding="false"
@@ -132,12 +122,12 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_behavior="@string/bottom_sheet_behavior"
             app:behavior_hideable="false"
-            app:behavior_peekHeight="165dp"
+            app:behavior_peekHeight="190dp"
             app:cardCornerRadius="32dp"
             app:cardUseCompatPadding="false"
             android:layout_gravity="bottom"
             android:layout_width="match_parent"
-            android:layout_height="256dp"
+            android:layout_height="350dp"
             android:id="@+id/bottomSheet_after">
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -223,12 +213,10 @@
                 <TextView
                     android:id="@+id/top_remaining_text"
                     android:layout_width="0dp"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
                     android:textSize="16sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_marginBottom="100dp"
                     app:layout_constraintTop_toBottomOf="@+id/topDeliveryBox"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="30dp"
                     app:layout_constraintRight_toLeftOf="@id/top_remaining"
                     app:layout_constraintLeft_toLeftOf="parent"
                     android:layout_marginStart="16dp"
@@ -239,12 +227,10 @@
                 <TextView
                     android:id="@+id/top_remaining"
                     android:layout_width="0dp"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
                     android:textSize="18sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_marginBottom="100dp"
                     app:layout_constraintTop_toBottomOf="@+id/topDeliveryBox"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="30dp"
                     app:layout_constraintRight_toRightOf="parent"
                     android:layout_marginEnd="16dp"
                     app:layout_constraintLeft_toRightOf="@+id/top_remaining_text"
@@ -259,7 +245,7 @@
                     app:layout_constraintLeft_toLeftOf="parent"
                     android:layout_marginStart="48dp"
                     app:layout_constraintTop_toBottomOf="@id/top_remaining_text"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="30dp"
                     android:src="@drawable/ic_dust_48"/>
 
                 <TextView
@@ -292,7 +278,7 @@
                     app:layout_constraintLeft_toRightOf="@+id/dust_text"
                     android:layout_marginStart="72dp"
                     app:layout_constraintTop_toBottomOf="@id/top_remaining_text"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="30dp"
                     android:src="@drawable/ic_road_48"/>
 
                 <TextView
@@ -318,6 +304,18 @@
                     android:layout_marginTop="1dp"
                     app:layout_constraintLeft_toRightOf="@+id/danger_image"
                     android:layout_marginStart="8dp"/>
+
+                <Button
+                    android:id="@+id/locationStartBtn"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginBottom="40dp"
+                    android:layout_width="120dp"
+                    android:layout_height="40dp"
+                    android:text="자동 주행"
+                    android:textColor="#000000"
+                    android:background="@drawable/location_button_radius"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
