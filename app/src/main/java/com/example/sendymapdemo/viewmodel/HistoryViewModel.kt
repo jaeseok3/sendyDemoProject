@@ -1,5 +1,6 @@
 package com.example.sendymapdemo.viewmodel
 
+import android.annotation.SuppressLint
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.sendymapdemo.dataclass.HistoryData
@@ -12,6 +13,7 @@ class HistoryViewModel (private val historyRepository: HistoryRepository, userRe
     var historyList: MutableLiveData<List<HistoryData>>? = MutableLiveData()
     private val userID = userRepository.userID
 
+    @SuppressLint("CheckResult")
     fun getHistory(){
         historyRepository.getHistory(userID)!!.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

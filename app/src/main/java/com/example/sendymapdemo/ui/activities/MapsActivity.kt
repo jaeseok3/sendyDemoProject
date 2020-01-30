@@ -9,6 +9,7 @@ import android.os.Handler
 import android.util.Log
 import android.view.Gravity
 import android.view.View
+import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import android.widget.Toast.makeText
 import com.naver.maps.geometry.LatLng
@@ -78,6 +79,7 @@ class MapsActivity : FragmentActivity(){
         val fragmentManager = supportFragmentManager
         //네이게이션 뷰의 헤더에 접근하기 위한 코드
         val headerView = new_nav_view.getHeaderView(0)
+        new_drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
 
         val nMap = mapsViewModel.getMapsRepository()
         headerView.historyButton.setOnClickListener {
@@ -88,8 +90,6 @@ class MapsActivity : FragmentActivity(){
                 transaction.commit()
             }
             new_drawer_layout.closeDrawer(GravityCompat.START)
-//            val historyIntent = Intent(this, HistoryActivity::class.java)
-//            startActivity(historyIntent)
         }
         headerView.rankingButton.setOnClickListener {
             if(!isFinishing) {
@@ -244,7 +244,7 @@ class MapsActivity : FragmentActivity(){
                             resultDst,
                             resultDistance,
                             resultReward.toString(),
-                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
+                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH시 mm분 ss초")),
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일")))
                     mapsViewModel.updateCredit(mapsViewModel.getUserID(), resultReward)
                     nMap.markerGoalPoint.map = null
@@ -288,7 +288,7 @@ class MapsActivity : FragmentActivity(){
                         }
                         draw_up_and_refresh.setImageResource(R.drawable.ic_refresh_24)
                         draw_up_and_refresh.setOnClickListener {
-                            makeText(this@MapsActivity,"의뢰 목록을 새로고침합니다.", LENGTH_SHORT)
+                            makeText(this@MapsActivity,"의뢰 목록을 새로고침합니다.", LENGTH_SHORT).show()
                             mapsViewModel.clear()
                             mapsViewModel.startFindPath(startPosition!!)
                         }
