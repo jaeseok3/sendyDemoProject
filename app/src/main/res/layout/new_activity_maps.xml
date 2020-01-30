@@ -58,6 +58,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp">
+
                 <View
                     android:id="@+id/btBar"
                     android:layout_width="40dp"
@@ -67,47 +68,50 @@
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
+
                 <TextView
                     android:id="@+id/selectRequestText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="34dp"
                     android:layout_marginTop="44dp"
+                    android:text="의뢰를 선택하세요"
                     android:textColor="#212121"
                     android:textSize="24sp"
                     android:textStyle="bold"
                     app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:text="의뢰를 선택하세요"
-                    />
+                    app:layout_constraintTop_toTopOf="parent" />
+
                 <TextView
                     android:id="@+id/finishDeliveryText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="34dp"
+                    android:layout_marginTop="2dp"
+                    android:text="운송을 끝내고 보상을 획득하세요."
                     android:textColor="#727272"
                     android:textSize="14sp"
                     app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/selectRequestText"
-                    android:layout_marginTop="2dp"
-                    android:text="운송을 끝내고 보상을 획득하세요." />
+                    app:layout_constraintTop_toBottomOf="@+id/selectRequestText" />
+
                 <ImageButton
                     android:id="@+id/draw_up_and_refresh"
                     android:layout_width="62dp"
                     android:layout_height="62dp"
-                    android:layout_marginEnd="34dp"
                     android:layout_marginTop="48dp"
+                    android:layout_marginEnd="34dp"
                     android:background="@drawable/bottom_open_button_bg"
                     android:contentDescription="bottomNavButton"
                     android:src="@drawable/ic_up_24"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintRight_toRightOf="parent" />
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
                 <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/request_recyclerView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@+id/finishDeliveryText"
                     android:layout_marginTop="24dp"
-                    android:id="@+id/request_recyclerView"/>
+                    app:layout_constraintTop_toBottomOf="@+id/finishDeliveryText" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

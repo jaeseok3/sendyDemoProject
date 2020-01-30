@@ -1,22 +1,24 @@
 package com.example.sendymapdemo.ui.activities
 
-import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Intent
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
+import android.view.Gravity
 import android.view.View
 import android.widget.Toast.LENGTH_SHORT
 import android.widget.Toast.makeText
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentTransaction
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import android.os.Handler
-import android.view.Gravity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -30,22 +32,23 @@ import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.util.FusedLocationSource
 import kotlinx.android.synthetic.main.new_activity_main.*
 import kotlinx.android.synthetic.main.new_activity_maps.*
-import kotlinx.android.synthetic.main.new_activity_maps.request_recyclerView
 import kotlinx.android.synthetic.main.new_nav_header.view.*
+import kotlinx.android.synthetic.main.new_request_item.view.clockImage
+import kotlinx.android.synthetic.main.new_request_item.view.distance
+import kotlinx.android.synthetic.main.new_request_item.view.dstText
+import kotlinx.android.synthetic.main.new_request_item.view.srcText
+import kotlinx.android.synthetic.main.new_request_item.view.time
 import kotlinx.android.synthetic.main.request_dialog.view.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.lang.Runnable
 import java.lang.Thread.sleep
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class MapsActivity : AppCompatActivity(){
-    private val mapsViewModel by viewModel<MapsViewModel>()
-
+class MapsActivity : FragmentActivity(){
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
-
+    private val mapsViewModel by viewModel<MapsViewModel>()
     private lateinit var adapter: RequestRecyclerAdapter
     private lateinit var requestLayoutManager: LinearLayoutManager
 
@@ -67,25 +70,36 @@ class MapsActivity : AppCompatActivity(){
     var progressRate = 0.0
     var resultReward:Double = 0.0
 
-    override fun onBackPressed() {
-        onDestroy()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.new_activity_main)
 
+        val fragmentManager = supportFragmentManager
         //네이게이션 뷰의 헤더에 접근하기 위한 코드
         val headerView = new_nav_view.getHeaderView(0)
 
         val nMap = mapsViewModel.getMapsRepository()
         headerView.historyButton.setOnClickListener {
-            val historyIntent = Intent(this, HistoryActivity::class.java)
-            startActivity(historyIntent)
+            if(!isFinishing) {
+                val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
+                transaction.add(R.id.new_drawer_layout, HistoryActivity())
+                transaction.addToBackStack(null)
+                transaction.commit()
+            }
+            new_drawer_layout.closeDrawer(GravityCompat.START)
+//            val historyIntent = Intent(this, HistoryActivity::class.java)
+//            startActivity(historyIntent)
         }
         headerView.rankingButton.setOnClickListener {
-            val rankingIntent = Intent(this, RankingActivity::class.java)
-            startActivity(rankingIntent)
+            if(!isFinishing) {
+                val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
+                transaction.add(R.id.new_drawer_layout, RankingActivity())
+                transaction.addToBackStack(null)
+                transaction.commit()
+            }
+            new_drawer_layout.closeDrawer(GravityCompat.START)
+//            val rankingIntent = Intent(this, RankingActivity::class.java)s
+//            startActivity(rankingIntent)
         }
 
         sideNavButton.setOnClickListener {
@@ -110,7 +124,6 @@ class MapsActivity : AppCompatActivity(){
 
         locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
 
-        val fragmentManager = supportFragmentManager
         val mapFragment = fragmentManager.findFragmentById(R.id.map) as MapFragment?
                 ?: MapFragment.newInstance((NaverMapOptions().locationButtonEnabled(true))
                         .also {
@@ -147,7 +160,7 @@ class MapsActivity : AppCompatActivity(){
                                 resultDistance,
                                 resultReward.toString(),
                                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
-                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일")))
+                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
                             mapsViewModel.updateCredit(mapsViewModel.getUserID(), resultReward)
                             nMap.markerWayPoint.map = null
                             nMap.markerGoalPoint.map = null
