@@ -17,7 +17,7 @@ interface RetrofitServerInterface {
     @GET("login2.php")
     fun getUserInfo(
             @Query("user") userID: String
-    ): Call<UserData>
+    ): Observable<UserData>
 
     @GET("httpHistoryInsert.php")
     fun insertHistory(

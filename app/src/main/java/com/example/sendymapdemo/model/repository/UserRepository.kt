@@ -20,14 +20,14 @@ class UserRepository(application: Application, private val retrofitInterface: Re
     lateinit var allUserDataList: List<UserData>
     lateinit var userID: String
 
-    fun getFromRoom(userID: String): UserData {
+    fun getFromRoom(userID: String): Observable<UserData> {
         return userDao.getData(userID)
     }
 
     fun updateCredit(userID: String, credit: Double){
-        retrofitInterface.updateCredit(userID, credit)
         Thread(Runnable {
-            userDao.updateCredit(userID, credit)
+            Log.e("UpdateCredit", "$userID, $credit")
+            retrofitInterface.updateCredit(userID, credit).execute()
         }).start()
     }
 
@@ -37,12 +37,11 @@ class UserRepository(application: Application, private val retrofitInterface: Re
         return allUserDataList
     }
 
-    fun getData(userID: String) {
-        val requestUserData = retrofitInterface.getUserInfo(userID)
-        Thread(Runnable { val serverUserData = requestUserData.execute().body()
-            userDao.insert(serverUserData!!)
-            Log.e("서버에서 가져온 값", "$serverUserData")
-            this.userID = serverUserData.id
-        }).start()
+    fun getData(userID: String): Observable<UserData> {
+        return retrofitInterface.getUserInfo(userID)
+                .doOnNext {
+                    Log.e("유저", "$it")
+                    this.userID = it.id
+                }
     }
 }

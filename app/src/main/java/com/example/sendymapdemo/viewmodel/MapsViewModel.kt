@@ -1,5 +1,6 @@
 package com.example.sendymapdemo.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.sendymapdemo.dataclass.RequestListData
@@ -9,12 +10,16 @@ import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.PathOverlay
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import kotlin.Exception
 
 class MapsViewModel (private val dangerRepository: DangerRepository, private val historyRepository: HistoryRepository,
                      private val mapsRepository: MapsRepository, private val requestRepository: RequestRepository,
                      private val userRepository: UserRepository) : ViewModel() {
     var dangerGrade: MutableLiveData<String> ?= MutableLiveData()
+    var userData: MutableLiveData<UserData> ?= MutableLiveData()
 
     fun getUserID(): String {
         return userRepository.userID
@@ -52,8 +57,16 @@ class MapsViewModel (private val dangerRepository: DangerRepository, private val
         userRepository.updateCredit(userID, credit)
     }
 
-    fun getFromRoom(userID: String): UserData {
-        return userRepository.getFromRoom(userID)
+    fun getUserDataFromServer(userID: String) {
+        userRepository.getData(userID)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        {userData!!.postValue(it)
+                        Log.e("userDATA", "$it")},
+                        {userData!!.postValue(null)},
+                        { Log.e("user data condition", "$userData")}
+                )
     }
 
     fun getDangerGrade(startLat:String, startLng:String, endLat:String, endLng:String){
@@ -82,7 +95,6 @@ class MapsViewModel (private val dangerRepository: DangerRepository, private val
 
     var requests:MutableLiveData<ArrayList<RequestListData>> = MutableLiveData()
     var latlngList = requestRepository.latlngList
-    var start : String = ""
 
     fun setLatlng(){
         requestRepository.latlngList = latlngList

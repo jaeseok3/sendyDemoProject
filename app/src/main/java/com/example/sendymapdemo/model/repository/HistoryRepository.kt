@@ -11,9 +11,6 @@ class HistoryRepository (private val retrofitInterface: RetrofitServerInterface)
 
     fun getHistory(userID: String): Observable<List<HistoryData>>? {
         return retrofitInterface.getHistory(userID)
-                .doOnNext {
-                    Log.e("request", "${it.size}")
-                }
     }
 
     fun insertHistory(userID: String, time: String, source: String, destination: String, distance: String, reward: String, htime: String, hdate: String) {
