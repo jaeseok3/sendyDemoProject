@@ -10,6 +10,7 @@ import com.example.sendymapdemo.dataclass.HistoryData
 import com.example.sendymapdemo.ui.adapters.HistoryListAdapter
 import com.example.sendymapdemo.viewmodel.HistoryViewModel
 import kotlinx.android.synthetic.main.history_activiry.*
+import kotlinx.android.synthetic.main.ranking_activity.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class HistoryActivity : AppCompatActivity(){
@@ -25,6 +26,10 @@ class HistoryActivity : AppCompatActivity(){
 
         historyViewModel.getHistory()
         subscribe()
+
+        back_button_history.setOnClickListener {
+            super.onBackPressed()
+        }
     }
 
     private fun subscribe(){

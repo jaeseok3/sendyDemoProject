@@ -25,6 +25,10 @@ class RankingActivity : AppCompatActivity(){
 
         rankingViewModel.getAllUserData()
         subscribe()
+
+        back_button_ranking.setOnClickListener {
+            super.onBackPressed()
+        }
     }
 
     private fun subscribe(){
