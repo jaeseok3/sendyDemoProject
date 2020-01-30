@@ -2,28 +2,23 @@ package com.example.sendymapdemo.ui.activities
 
 import android.content.Intent
 import android.content.pm.PackageManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.Window
-import android.widget.Button
-import android.widget.EditText
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.fragment.app.FragmentActivity
 import com.example.sendymapdemo.R
-import com.example.sendymapdemo.model.repository.UserRepository
 import com.example.sendymapdemo.viewmodel.LoginViewModel
 import kotlinx.android.synthetic.main.activity_login.*
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : FragmentActivity() {
     private val loginViewModel by viewModel<LoginViewModel>()
     override fun onBackPressed() {
         super.onBackPressed()
         finishAffinity()
     }
     override fun onCreate(savedInstanceState: Bundle?) {
-        supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
+//        supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
