@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.sendymapdemo.R
@@ -18,36 +19,25 @@ import kotlinx.android.synthetic.main.history_activiry.view.*
 import kotlinx.android.synthetic.main.ranking_activity.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class HistoryActivity : Fragment(){
+class HistoryActivity : Fragment() {
     private val historyViewModel by viewModel<HistoryViewModel>()
 
     private lateinit var historylayoutManager: LinearLayoutManager
     private lateinit var adapter: HistoryListAdapter
     private var newHistoryList : List<HistoryData> ?= null
-    override fun onDestroyView() {
-        super.onDestroyView()
-        super.onPause()
-        val fragmentManager: FragmentManager = activity!!.supportFragmentManager
-        fragmentManager.beginTransaction().remove(this).commit()
-        fragmentManager.popBackStack()
-    }
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        historyViewModel.getHistory()
-        subscribe()
-    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        var view: View =inflater.inflate(R.layout.history_activiry,container,false)
-
+        historyViewModel.getHistory()
+        subscribe()
+        val view: View =inflater.inflate(R.layout.history_activiry,container,false)
         view.back_button_history.setOnClickListener {
             val fragmentManager: FragmentManager = activity!!.supportFragmentManager
             fragmentManager.beginTransaction().remove(this@HistoryActivity).commit()
             fragmentManager.popBackStack()
-            println("ranking click")
         }
         return view
     }

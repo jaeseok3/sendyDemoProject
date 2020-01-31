@@ -18,17 +18,21 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         android:allowClearUserData="true"
-
         android:hardwareAccelerated="true">
+
         <activity android:name=".ui.activities.LoginActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar">
+        </activity>
+
+        <activity android:name=".ui.activities.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity android:name=".ui.activities.RankingActivity"
+            android:label="순위 조회"
             android:parentActivityName=".ui.activities.MapsActivity"
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity android:name=".ui.activities.HistoryActivity"
@@ -44,7 +48,6 @@
             android:label="@string/title_activity_maps"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
-
         </activity>
 
     </application>

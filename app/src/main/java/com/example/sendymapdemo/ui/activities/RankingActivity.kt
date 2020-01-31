@@ -34,29 +34,14 @@ class RankingActivity : Fragment(){
         fragmentManager.beginTransaction().remove(this).commit()
         fragmentManager.popBackStack()
     }
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-//        setContentView(R.layout.ranking_activity)
-        println("ranking click")
-        rankingViewModel.getAllUserData()
-        subscribe()
-
-
-    }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-//        print("ranking click")
+        rankingViewModel.getAllUserData()
+        subscribe()
         val view:View=inflater.inflate(R.layout.ranking_activity,container,false)
-
-        view.back_button_ranking.setOnClickListener {
-            val fragmentManager: FragmentManager = activity!!.supportFragmentManager
-            fragmentManager.beginTransaction().remove(this@RankingActivity).commit()
-            fragmentManager.popBackStack()
-            println("ranking click")
-        }
         return view
     }
     private fun subscribe(){
@@ -66,7 +51,6 @@ class RankingActivity : Fragment(){
         }
         rankingViewModel.userList?.observe(this, userListObserver)
     }
-
     private fun recyclerViewSetup() {
         adapter = LeaderBoardAdapter(newUserDataList!!)
         leaderBoardLayoutManager = LinearLayoutManager(this.context)
