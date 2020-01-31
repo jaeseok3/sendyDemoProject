@@ -35,6 +35,7 @@
         android:textSize="16sp"
         android:textColor="#000000"/>
 
+
     <TextView
         android:id="@+id/boardName"
         android:layout_width="wrap_content"
@@ -44,6 +45,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:text="Demba"
+        android:textColor="@color/black"
         android:textSize="20sp"
         android:textStyle="bold"/>
 
@@ -59,6 +61,7 @@
         android:text="485"
         android:textSize="20sp"
         android:textStyle="bold"/>
+
 
     <ImageView
         android:id="@+id/credit_ranking_img"

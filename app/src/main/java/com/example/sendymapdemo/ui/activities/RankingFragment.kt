@@ -4,10 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -26,7 +23,6 @@ class RankingFragment : Fragment(){
     private lateinit var leaderBoardLayoutManager: LinearLayoutManager
     private lateinit var adapter: LeaderBoardAdapter
     private var newUserDataList: List<UserData> ?= null
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -52,6 +48,5 @@ class RankingFragment : Fragment(){
         leaderBoardLayoutManager = LinearLayoutManager(this.context)
         leaderBoard_recyclerList.adapter = adapter
         leaderBoard_recyclerList.layoutManager = leaderBoardLayoutManager
-        adapter.notifyDataSetChanged()
     }
 }
