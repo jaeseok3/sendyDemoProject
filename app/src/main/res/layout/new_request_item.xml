@@ -131,6 +131,7 @@
         android:layout_marginEnd="24dp"
         android:text="GO"
         android:textColor="#ffffff"
+        android:elevation="5dp"
         android:gravity="center"
         android:background="@drawable/request_list_button"
         />

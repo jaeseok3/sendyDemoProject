@@ -17,6 +17,9 @@
         android:layout_marginStart="24dp"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="24dp"
+        android:background="@color/transparent"
+        android:backgroundTint="@color/transparent"
+        android:elevation="10dp"
         android:src="@drawable/ic_profile_default"/>
     <TextView
         android:id="@+id/userName"
@@ -39,6 +42,7 @@
         app:layout_constraintTop_toBottomOf="@+id/userName"
         android:layout_marginTop="16dp"
         android:id="@+id/greyBoxOne"
+        android:elevation="10dp"
         android:background="@drawable/nav_text_bg_grey">
         <TextView
             android:layout_width="wrap_content"
@@ -83,6 +87,7 @@
         app:layout_constraintTop_toBottomOf="@+id/greyBoxOne"
         android:layout_marginTop="8dp"
         android:id="@+id/greyBoxtwo"
+        android:elevation="10dp"
         android:background="@drawable/nav_text_bg_grey">
         <TextView
             android:layout_width="wrap_content"
@@ -127,6 +132,7 @@
         app:layout_constraintTop_toBottomOf="@+id/greyBoxtwo"
         android:layout_marginTop="8dp"
         android:id="@+id/greyBoxThree"
+        android:elevation="10dp"
         android:background="@drawable/nav_text_bg_grey">
         <TextView
             android:layout_width="wrap_content"
@@ -190,10 +196,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:textColor="#212121"
-            android:text="운행기록조회"
-            app:layout_constraintLeft_toRightOf="@+id/shippingImg"
-            android:layout_marginStart="16dp"
+        android:textColor="#212121"
+        android:text="운행기록조회"
+        app:layout_constraintLeft_toRightOf="@+id/shippingImg"
+        android:layout_marginStart="16dp"
             app:layout_constraintTop_toTopOf="@+id/shippingImg"
             android:textStyle="bold"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
