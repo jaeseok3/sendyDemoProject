@@ -5,9 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.sendymapdemo.R
 import com.example.sendymapdemo.dataclass.HistoryData
@@ -15,7 +14,6 @@ import com.example.sendymapdemo.ui.adapters.HistoryListAdapter
 import com.example.sendymapdemo.viewmodel.HistoryViewModel
 import kotlinx.android.synthetic.main.history_activiry.*
 import kotlinx.android.synthetic.main.history_activiry.view.*
-import kotlinx.android.synthetic.main.ranking_activity.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class HistoryActivity : Fragment(){
@@ -24,13 +22,7 @@ class HistoryActivity : Fragment(){
     private lateinit var historylayoutManager: LinearLayoutManager
     private lateinit var adapter: HistoryListAdapter
     private var newHistoryList : List<HistoryData> ?= null
-    override fun onDestroyView() {
-        super.onDestroyView()
-        super.onPause()
-        val fragmentManager: FragmentManager = activity!!.supportFragmentManager
-        fragmentManager.beginTransaction().remove(this).commit()
-        fragmentManager.popBackStack()
-    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         historyViewModel.getHistory()
@@ -42,12 +34,8 @@ class HistoryActivity : Fragment(){
         savedInstanceState: Bundle?
     ): View? {
         var view: View =inflater.inflate(R.layout.history_activiry,container,false)
-
         view.back_button_history.setOnClickListener {
-            val fragmentManager: FragmentManager = activity!!.supportFragmentManager
-            fragmentManager.beginTransaction().remove(this@HistoryActivity).commit()
-            fragmentManager.popBackStack()
-            println("ranking click")
+            view.findNavController().navigate(R.id.action_historyActivity_to_mapsActivity)
         }
         return view
     }

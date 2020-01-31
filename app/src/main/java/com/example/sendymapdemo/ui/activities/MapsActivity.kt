@@ -6,19 +6,19 @@ import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import android.widget.Toast.makeText
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
 import androidx.core.view.GravityCompat
-import androidx.drawerlayout.widget.DrawerLayout
-import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentTransaction
-import com.google.android.material.bottomsheet.BottomSheetBehavior
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.sendymapdemo.R
 import com.example.sendymapdemo.dataclass.PathData
@@ -26,10 +26,15 @@ import com.example.sendymapdemo.dataclass.RequestListData
 import com.example.sendymapdemo.dataclass.UserData
 import com.example.sendymapdemo.ui.adapters.RequestRecyclerAdapter
 import com.example.sendymapdemo.viewmodel.MapsViewModel
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.naver.maps.geometry.LatLng
+import com.naver.maps.map.*
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.util.FusedLocationSource
 import kotlinx.android.synthetic.main.new_activity_main.*
+import kotlinx.android.synthetic.main.new_activity_main.view.*
 import kotlinx.android.synthetic.main.new_activity_maps.*
+import kotlinx.android.synthetic.main.new_activity_maps.view.*
 import kotlinx.android.synthetic.main.new_nav_header.view.*
 import kotlinx.android.synthetic.main.new_request_item.view.clockImage
 import kotlinx.android.synthetic.main.new_request_item.view.distance
@@ -42,7 +47,7 @@ import java.lang.Thread.sleep
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class MapsActivity : FragmentActivity(){
+class MapsActivity : Fragment(){
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
@@ -87,33 +92,69 @@ class MapsActivity : FragmentActivity(){
         new_nav_view.getHeaderView(0).userAccum_new.text = userData!!.property
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.new_activity_main)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val nMap = mapsViewModel.getMapsRepository()
+        var fragmentManager = childFragmentManager
+        val mapFragment = fragmentManager.findFragmentById(R.id.map) as MapFragment?
+            ?: MapFragment.newInstance((NaverMapOptions().locationButtonEnabled(true))
+                .also {
+                    fragmentManager.beginTransaction().add(R.id.map, map).commit()
+                })
+        mapFragment.getMapAsync(nMap)
+        val userID = mapsViewModel.getUserID()
+        var userData: UserData
+        val headerView = view.new_nav_view.getHeaderView(0)
 
-        val fragmentManager = supportFragmentManager
-        //네이게이션 뷰의 헤더에 접근하기 위한 코드
-        val headerView = new_nav_view.getHeaderView(0)
         new_drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
 
-        val nMap = mapsViewModel.getMapsRepository()
         headerView.historyButton.setOnClickListener {
-            if(!isFinishing) {
-                val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
-                transaction.add(R.id.new_drawer_layout, HistoryActivity())
-                transaction.addToBackStack(null)
-                transaction.commit()
-            }
+            view.findNavController().navigate(R.id.action_mapsActivity_to_historyActivity)
             new_drawer_layout.closeDrawer(GravityCompat.START)
         }
         headerView.rankingButton.setOnClickListener {
-            if(!isFinishing) {
-                val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
-                transaction.add(R.id.new_drawer_layout, RankingActivity())
-                transaction.addToBackStack(null)
-                transaction.commit()
-            }
+            view.findNavController().navigate(R.id.action_mapsActivity_to_rankingActivity)
             new_drawer_layout.closeDrawer(GravityCompat.START)
+        }
+
+        locationStartBtn.setOnClickListener {
+            val latlngList = mapsViewModel.getLatLngList()
+            if(nMap.nMap!!.locationTrackingMode == LocationTrackingMode.None) {
+                Log.e("Flag", "${nMap.nMap!!.locationTrackingMode}")
+                val bottomSheetBehavior_after = BottomSheetBehavior.from(view.activity_main.bottomSheet_after)
+                bottomSheetBehavior_after.state = BottomSheetBehavior.STATE_COLLAPSED
+                Thread(Runnable{
+                    for (i in 0 until latlngList.size) {
+                        currentLocation.latitude = latlngList[i].latitude
+                        currentLocation.longitude = latlngList[i].longitude
+                        progressRate = i / latlngList.size.toDouble()
+
+                        Log.e("위치변경", "${currentLocation.latitude}, ${currentLocation.longitude}")
+
+                           drawingLocationUI(LatLng(latlngList[i].latitude, latlngList[i].longitude), progressRate)
+//                        mapsViewModel.getDangerGrade(latlngList[i].latitude.toString(),
+//                                latlngList[i].longitude.toString(),
+//                                latlngList[i].latitude.toString(),
+//                                latlngList[i].longitude.toString())
+                        sleep(300)
+
+                        if (nMap.nMap!!.locationTrackingMode == LocationTrackingMode.Follow ||
+                            nMap.nMap!!.locationTrackingMode == LocationTrackingMode.NoFollow) {
+                            progressRate = 0.0
+                            drawingLocationUI(LatLng(currentLocation.latitude, currentLocation.longitude), progressRate)
+                            break
+                        }
+                    }
+                }).start()
+            }
+            else{
+                Log.e("Flag", "${nMap.nMap!!.locationTrackingMode}")
+                nMap.nMap!!.locationTrackingMode = LocationTrackingMode.None
+            }
+            val dangerGradeObserver = Observer<String> {
+                dangerInfo.text = it
+            }
+            mapsViewModel.dangerGrade!!.observe(this, dangerGradeObserver)
         }
 
         sideNavButton.setOnClickListener {
@@ -121,17 +162,6 @@ class MapsActivity : FragmentActivity(){
             mapsViewModel.getUserDataFromServer(mapsViewModel.getUserID())
             subscribeUserData()
         }
-
-        configureBottomNav()
-
-        locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
-
-        val mapFragment = fragmentManager.findFragmentById(R.id.map) as MapFragment?
-                ?: MapFragment.newInstance((NaverMapOptions().locationButtonEnabled(true))
-                        .also {
-                            fragmentManager.beginTransaction().add(R.id.map, map).commit()
-                        })
-        mapFragment.getMapAsync(nMap)
 
         nMap.listener = {
             locationBtn.map = nMap.nMap
@@ -149,19 +179,19 @@ class MapsActivity : FragmentActivity(){
                     Log.e("e", "${goalLatLng},${wayLatLng},${arriveCheck}")
                     when {
                         checkError(currentLatLng, wayLatLng!!) && !arriveCheck -> {
-                            makeText(this, "출발지에 도착하였습니다.", LENGTH_SHORT).show()
+                            makeText(this.context, "출발지에 도착하였습니다.", LENGTH_SHORT).show()
                             nMap.markerStartPoint.map = null
                             arriveCheck = true
                         }
                         checkError(currentLatLng, goalLatLng!!) && arriveCheck -> {
-                            makeText(this, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
+                            makeText(this.context, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
                             mapsViewModel.insertHistory(mapsViewModel.getUserID(),
                                 fullTime,
                                 resultSrc,
                                 resultDst,
                                 resultDistance,
                                 resultReward.toString(),
-                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
+                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH시 mm분 ss초")),
                                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
                             mapsViewModel.updateCredit(mapsViewModel.getUserID(), resultReward)
                             mapsViewModel.getUserDataFromServer(mapsViewModel.getUserID())
@@ -174,52 +204,160 @@ class MapsActivity : FragmentActivity(){
                 }
             }
         }
-        locationStartBtn.setOnClickListener {
-            val latlngList = mapsViewModel.getLatLngList()
-            if(nMap.nMap!!.locationTrackingMode == LocationTrackingMode.None) {
-                Log.e("Flag", "${nMap.nMap!!.locationTrackingMode}")
-                val bottomSheetBehavior_after = BottomSheetBehavior.from(bottomSheet_after)
-                bottomSheetBehavior_after.state = BottomSheetBehavior.STATE_COLLAPSED
-                Thread(Runnable{
-                    for (i in 0 until latlngList.size) {
-                        currentLocation.latitude = latlngList[i].latitude
-                        currentLocation.longitude = latlngList[i].longitude
-                        progressRate = i / latlngList.size.toDouble()
 
-                        Log.e("위치변경", "${currentLocation.latitude}, ${currentLocation.longitude}")
+        configureBottomNav()
+        locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
+    }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val view=inflater.inflate(R.layout.new_activity_main,container,false)
+//        val view2 = inflater.inflate(R.layout.new_activity_main,container,false)
+//        val nMap = mapsViewModel.getMapsRepository()
+        return view
+    }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-                        drawingLocationUI(LatLng(latlngList[i].latitude, latlngList[i].longitude), progressRate)
+
+//        setContentView(R.layout.new_activity_main)
+//        val nMap = mapsViewModel.getMapsRepository()
+
+//        val fragmentManager = supportFragmentManager
+        //네이게이션 뷰의 헤더에 접근하기 위한 코드
+
+//        headerView.historyButton.setOnClickListener {
+//            if(!isFinishing) {
+//                val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
+//                transaction.add(R.id.new_drawer_layout, HistoryActivity())
+//                transaction.addToBackStack(null)
+//                transaction.commit()
+//            }
+//            new_drawer_layout.closeDrawer(GravityCompat.START)
+////            val historyIntent = Intent(this, HistoryActivity::class.java)
+////            startActivity(historyIntent)
+//        }
+//        headerView.rankingButton.setOnClickListener {
+//            if(!isFinishing) {
+//                val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
+//                transaction.add(R.id.new_drawer_layout, RankingActivity())
+//                transaction.addToBackStack(null)
+//                transaction.commit()
+//            }
+//            new_drawer_layout.closeDrawer(GravityCompat.START)
+////            val rankingIntent = Intent(this, RankingActivity::class.java)s
+////            startActivity(rankingIntent)
+//        }
+
+
+
+
+
+
+
+//        configureBottomNav()
+//
+//        locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
+
+//        val mapFragment = fragmentManager!!.findFragmentById(R.id.map) as MapFragment?
+//                ?: MapFragment.newInstance((NaverMapOptions().locationButtonEnabled(true))
+//                        .also {
+//                            fragmentManager!!.beginTransaction().add(R.id.map, map).commit()
+//                        })
+//        mapFragment.getMapAsync(nMap)
+//
+//        nMap.listener = {
+//            locationBtn.map = nMap.nMap
+//            Log.e("메인액티비티","온맵레디")
+//            nMap.nMap!!.locationSource = locationSource
+//            nMap.nMap!!.uiSettings.isZoomControlEnabled = false
+//            nMap.nMap!!.locationTrackingMode = LocationTrackingMode.Follow
+//            nMap.nMap!!.locationOverlay.isVisible = true
+//            nMap.nMap!!.addOnLocationChangeListener { location ->
+//                currentLocation = location
+//                val currentLatLng = LatLng(location.latitude, location.longitude)
+//                startPosition = "${location.longitude},${location.latitude}"
+//                Log.e("현재위치", "${location.latitude},${location.longitude}")
+//                if(goalLatLng != null && wayLatLng != null){
+//                    Log.e("e", "${goalLatLng},${wayLatLng},${arriveCheck}")
+//                    when {
+//                        checkError(currentLatLng, wayLatLng!!) && !arriveCheck -> {
+//                            makeText(this.context, "출발지에 도착하였습니다.", LENGTH_SHORT).show()
+//                            nMap.markerStartPoint.map = null
+//                            arriveCheck = true
+//                        }
+//                        checkError(currentLatLng, goalLatLng!!) && arriveCheck -> {
+//                            makeText(this.context, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
+//                            mapsViewModel.insertHistory(mapsViewModel.getUserID(),
+//                                fullTime,
+//                                resultSrc,
+//                                resultDst,
+//                                resultDistance,
+//                                resultReward.toString(),
+//                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
+//                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
+//                            mapsViewModel.updateCredit(mapsViewModel.getUserID(), resultReward)
+//                            nMap.markerWayPoint.map = null
+//                            nMap.markerGoalPoint.map = null
+//                            arriveCheck = false
+//
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        locationStartBtn.setOnClickListener {
+//            val latlngList = mapsViewModel.getLatLngList()
+//            if(nMap.nMap!!.locationTrackingMode == LocationTrackingMode.None) {
+//                Log.e("Flag", "${nMap.nMap!!.locationTrackingMode}")
+//                val bottomSheetBehavior_after = BottomSheetBehavior.from(bottomSheet_after)
+//                bottomSheetBehavior_after.state = BottomSheetBehavior.STATE_COLLAPSED
+//                Thread(Runnable{
+//                    for (i in 0 until latlngList.size) {
+//                        currentLocation.latitude = latlngList[i].latitude
+//                        currentLocation.longitude = latlngList[i].longitude
+//                        progressRate = i / latlngList.size.toDouble()
+//
+//                        Log.e("위치변경", "${currentLocation.latitude}, ${currentLocation.longitude}")
+//
+//                        drawingLocationUI(LatLng(latlngList[i].latitude, latlngList[i].longitude), progressRate)
 //                        mapsViewModel.getDangerGrade(latlngList[i].latitude.toString(),
 //                                latlngList[i].longitude.toString(),
 //                                latlngList[i].latitude.toString(),
 //                                latlngList[i].longitude.toString())
-                        sleep(300)
-
-                        if (nMap.nMap!!.locationTrackingMode == LocationTrackingMode.Follow ||
-                                nMap.nMap!!.locationTrackingMode == LocationTrackingMode.NoFollow) {
-                            progressRate = 0.0
-                            drawingLocationUI(LatLng(currentLocation.latitude, currentLocation.longitude), progressRate)
-                            break
-                        }
-                    }
-                }).start()
-            }
-            else{
-                Log.e("Flag", "${nMap.nMap!!.locationTrackingMode}")
-                nMap.nMap!!.locationTrackingMode = LocationTrackingMode.None
-            }
-            val dangerGradeObserver = Observer<String> {
-                dangerInfo.text = it
-            }
-            mapsViewModel.dangerGrade!!.observe(this, dangerGradeObserver)
-        }
+//                        sleep(2000)
+//
+//                        if (nMap.nMap!!.locationTrackingMode == LocationTrackingMode.Follow ||
+//                                nMap.nMap!!.locationTrackingMode == LocationTrackingMode.NoFollow) {
+//                            progressRate = 0.0
+//                            drawingLocationUI(LatLng(currentLocation.latitude, currentLocation.longitude), progressRate)
+//                            break
+//                        }
+//                    }
+//                }).start()
+//            }
+//            else{
+//                Log.e("Flag", "${nMap.nMap!!.locationTrackingMode}")
+//                nMap.nMap!!.locationTrackingMode = LocationTrackingMode.None
+//            }
+//            val dangerGradeObserver = Observer<String> {
+//                dangerInfo.text = it
+//            }
+//            mapsViewModel.dangerGrade!!.observe(this, dangerGradeObserver)
+//        }
     }
+
+
+
+
     private fun drawingLocationUI(latLng: LatLng, progressRate: Double) = Thread( Runnable {
         val nMap = mapsViewModel.getMapsRepository()
         val arrStr = resultDistance.split(" Km")
         val distanceDouble = arrStr[0].toDouble() * (1 - progressRate)
         val distanceStr = String.format("%.1f", distanceDouble) + " Km"
-        runOnUiThread {
+        activity!!.runOnUiThread {
             val locationOverlay = nMap.nMap!!.locationOverlay
             locationOverlay.isVisible = true
             locationOverlay.position = latLng
@@ -233,13 +371,13 @@ class MapsActivity : FragmentActivity(){
 
             when{
                 checkError(latLng, wayLatLng!!) && !arriveCheck -> {
-                    makeText(applicationContext, "출발지에 도착하였습니다.", LENGTH_SHORT).show()
+                    makeText(context, "출발지에 도착하였습니다.", LENGTH_SHORT).show()
                     nMap.markerStartPoint.map = null
                     nMap.markerWayPoint.map = null
                     arriveCheck = true
                 }
                 checkError(latLng, goalLatLng!!) && arriveCheck -> {
-                    makeText(applicationContext, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
+                    makeText(context, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
                     mapsViewModel.insertHistory(mapsViewModel.getUserID(),
                             fullTime,
                             resultSrc,
@@ -253,8 +391,8 @@ class MapsActivity : FragmentActivity(){
                     nMap.markerGoalPoint.map = null
                     nMap.pathOverlay.map = null
                     arriveCheck = false
-                    bottomSheet_after.visibility = View.GONE
-                    bottomSheet_before.visibility = View.VISIBLE
+                    bottomSheet_before.visibility = View.GONE
+                    bottomSheet_after.visibility = View.VISIBLE
                 }
             }
         }
@@ -291,7 +429,8 @@ class MapsActivity : FragmentActivity(){
                         }
                         draw_up_and_refresh.setImageResource(R.drawable.ic_refresh_24)
                         draw_up_and_refresh.setOnClickListener {
-                            makeText(this@MapsActivity,"의뢰 목록을 새로고침합니다.", LENGTH_SHORT).show()
+
+                            makeText(context,"의뢰 목록을 새로고침합니다.", LENGTH_SHORT).show()
                             mapsViewModel.clear()
                             mapsViewModel.startFindPath(startPosition!!)
                         }
@@ -328,7 +467,7 @@ class MapsActivity : FragmentActivity(){
             }
             fun recyclerViewSetup(){
                 adapter = RequestRecyclerAdapter(newRequestList!!)
-                requestLayoutManager = LinearLayoutManager(applicationContext)
+                requestLayoutManager = LinearLayoutManager(this@MapsActivity.context)
                 request_recyclerView.adapter = adapter
                 request_recyclerView.layoutManager = requestLayoutManager
                 //request_recyclerView.addItemDecoration(DividerItemDecoration(applicationContext, DividerItemDecoration.VERTICAL))
@@ -338,7 +477,7 @@ class MapsActivity : FragmentActivity(){
                     adapter.itemClick = object : RequestRecyclerAdapter.OnItemClickListener {
                         override fun onItemClickListener(view: View, position: Int) {
                             //val builder = AlertDialog.Builder(this@MapsActivity)
-                            val f = Dialog(this@MapsActivity)
+                            val f = Dialog(this@MapsActivity.context!!)
                             val dialogView = layoutInflater.inflate(R.layout.request_dialog, null)
                             f.setContentView(dialogView)
                             //builder.setView(dialogView)
@@ -378,9 +517,9 @@ class MapsActivity : FragmentActivity(){
                                 resultDistance = newRequestList!![position].distance
                                 resultReward = newRequestList!![position].reward.toDouble()
                                 wayLatLng = LatLng(newRequestList!![position].responseData.route.traoptimal[0].summary.waypoints[0].location[1],
-                                        newRequestList!![position].responseData.route.traoptimal[0].summary.waypoints[0].location[0])
+                                    newRequestList!![position].responseData.route.traoptimal[0].summary.waypoints[0].location[0])
                                 goalLatLng = LatLng(newRequestList!![position].responseData.route.traoptimal[0].summary.goal.location[1],
-                                        newRequestList!![position].responseData.route.traoptimal[0].summary.goal.location[0])
+                                    newRequestList!![position].responseData.route.traoptimal[0].summary.goal.location[0])
                                 mapsViewModel.clear()
                             }
                             dialogView.request_cancle_button.setOnClickListener{
