@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/loginActivity"
+    >
+
+    <fragment
+        android:id="@+id/mapsActivity"
+        android:name="com.example.sendymapdemo.ui.activities.MapsActivity"
+        android:label="MapsActivity"
+
+        >
+        <action
+            android:id="@+id/action_mapsActivity_to_historyActivity"
+            app:destination="@id/historyActivity" />
+        <action
+            android:id="@+id/action_mapsActivity_to_rankingActivity"
+            app:destination="@id/rankingActivity" />
+    </fragment>
+    <fragment
+        android:id="@+id/rankingActivity"
+        android:name="com.example.sendymapdemo.ui.activities.RankingActivity"
+        android:label="RankingActivity" >
+        <action
+            android:id="@+id/action_rankingActivity_to_mapsActivity"
+            app:destination="@id/mapsActivity"
+            app:popUpTo="@id/mapsActivity"
+            app:popUpToInclusive="true"/>
+    </fragment>
+    <fragment
+        android:id="@+id/loginActivity"
+        android:name="com.example.sendymapdemo.ui.activities.LoginActivity"
+        android:label="LoginActivity"
+        tools:layout="@layout/activity_login">
+        <action
+            android:id="@+id/action_loginActivity_to_mapsActivity"
+            app:destination="@id/mapsActivity"
+            app:popUpTo="@id/loginActivity"
+            app:popUpToInclusive="true"/>
+    </fragment>
+    <fragment
+        android:id="@+id/historyActivity"
+        android:name="com.example.sendymapdemo.ui.activities.HistoryActivity"
+        android:label="HistoryActivity" >
+        <action
+            android:id="@+id/action_historyActivity_to_mapsActivity"
+            app:destination="@id/mapsActivity"
+            app:popUpTo="@id/mapsActivity"
+            app:popUpToInclusive="true"/>
+    </fragment>
+</navigation>
