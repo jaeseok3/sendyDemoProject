@@ -15,7 +15,7 @@
         app:navermap_latitude="35.1798159"
         app:navermap_longitude="129.0750222"
         app:navermap_zoom="13"
-        tools:context=".ui.activities.MapsActivity"/>
+        tools:context=".ui.activities.MapsFragment"/>
 
     <com.naver.maps.map.widget.LocationButtonView
         android:id="@+id/locationBtn"

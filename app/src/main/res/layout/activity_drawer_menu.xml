@@ -25,5 +25,4 @@
         app:headerLayout="@layout/new_nav_header">
     </com.google.android.material.navigation.NavigationView>
 
-
 </androidx.drawerlayout.widget.DrawerLayout>

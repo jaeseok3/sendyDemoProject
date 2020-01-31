@@ -16,24 +16,21 @@ import kotlinx.android.synthetic.main.history_activiry.*
 import kotlinx.android.synthetic.main.history_activiry.view.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class HistoryActivity : Fragment(){
+class HistoryFragment : Fragment() {
     private val historyViewModel by viewModel<HistoryViewModel>()
 
     private lateinit var historylayoutManager: LinearLayoutManager
     private lateinit var adapter: HistoryListAdapter
     private var newHistoryList : List<HistoryData> ?= null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        historyViewModel.getHistory()
-        subscribe()
-    }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        var view: View =inflater.inflate(R.layout.history_activiry,container,false)
+        val view: View =inflater.inflate(R.layout.history_activiry,container,false)
+        historyViewModel.getHistory()
+        subscribe()
         view.back_button_history.setOnClickListener {
             view.findNavController().navigate(R.id.action_historyActivity_to_mapsActivity)
         }
