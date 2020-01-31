@@ -31,12 +31,15 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/accept"
-        app:layout_constraintBottom_toTopOf="@+id/cannotcancle">
+        app:layout_constraintBottom_toTopOf="@+id/cannotcancle"
+        app:cardBackgroundColor="@color/white"
+        >
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="#ffffff">
             <ImageView
                 android:id="@+id/clockImage"
                 android:layout_width="48dp"
