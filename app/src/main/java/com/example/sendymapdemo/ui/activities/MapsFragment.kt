@@ -40,7 +40,6 @@ import kotlinx.android.synthetic.main.new_request_item.view.srcText
 import kotlinx.android.synthetic.main.new_request_item.view.time
 import kotlinx.android.synthetic.main.request_dialog.view.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.lang.Thread.sleep
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -50,19 +49,14 @@ class MapsFragment : Fragment() {
     }
     private val mapsViewModel by viewModel<MapsViewModel>()
 
-    private var newRequestList : ArrayList<RequestListData>? = null
     private var wayLatLng: LatLng ?= null
     private var goalLatLng: LatLng ?= null
+    private var isAccepted: Boolean = false
     private var arriveCheck: Boolean = false
     private var progressRate = 0.0
     private var resultReward:Double = 0.0
     private var isRequested: Int = 0
     private var userData: UserData ?= null
-    private lateinit var resultSrc : String
-    private lateinit var resultDst : String
-    private lateinit var fullTime : String
-    private lateinit var resultDistance: String
-    private lateinit var pathData: PathData
     private lateinit var currentLocation: Location
     private lateinit var nMap: MapsRepository
     private var startPosition: String? = null
@@ -97,7 +91,7 @@ class MapsFragment : Fragment() {
         }
         sideNavButton.setOnClickListener {
             new_drawer_layout.openDrawer(Gravity.LEFT)
-            mapsViewModel.getUserDataFromServer(mapsViewModel.getUserID())
+            mapsViewModel.getUserDataFromServer(userData!!.id)
             subscribeUserData()
         }
 
@@ -112,12 +106,14 @@ class MapsFragment : Fragment() {
         }
         locationStartBtn.setOnClickListener { locationStartButtonOnClick() }
     }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         nMap = mapsViewModel.getMapsRepository()
+        if(isAccepted){
+            bottomSheet_before.visibility = View.GONE
+            bottomSheet_after.visibility = View.VISIBLE
+        }
         return inflater.inflate(R.layout.activity_drawer_menu, container, false)
     }
-
     private fun locationChangeListner(location: Location){
         currentLocation = location
         val currentLatLng = LatLng(location.latitude, location.longitude)
@@ -126,14 +122,14 @@ class MapsFragment : Fragment() {
         if (goalLatLng != null && wayLatLng != null) {
             Log.e("e", "${goalLatLng},${wayLatLng},${arriveCheck}")
             when {
-                checkError(currentLatLng, wayLatLng!!) && !arriveCheck -> {
+                mapsViewModel.checkError(currentLatLng, wayLatLng!!) && !arriveCheck -> {
                     makeText(this.context, "출발지에 도착하였습니다.", LENGTH_SHORT).show()
                     nMap.markerStartPoint.map = null
                     arriveCheck = true
                 }
-                checkError(currentLatLng, goalLatLng!!) && arriveCheck -> {
+                mapsViewModel.checkError(currentLatLng, goalLatLng!!) && arriveCheck -> {
                     makeText(this.context, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
-                    mapsViewModel.insertHistory(mapsViewModel.getUserID(),
+                    mapsViewModel.insertHistory(userData!!.id,
                             fullTime,
                             resultSrc,
                             resultDst,
@@ -141,11 +137,12 @@ class MapsFragment : Fragment() {
                             resultReward.toString(),
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
-                    mapsViewModel.updateCredit(mapsViewModel.getUserID(), resultReward)
-                    mapsViewModel.getUserDataFromServer(mapsViewModel.getUserID())
+                    mapsViewModel.updateCredit(userData!!.id, resultReward)
+                    mapsViewModel.getUserDataFromServer(userData!!.id)
                     nMap.markerWayPoint.map = null
                     nMap.markerGoalPoint.map = null
                     arriveCheck = false
+                    isAccepted = false
                 }
             }
         }
@@ -153,21 +150,19 @@ class MapsFragment : Fragment() {
     private fun locationStartButtonOnClick() {
         val latlngList = mapsViewModel.getLatLngList()
         if(nMap.nMap!!.locationTrackingMode == LocationTrackingMode.None) {
-            val bottomSheetBehavior_after = BottomSheetBehavior.from(bottomSheet_after)
-            bottomSheetBehavior_after.state = BottomSheetBehavior.STATE_COLLAPSED
+            BottomSheetBehavior.from(bottomSheet_after).state = BottomSheetBehavior.STATE_COLLAPSED
             Thread(Runnable{
                 for (i in 0 until latlngList.size) {
                     currentLocation.latitude = latlngList[i].latitude
                     currentLocation.longitude = latlngList[i].longitude
                     progressRate = i / latlngList.size.toDouble()
 
-                    drawingLocationUI(LatLng(latlngList[i].latitude, latlngList[i].longitude), progressRate)
-                    sleep(300)
+                    activity!!.runOnUiThread { drawingLocationUI(LatLng(latlngList[i].latitude, latlngList[i].longitude), progressRate) }
 
                     if (nMap.nMap!!.locationTrackingMode == LocationTrackingMode.Follow ||
                             nMap.nMap!!.locationTrackingMode == LocationTrackingMode.NoFollow) {
                         progressRate = 0.0
-                        drawingLocationUI(LatLng(currentLocation.latitude, currentLocation.longitude), progressRate)
+                        activity!!.runOnUiThread { drawingLocationUI(LatLng(currentLocation.latitude, currentLocation.longitude), progressRate) }
                         break
                     }
                 }
@@ -181,7 +176,7 @@ class MapsFragment : Fragment() {
         }
         mapsViewModel.dangerGrade!!.observe(this, dangerGradeObserver)
     }
-    private fun drawingLocationUI(latLng: LatLng, progressRate: Double) = Thread( Runnable {
+    private fun drawingLocationUI(latLng: LatLng, progressRate: Double) {
         val nMap = mapsViewModel.getMapsRepository()
         val arrStr = resultDistance.split(" Km")
         val distanceDouble = arrStr[0].toDouble() * (1 - progressRate)
@@ -199,15 +194,15 @@ class MapsFragment : Fragment() {
             Log.e("progress", "$progressRate")
 
             when{
-                checkError(latLng, wayLatLng!!) && !arriveCheck -> {
+                mapsViewModel.checkError(latLng, wayLatLng!!) && !arriveCheck -> {
                     makeText(this.context, "출발지에 도착하였습니다.", LENGTH_SHORT).show()
                     nMap.markerStartPoint.map = null
                     nMap.markerWayPoint.map = null
                     arriveCheck = true
                 }
-                checkError(latLng, goalLatLng!!) && arriveCheck -> {
+                mapsViewModel.checkError(latLng, goalLatLng!!) && arriveCheck -> {
                     makeText(this.context, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
-                    mapsViewModel.insertHistory(mapsViewModel.getUserID(),
+                    mapsViewModel.insertHistory(userData!!.id,
                             fullTime,
                             resultSrc,
                             resultDst,
@@ -215,24 +210,17 @@ class MapsFragment : Fragment() {
                             resultReward.toString(),
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH시 mm분 ss초")),
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일")))
-                    mapsViewModel.updateCredit(mapsViewModel.getUserID(), resultReward)
-                    mapsViewModel.getUserDataFromServer(mapsViewModel.getUserID())
+                    mapsViewModel.updateCredit(userData!!.id, resultReward)
+                    mapsViewModel.getUserDataFromServer(userData!!.id)
                     nMap.markerGoalPoint.map = null
                     nMap.pathOverlay.map = null
                     arriveCheck = false
+                    isAccepted = false
                     bottomSheet_after.visibility = View.GONE
                     bottomSheet_before.visibility = View.VISIBLE
                 }
             }
         }
-    }).start()
-    private fun checkError(location: LatLng, goalLatLng: LatLng): Boolean {
-        val currentLat = location.latitude
-        val currentLng = location.longitude
-        val goalLat = goalLatLng.latitude
-        val goalLng = goalLatLng.longitude
-        return ((currentLat <= goalLat + 0.0001 && currentLat >= goalLat - 0.0001) ||
-                (currentLng <= goalLng + 0.0001 && currentLng >= goalLng - 0.0001))
     }
     private fun configureBottomNav(){
         bottomSheet_before.visibility = View.VISIBLE
@@ -243,11 +231,14 @@ class MapsFragment : Fragment() {
             BottomSheetBehavior.from(bottomSheet_before).state = BottomSheetBehavior.STATE_EXPANDED
         }
         BottomSheetBehavior.from(bottomSheet_before).setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onSlide(p0: View, p1: Float) {
+
+            }
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {
                     BottomSheetBehavior.STATE_EXPANDED -> {
                         subscribeRequestList()
-                        if(isRequested == 0 && startPosition != null) {
+                        if(isRequested == 0 && startPosition != null && !isAccepted) {
                             mapsViewModel.startFindPath(startPosition!!)
                             subscribeRequestList()
                             isRequested++
@@ -276,19 +267,15 @@ class MapsFragment : Fragment() {
                     }
                 }
             }
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {
-            }
         })
     }
-    private fun recyclerViewSetup(){
-        val adapter = RequestRecyclerAdapter(newRequestList!!)
+    private fun recyclerViewSetup(requestList : ArrayList<RequestListData>){
+        val adapter = RequestRecyclerAdapter(requestList)
         val requestLayoutManager = LinearLayoutManager(this.context)
         request_recyclerView.adapter = adapter
         request_recyclerView.layoutManager = requestLayoutManager
-        //request_recyclerView.addItemDecoration(DividerItemDecoration(applicationContext, DividerItemDecoration.VERTICAL))
-        Log.e("리사이클러뷰 셋업", "리사이클러뷰 셋업")
         adapter.notifyDataSetChanged()
-        if(newRequestList!!.size == 5){
+        if(requestList.size == 5){
             adapter.itemClick = object : RequestRecyclerAdapter.OnItemClickListener {
                 override fun onItemClickListener(view: View, position: Int) {
                     val f = Dialog(this@MapsFragment.context!!)
@@ -298,41 +285,38 @@ class MapsFragment : Fragment() {
                     f.window!!.setBackgroundDrawableResource(R.drawable.bg_dialog_radius)
                     f.show()
 
-                    dialogView.clockImage.setImageResource(newRequestList!![position].image)
-                    dialogView.srcText.text = newRequestList!![position].source
-                    dialogView.dstText.text = newRequestList!![position].destination
-                    dialogView.creditTextDialog.text = newRequestList!![position].reward.toString()
-                    dialogView.time.text = newRequestList!![position].time
-                    dialogView.distance.text = newRequestList!![position].distance
+                    dialogView.clockImage.setImageResource(requestList[position].image)
+                    dialogView.srcText.text = requestList[position].source
+                    dialogView.dstText.text = requestList[position].destination
+                    dialogView.creditTextDialog.text = requestList[position].reward.toString()
+                    dialogView.time.text = requestList[position].time
+                    dialogView.distance.text = requestList[position].distance
                     dialogView.setBackgroundResource(R.color.transparent)
 
                     dialogView.request_accept_button.setOnClickListener {
-                        Log.e("선택한 출발지", newRequestList!![position].source)
-                        Log.e("선택한 출발지_코드", newRequestList!![position].sourceCode)
-                        Log.e("선택한 도착지", newRequestList!![position].destination)
-                        Log.e("선택한 도착지_코드", newRequestList!![position].destinationCode)
+                        topSrcBox.text = requestList[position].source
+                        topDstBox.text = requestList[position].destination
+                        top_remaining.text = requestList[position].distance
+                        pathData = requestList[position].responseData
+                        mapsViewModel.setUIPath(position)
 
-                        topSrcBox.text = newRequestList!![position].source
-                        topDstBox.text = newRequestList!![position].destination
-                        top_remaining.text = newRequestList!![position].distance
-                        pathData = newRequestList!![position].responseData
-                        setUIPath()
-
-                        isRequested = 0
                         f.dismiss()
                         BottomSheetBehavior.from(bottomSheet_before).state = BottomSheetBehavior.STATE_COLLAPSED
                         bottomSheet_before.visibility = View.GONE
                         bottomSheet_after.visibility = View.VISIBLE
 
-                        fullTime = newRequestList!![position].time
-                        resultSrc = newRequestList!![position].source
-                        resultDst = newRequestList!![position].destination
-                        resultDistance = newRequestList!![position].distance
-                        resultReward = newRequestList!![position].reward.toDouble()
-                        wayLatLng = LatLng(newRequestList!![position].responseData.route.traoptimal[0].summary.waypoints[0].location[1],
-                                newRequestList!![position].responseData.route.traoptimal[0].summary.waypoints[0].location[0])
-                        goalLatLng = LatLng(newRequestList!![position].responseData.route.traoptimal[0].summary.goal.location[1],
-                                newRequestList!![position].responseData.route.traoptimal[0].summary.goal.location[0])
+                        isRequested = 0
+                        isAccepted = true
+
+                        fullTime = requestList[position].time
+                        resultSrc = requestList[position].source
+                        resultDst = requestList[position].destination
+                        resultDistance = requestList[position].distance
+                        resultReward = requestList[position].reward.toDouble()
+                        wayLatLng = LatLng(requestList[position].responseData.route.traoptimal[0].summary.waypoints[0].location[1],
+                                requestList[position].responseData.route.traoptimal[0].summary.waypoints[0].location[0])
+                        goalLatLng = LatLng(requestList[position].responseData.route.traoptimal[0].summary.goal.location[1],
+                                requestList[position].responseData.route.traoptimal[0].summary.goal.location[0])
                         mapsViewModel.clear()
                     }
                     dialogView.request_cancle_button.setOnClickListener{
@@ -342,49 +326,7 @@ class MapsFragment : Fragment() {
             }
         }
     }
-    private fun setUIPath(){
-        val pathArr = pathData.route.traoptimal[0].path
-        val startLng = pathData.route.traoptimal[0].summary.start.location[0]
-        val startLat = pathData.route.traoptimal[0].summary.start.location[1]
-        val wayPointLng = pathData.route.traoptimal[0].summary.waypoints[0].location[0]
-        val wayPointLat = pathData.route.traoptimal[0].summary.waypoints[0].location[1]
-        val goalLng = pathData.route.traoptimal[0].summary.goal.location[0]
-        val goalLat = pathData.route.traoptimal[0].summary.goal.location[1]
 
-        val pathOverlay = mapsViewModel.getMapsPathOverlay()
-        val markerStartPoint = mapsViewModel.getMapsMarkerStartPoint()
-        val markerWayPoint = mapsViewModel.getMapsMarkerWayPoint()
-        val markerGoalPoint = mapsViewModel.getMapsMarkerGoalPoint()
-
-        for(i in pathArr.indices){
-            val path = pathArr[i].toString()
-            val pathLatLng = parsingPath(path)
-            mapsViewModel.latlngList.add(pathLatLng)
-            mapsViewModel.setLatlng()
-        }
-
-        pathOverlay.coords = mapsViewModel.latlngList
-        pathOverlay.width = 10
-        pathOverlay.color = Color.parseColor("#2e58ec")
-        pathOverlay.passedColor = Color.GRAY
-        pathOverlay.map = mapsViewModel.getMapsRepository().nMap!!
-        markerStartPoint.position = LatLng(startLat, startLng)
-        markerStartPoint.icon = OverlayImage.fromResource(R.drawable.ic_pin_ar_blue)
-        markerStartPoint.map = mapsViewModel.getMapsRepository().nMap!!
-        markerWayPoint.position = LatLng(wayPointLat, wayPointLng)
-        markerWayPoint.icon = OverlayImage.fromResource(R.drawable.ic_pin_wp_purple)
-        markerWayPoint.map = mapsViewModel.getMapsRepository().nMap!!
-        markerGoalPoint.position = LatLng(goalLat, goalLng)
-        markerGoalPoint.icon = OverlayImage.fromResource(R.drawable.ic_pin_dp_cyan)
-        markerGoalPoint.map = mapsViewModel.getMapsRepository().nMap!!
-    }
-    private fun parsingPath(rawPathData: String): LatLng {
-        val arr = rawPathData.split(",")
-        val lng: Double = arr[0].substring(1).toDouble()
-        val lat: Double = arr[1].substring(0, arr[1].indexOf("]")).toDouble()
-
-        return LatLng(lat, lng)
-    }
     private fun subscribeUserData(){
         val userDataObserver = Observer<UserData> {
             userData = it
@@ -394,8 +336,7 @@ class MapsFragment : Fragment() {
     }
     private fun subscribeRequestList(){
         val requestListObserver = Observer<ArrayList<RequestListData>> {
-            newRequestList = it
-            recyclerViewSetup()
+            recyclerViewSetup(it)
         }
         mapsViewModel.requests.observe(LifecycleOwner{lifecycle}, requestListObserver)
     }

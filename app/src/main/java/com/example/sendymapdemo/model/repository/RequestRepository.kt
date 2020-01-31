@@ -42,7 +42,6 @@ class RequestRepository(private val retrofitServerInterface: RetrofitServerInter
                         getGeoName(newGeoInfo.src), getGeoName(newGeoInfo.dst), timeStr, distanceStr, reward,
                         newGeoInfo.dst, newGeoInfo.src, requestResult)
                 requestList.add(requestListItem)
-                Log.e("리스트 사이즈", "${requestList.size},${requestListItem}")
             }catch (e: Exception){
                 e.printStackTrace()
             }
