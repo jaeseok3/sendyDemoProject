@@ -1,44 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/nav_graph"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
     app:startDestination="@id/loginActivity">
 
     <fragment
-        android:id="@+id/loginActivity"
-        android:name="com.example.sendymapdemo.ui.activities.LoginActivity"
-        android:label="LoginActivity" >
-        <action
-            android:id="@+id/action_loginActivity_to_mapsActivity"
-            app:destination="@id/mapsActivity" />
-    </fragment>
-    <fragment
         android:id="@+id/mapsActivity"
-        android:name="com.example.sendymapdemo.ui.activities.MapsActivity"
-        android:label="MapsActivity" >
-        <action
-            android:id="@+id/action_mapsActivity_to_loginActivity"
-            app:destination="@id/loginActivity" />
+        android:name="com.example.sendymapdemo.ui.activities.MapsFragment"
+        android:label="MapsActivity"
+        tools:layout="@layout/new_activity_maps">
         <action
             android:id="@+id/action_mapsActivity_to_historyActivity"
-            app:destination="@id/historyActivity" />
+            app:destination="@id/historyActivity"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
         <action
             android:id="@+id/action_mapsActivity_to_rankingActivity"
-            app:destination="@id/rankingActivity" />
-    </fragment>
-    <fragment
-        android:id="@+id/historyActivity"
-        android:name="com.example.sendymapdemo.ui.activities.HistoryActivity"
-        android:label="HistoryActivity" >
+            app:destination="@id/rankingActivity"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
         <action
-            android:id="@+id/action_historyActivity_to_mapsActivity"
-            app:destination="@id/mapsActivity" />
+            android:id="@+id/action_mapsActivity_to_loginActivity"
+            app:destination="@id/loginActivity"
+            app:enterAnim="@anim/fragment_close_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit"
+            app:popUpTo="@+id/mapsActivity"
+            app:popUpToInclusive="true" />
     </fragment>
+
     <fragment
         android:id="@+id/rankingActivity"
-        android:name="com.example.sendymapdemo.ui.activities.RankingActivity"
-        android:label="RankingActivity" >
+        android:name="com.example.sendymapdemo.ui.activities.RankingFragment"
+        android:label="RankingActivity"
+        tools:layout="@layout/ranking_activity">
         <action
             android:id="@+id/action_rankingActivity_to_mapsActivity"
-            app:destination="@id/mapsActivity" />
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@+id/rankingActivity"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/loginActivity"
+        android:name="com.example.sendymapdemo.ui.activities.LoginFragment"
+        android:label="LoginActivity"
+        tools:layout="@layout/activity_login">
+        <action
+            android:id="@+id/action_loginActivity_to_mapsActivity"
+            app:destination="@id/mapsActivity"
+            app:enterAnim="@anim/fragment_close_enter"
+            app:exitAnim="@anim/fragment_close_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit"
+            app:popUpTo="@+id/loginActivity"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/historyActivity"
+        android:name="com.example.sendymapdemo.ui.activities.HistoryFragment"
+        android:label="HistoryActivity"
+        tools:layout="@layout/history_activiry">
+        <action
+            android:id="@+id/action_historyActivity_to_mapsActivity"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@+id/historyActivity"
+            app:popUpToInclusive="true" />
     </fragment>
 </navigation>

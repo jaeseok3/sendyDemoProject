@@ -20,7 +20,7 @@
         android:allowClearUserData="true"
         android:hardwareAccelerated="true">
 
-        <activity android:name=".ui.activities.LoginActivity"
+        <activity android:name=".ui.activities.LoginFragment"
             android:theme="@style/Theme.AppCompat.NoActionBar">
         </activity>
 
@@ -31,12 +31,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.activities.RankingActivity"
+        <activity android:name=".ui.activities.RankingFragment"
             android:label="순위 조회"
-            android:parentActivityName=".ui.activities.MapsActivity"
+            android:parentActivityName=".ui.activities.MapsFragment"
             android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity android:name=".ui.activities.HistoryActivity"
-            android:parentActivityName=".ui.activities.MapsActivity"
+        <activity android:name=".ui.activities.HistoryFragment"
+            android:parentActivityName=".ui.activities.MapsFragment"
             android:theme="@style/AppTheme.NoActionBar"></activity>
 
         <meta-data
@@ -44,7 +44,7 @@
             android:value="nx5wmexmtw" />
 
         <activity
-            android:name=".ui.activities.MapsActivity"
+            android:name=".ui.activities.MapsFragment"
             android:label="@string/title_activity_maps"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
