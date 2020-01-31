@@ -9,12 +9,10 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import android.widget.Toast.makeText
-import com.naver.maps.geometry.LatLng
-import com.naver.maps.map.*
 import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
@@ -74,7 +72,10 @@ class MapsActivity : Fragment(){
     var progressRate = 0.0
     var resultReward:Double = 0.0
     private var userData: UserData ?= null
-
+    override fun onDestroy() {
+        super.onDestroy()
+        //android.os.Process.killProcess(android.os.Process.myPid())
+    }
     private fun subscribeUserData(){
         val userDataObserver = Observer<UserData> {
             userData = it
@@ -214,142 +215,8 @@ class MapsActivity : Fragment(){
         savedInstanceState: Bundle?
     ): View? {
         val view=inflater.inflate(R.layout.new_activity_main,container,false)
-//        val view2 = inflater.inflate(R.layout.new_activity_main,container,false)
-//        val nMap = mapsViewModel.getMapsRepository()
         return view
     }
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-
-//        setContentView(R.layout.new_activity_main)
-//        val nMap = mapsViewModel.getMapsRepository()
-
-//        val fragmentManager = supportFragmentManager
-        //네이게이션 뷰의 헤더에 접근하기 위한 코드
-
-//        headerView.historyButton.setOnClickListener {
-//            if(!isFinishing) {
-//                val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
-//                transaction.add(R.id.new_drawer_layout, HistoryActivity())
-//                transaction.addToBackStack(null)
-//                transaction.commit()
-//            }
-//            new_drawer_layout.closeDrawer(GravityCompat.START)
-////            val historyIntent = Intent(this, HistoryActivity::class.java)
-////            startActivity(historyIntent)
-//        }
-//        headerView.rankingButton.setOnClickListener {
-//            if(!isFinishing) {
-//                val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
-//                transaction.add(R.id.new_drawer_layout, RankingActivity())
-//                transaction.addToBackStack(null)
-//                transaction.commit()
-//            }
-//            new_drawer_layout.closeDrawer(GravityCompat.START)
-////            val rankingIntent = Intent(this, RankingActivity::class.java)s
-////            startActivity(rankingIntent)
-//        }
-
-
-
-
-
-
-
-//        configureBottomNav()
-//
-//        locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
-
-//        val mapFragment = fragmentManager!!.findFragmentById(R.id.map) as MapFragment?
-//                ?: MapFragment.newInstance((NaverMapOptions().locationButtonEnabled(true))
-//                        .also {
-//                            fragmentManager!!.beginTransaction().add(R.id.map, map).commit()
-//                        })
-//        mapFragment.getMapAsync(nMap)
-//
-//        nMap.listener = {
-//            locationBtn.map = nMap.nMap
-//            Log.e("메인액티비티","온맵레디")
-//            nMap.nMap!!.locationSource = locationSource
-//            nMap.nMap!!.uiSettings.isZoomControlEnabled = false
-//            nMap.nMap!!.locationTrackingMode = LocationTrackingMode.Follow
-//            nMap.nMap!!.locationOverlay.isVisible = true
-//            nMap.nMap!!.addOnLocationChangeListener { location ->
-//                currentLocation = location
-//                val currentLatLng = LatLng(location.latitude, location.longitude)
-//                startPosition = "${location.longitude},${location.latitude}"
-//                Log.e("현재위치", "${location.latitude},${location.longitude}")
-//                if(goalLatLng != null && wayLatLng != null){
-//                    Log.e("e", "${goalLatLng},${wayLatLng},${arriveCheck}")
-//                    when {
-//                        checkError(currentLatLng, wayLatLng!!) && !arriveCheck -> {
-//                            makeText(this.context, "출발지에 도착하였습니다.", LENGTH_SHORT).show()
-//                            nMap.markerStartPoint.map = null
-//                            arriveCheck = true
-//                        }
-//                        checkError(currentLatLng, goalLatLng!!) && arriveCheck -> {
-//                            makeText(this.context, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
-//                            mapsViewModel.insertHistory(mapsViewModel.getUserID(),
-//                                fullTime,
-//                                resultSrc,
-//                                resultDst,
-//                                resultDistance,
-//                                resultReward.toString(),
-//                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
-//                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
-//                            mapsViewModel.updateCredit(mapsViewModel.getUserID(), resultReward)
-//                            nMap.markerWayPoint.map = null
-//                            nMap.markerGoalPoint.map = null
-//                            arriveCheck = false
-//
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        locationStartBtn.setOnClickListener {
-//            val latlngList = mapsViewModel.getLatLngList()
-//            if(nMap.nMap!!.locationTrackingMode == LocationTrackingMode.None) {
-//                Log.e("Flag", "${nMap.nMap!!.locationTrackingMode}")
-//                val bottomSheetBehavior_after = BottomSheetBehavior.from(bottomSheet_after)
-//                bottomSheetBehavior_after.state = BottomSheetBehavior.STATE_COLLAPSED
-//                Thread(Runnable{
-//                    for (i in 0 until latlngList.size) {
-//                        currentLocation.latitude = latlngList[i].latitude
-//                        currentLocation.longitude = latlngList[i].longitude
-//                        progressRate = i / latlngList.size.toDouble()
-//
-//                        Log.e("위치변경", "${currentLocation.latitude}, ${currentLocation.longitude}")
-//
-//                        drawingLocationUI(LatLng(latlngList[i].latitude, latlngList[i].longitude), progressRate)
-//                        mapsViewModel.getDangerGrade(latlngList[i].latitude.toString(),
-//                                latlngList[i].longitude.toString(),
-//                                latlngList[i].latitude.toString(),
-//                                latlngList[i].longitude.toString())
-//                        sleep(2000)
-//
-//                        if (nMap.nMap!!.locationTrackingMode == LocationTrackingMode.Follow ||
-//                                nMap.nMap!!.locationTrackingMode == LocationTrackingMode.NoFollow) {
-//                            progressRate = 0.0
-//                            drawingLocationUI(LatLng(currentLocation.latitude, currentLocation.longitude), progressRate)
-//                            break
-//                        }
-//                    }
-//                }).start()
-//            }
-//            else{
-//                Log.e("Flag", "${nMap.nMap!!.locationTrackingMode}")
-//                nMap.nMap!!.locationTrackingMode = LocationTrackingMode.None
-//            }
-//            val dangerGradeObserver = Observer<String> {
-//                dangerInfo.text = it
-//            }
-//            mapsViewModel.dangerGrade!!.observe(this, dangerGradeObserver)
-//        }
-    }
-
-
 
 
     private fun drawingLocationUI(latLng: LatLng, progressRate: Double) = Thread( Runnable {
