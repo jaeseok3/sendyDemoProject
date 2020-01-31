@@ -9,8 +9,11 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import android.widget.Toast.makeText
+import com.naver.maps.geometry.LatLng
+import com.naver.maps.map.*
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
@@ -70,6 +73,24 @@ class MapsActivity : Fragment(){
     private lateinit var resultDistance: String
     var progressRate = 0.0
     var resultReward:Double = 0.0
+    private var userData: UserData ?= null
+
+    private fun subscribeUserData(){
+        val userDataObserver = Observer<UserData> {
+            userData = it
+            Log.e("userDATA", "$it, userData")
+            setUserDataInNav()
+        }
+        mapsViewModel.userData?.observe(this, userDataObserver)
+    }
+
+    private fun setUserDataInNav(){
+        Log.e("유저", "$userData")
+        new_nav_view.getHeaderView(0).userName.text = userData!!.id
+        new_nav_view.getHeaderView(0).userRanking.text = "${userData!!.rank} 등"
+        new_nav_view.getHeaderView(0).userCredit_new.text = userData!!.credit
+        new_nav_view.getHeaderView(0).userAccum_new.text = userData!!.property
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -85,6 +106,7 @@ class MapsActivity : Fragment(){
         var userData: UserData
         val headerView = view.new_nav_view.getHeaderView(0)
 
+        new_drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
 
         headerView.historyButton.setOnClickListener {
             view.findNavController().navigate(R.id.action_mapsActivity_to_historyActivity)
@@ -94,21 +116,6 @@ class MapsActivity : Fragment(){
             view.findNavController().navigate(R.id.action_mapsActivity_to_rankingActivity)
             new_drawer_layout.closeDrawer(GravityCompat.START)
         }
-        Thread(Runnable {
-            userData = mapsViewModel.getFromRoom(userID)
-            Log.e("유저", "$userID,$userData")
-            Runnable {
-                headerView.userName.text = userData.id
-                headerView.userRanking.text = "${userData.rank} 등"
-                headerView.userCredit_new.text = userData.credit
-                headerView.userAccum_new.text = userData.property
-            }.run()
-        }).start()
-
-        sideNavButton.setOnClickListener {
-            new_drawer_layout.openDrawer(Gravity.LEFT)
-        }
-
 
         locationStartBtn.setOnClickListener {
             val latlngList = mapsViewModel.getLatLngList()
@@ -124,12 +131,12 @@ class MapsActivity : Fragment(){
 
                         Log.e("위치변경", "${currentLocation.latitude}, ${currentLocation.longitude}")
 
-                        drawingLocationUI(LatLng(latlngList[i].latitude, latlngList[i].longitude), progressRate)
-                        mapsViewModel.getDangerGrade(latlngList[i].latitude.toString(),
-                            latlngList[i].longitude.toString(),
-                            latlngList[i].latitude.toString(),
-                            latlngList[i].longitude.toString())
-                        sleep(2000)
+                           drawingLocationUI(LatLng(latlngList[i].latitude, latlngList[i].longitude), progressRate)
+//                        mapsViewModel.getDangerGrade(latlngList[i].latitude.toString(),
+//                                latlngList[i].longitude.toString(),
+//                                latlngList[i].latitude.toString(),
+//                                latlngList[i].longitude.toString())
+                        sleep(300)
 
                         if (nMap.nMap!!.locationTrackingMode == LocationTrackingMode.Follow ||
                             nMap.nMap!!.locationTrackingMode == LocationTrackingMode.NoFollow) {
@@ -150,8 +157,11 @@ class MapsActivity : Fragment(){
             mapsViewModel.dangerGrade!!.observe(this, dangerGradeObserver)
         }
 
-
-
+        sideNavButton.setOnClickListener {
+            new_drawer_layout.openDrawer(Gravity.LEFT)
+            mapsViewModel.getUserDataFromServer(mapsViewModel.getUserID())
+            subscribeUserData()
+        }
 
         nMap.listener = {
             locationBtn.map = nMap.nMap
@@ -184,6 +194,7 @@ class MapsActivity : Fragment(){
                                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH시 mm분 ss초")),
                                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
                             mapsViewModel.updateCredit(mapsViewModel.getUserID(), resultReward)
+                            mapsViewModel.getUserDataFromServer(mapsViewModel.getUserID())
                             nMap.markerWayPoint.map = null
                             nMap.markerGoalPoint.map = null
                             arriveCheck = false
@@ -195,7 +206,6 @@ class MapsActivity : Fragment(){
         }
 
         configureBottomNav()
-
         locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
     }
     override fun onCreateView(
@@ -374,9 +384,10 @@ class MapsActivity : Fragment(){
                             resultDst,
                             resultDistance,
                             resultReward.toString(),
-                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초")),
+                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH시 mm분 ss초")),
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일")))
                     mapsViewModel.updateCredit(mapsViewModel.getUserID(), resultReward)
+                    mapsViewModel.getUserDataFromServer(mapsViewModel.getUserID())
                     nMap.markerGoalPoint.map = null
                     nMap.pathOverlay.map = null
                     arriveCheck = false
@@ -418,6 +429,7 @@ class MapsActivity : Fragment(){
                         }
                         draw_up_and_refresh.setImageResource(R.drawable.ic_refresh_24)
                         draw_up_and_refresh.setOnClickListener {
+
                             makeText(context,"의뢰 목록을 새로고침합니다.", LENGTH_SHORT).show()
                             mapsViewModel.clear()
                             mapsViewModel.startFindPath(startPosition!!)
@@ -540,20 +552,18 @@ class MapsActivity : Fragment(){
                 }
 
                 pathOverlay.coords = mapsViewModel.latlngList
-                pathOverlay.width = 30
-                pathOverlay.color = Color.BLUE
-                pathOverlay.patternImage = OverlayImage.fromResource(R.drawable.path_pattern)
-                pathOverlay.patternInterval = 50
+                pathOverlay.width = 10
+                pathOverlay.color = Color.parseColor("#2e58ec")
                 pathOverlay.passedColor = Color.GRAY
                 pathOverlay.map = mapsViewModel.getMapsRepository().nMap!!
                 markerStartPoint.position = LatLng(startLat, startLng)
-                markerStartPoint.iconTintColor = Color.BLUE
+                markerStartPoint.icon = OverlayImage.fromResource(R.drawable.ic_pin_ar_blue)
                 markerStartPoint.map = mapsViewModel.getMapsRepository().nMap!!
                 markerWayPoint.position = LatLng(wayPointLat, wayPointLng)
-                markerWayPoint.iconTintColor = Color.GREEN
+                markerWayPoint.icon = OverlayImage.fromResource(R.drawable.ic_pin_wp_purple)
                 markerWayPoint.map = mapsViewModel.getMapsRepository().nMap!!
                 markerGoalPoint.position = LatLng(goalLat, goalLng)
-                markerGoalPoint.iconTintColor = Color.RED
+                markerGoalPoint.icon = OverlayImage.fromResource(R.drawable.ic_pin_dp_cyan)
                 markerGoalPoint.map = mapsViewModel.getMapsRepository().nMap!!
             }
 

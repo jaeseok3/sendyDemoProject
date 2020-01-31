@@ -25,10 +25,8 @@ class HistoryActivity : Fragment(){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        setContentView(R.layout.history_activiry)
         historyViewModel.getHistory()
         subscribe()
-
     }
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,12 +46,19 @@ class HistoryActivity : Fragment(){
         }
         historyViewModel.historyList?.observe(this, historyListObserver)
     }
-
     private fun recyclerViewSetup() {
-        adapter = HistoryListAdapter(newHistoryList!!)
-        historylayoutManager = LinearLayoutManager(this.context)
+        if(newHistoryList != null){
+            adapter = HistoryListAdapter(newHistoryList!!)
+            historylayoutManager = LinearLayoutManager(this.context)
 
-        historyRecyclerList.adapter = adapter
-        historyRecyclerList.layoutManager = historylayoutManager
+            historyRecyclerList.adapter = adapter
+            historyRecyclerList.layoutManager = historylayoutManager
+            history_empty_text.visibility = View.GONE
+            historyRecyclerList.visibility = View.VISIBLE
+        }
+        else{
+            historyRecyclerList.visibility = View.GONE
+            history_empty_text.visibility = View.VISIBLE
+        }
     }
 }
