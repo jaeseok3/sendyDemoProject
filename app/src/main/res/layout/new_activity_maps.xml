@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:id="@+id/activity_main">
 
     <fragment
         android:id="@+id/map"
@@ -36,6 +37,7 @@
         android:layout_marginTop="24dp"
         android:layout_marginStart="24dp"
         android:src="@drawable/ic_menu_24"
+        android:backgroundTint="@color/white"
         android:background="@drawable/nav_open_button_bg" />
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -126,6 +128,7 @@
             app:layout_behavior="@string/bottom_sheet_behavior"
             app:behavior_hideable="false"
             app:behavior_peekHeight="190dp"
+            app:cardBackgroundColor="@color/white"
             app:cardCornerRadius="32dp"
             app:cardUseCompatPadding="false"
             android:layout_gravity="bottom"
@@ -149,176 +152,178 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    app:layout_constraintTop_toBottomOf="@id/btBarDelivery"
-                    android:layout_marginTop="16dp"
+                    android:id="@+id/driving_info_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="운송하기"
-                    android:textSize="16sp"
-                    android:textColor="#212121"
+                    android:layout_marginTop="16dp"
                     android:gravity="center_horizontal"
+                    android:text="운송하기"
+                    android:textColor="#212121"
+                    android:textSize="16sp"
                     android:textStyle="normal"
-                    android:id="@+id/driving_info_text"/>
+                    app:layout_constraintTop_toBottomOf="@id/btBarDelivery" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/topDeliveryBox"
-                    android:background="@drawable/driving_info_radius"
-                    app:layout_constraintTop_toBottomOf="@+id/driving_info_text"
-                    android:layout_marginTop="16dp"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    android:layout_marginStart="24dp"
-                    app:layout_constraintRight_toRightOf="parent"
-                    android:layout_marginEnd="24dp"
                     android:layout_width="0dp"
-                    android:layout_height="44dp">
+                    android:layout_height="44dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="24dp"
+                    android:background="@drawable/driving_info_radius"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/driving_info_text">
 
                     <TextView
                         android:id="@+id/topSrcBox"
-                        android:background="@drawable/driving_src_dest_info_radius"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
                         android:layout_marginEnd="16dp"
-                        android:text="BIFC"
+                        android:background="@drawable/driving_src_dest_info_radius"
                         android:gravity="center"
+                        android:text="BIFC"
+                        android:textColor="@color/black"
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintLeft_toLeftOf="parent"
-                        app:layout_constraintRight_toLeftOf="@+id/arrow_img"/>
+                        app:layout_constraintRight_toLeftOf="@+id/arrow_img"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <ImageView
                         android:id="@+id/arrow_img"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        app:layout_constraintTop_toTopOf="@id/topDeliveryBox"
                         android:layout_marginTop="11dp"
                         android:src="@drawable/ic_double_arrow_16"
                         app:layout_constraintLeft_toLeftOf="@id/topDeliveryBox"
-                        app:layout_constraintRight_toRightOf="@id/topDeliveryBox"/>
+                        app:layout_constraintRight_toRightOf="@id/topDeliveryBox"
+                        app:layout_constraintTop_toTopOf="@id/topDeliveryBox" />
 
                     <TextView
                         android:id="@+id/topDstBox"
-                        android:background="@drawable/driving_src_dest_info_radius"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
-                        app:layout_constraintRight_toRightOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
+                        android:background="@drawable/driving_src_dest_info_radius"
+                        android:gravity="center"
+                        android:text="수영역"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/black"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintLeft_toRightOf="@id/arrow_img"
-                        android:layout_marginStart="16dp"
-                        android:text="수영역"
-                        android:gravity="center"
-                        android:textSize="18sp"
-                        android:textStyle="bold"/>
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <TextView
                     android:id="@+id/top_remaining_text"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textSize="16sp"
-                    app:layout_constraintTop_toBottomOf="@+id/topDeliveryBox"
-                    android:layout_marginTop="30dp"
-                    app:layout_constraintRight_toLeftOf="@id/top_remaining"
-                    app:layout_constraintLeft_toLeftOf="parent"
                     android:layout_marginStart="16dp"
-                    android:textColor="#212121"
+                    android:layout_marginTop="30dp"
                     android:gravity="end|center"
-                    android:text="목적지까지 남은 거리 "/>
+                    android:text="목적지까지 남은 거리 "
+                    android:textColor="#212121"
+                    android:textSize="16sp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toLeftOf="@id/top_remaining"
+                    app:layout_constraintTop_toBottomOf="@+id/topDeliveryBox" />
 
                 <TextView
                     android:id="@+id/top_remaining"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textSize="18sp"
-                    app:layout_constraintTop_toBottomOf="@+id/topDeliveryBox"
                     android:layout_marginTop="30dp"
-                    app:layout_constraintRight_toRightOf="parent"
                     android:layout_marginEnd="16dp"
-                    app:layout_constraintLeft_toRightOf="@+id/top_remaining_text"
-                    android:text="9.4Km"
                     android:gravity="center"
-                    android:textStyle="bold"/>
+                    android:text="9.4Km"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    app:layout_constraintLeft_toRightOf="@+id/top_remaining_text"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/topDeliveryBox" />
 
                 <ImageView
                     android:id="@+id/dust_image"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    app:layout_constraintLeft_toLeftOf="parent"
                     android:layout_marginStart="48dp"
-                    app:layout_constraintTop_toBottomOf="@id/top_remaining_text"
                     android:layout_marginTop="30dp"
-                    android:src="@drawable/ic_dust_48"/>
+                    android:src="@drawable/ic_dust_48"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/top_remaining_text" />
 
                 <TextView
                     android:id="@+id/dust_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:textColor="#727272"
+                    android:layout_marginStart="8dp"
                     android:text="미세먼지"
-                    app:layout_constraintTop_toTopOf="@+id/dust_image"
+                    android:textColor="#727272"
+                    android:textSize="14sp"
                     app:layout_constraintLeft_toRightOf="@+id/dust_image"
-                    android:layout_marginStart="8dp" />
+                    app:layout_constraintTop_toTopOf="@+id/dust_image" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="18sp"
-                    android:textColor="#212121"
-                    android:text="나쁨"
-                    android:textStyle="bold"
-                    app:layout_constraintTop_toBottomOf="@+id/dust_text"
+                    android:layout_marginStart="8dp"
                     android:layout_marginTop="1dp"
+                    android:text="나쁨"
+                    android:textColor="#212121"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
                     app:layout_constraintLeft_toRightOf="@+id/dust_image"
-                    android:layout_marginStart="8dp"/>
+                    app:layout_constraintTop_toBottomOf="@+id/dust_text" />
 
                 <ImageView
                     android:id="@+id/danger_image"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    app:layout_constraintLeft_toRightOf="@+id/dust_text"
                     android:layout_marginStart="72dp"
-                    app:layout_constraintTop_toBottomOf="@id/top_remaining_text"
                     android:layout_marginTop="30dp"
-                    android:src="@drawable/ic_road_48"/>
+                    android:src="@drawable/ic_road_48"
+                    app:layout_constraintLeft_toRightOf="@+id/dust_text"
+                    app:layout_constraintTop_toBottomOf="@id/top_remaining_text" />
 
                 <TextView
                     android:id="@+id/danger_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:textColor="#727272"
+                    android:layout_marginStart="8dp"
                     android:text="도로위험지수"
-                    app:layout_constraintTop_toTopOf="@+id/danger_image"
+                    android:textColor="#727272"
+                    android:textSize="14sp"
                     app:layout_constraintLeft_toRightOf="@+id/danger_image"
-                    android:layout_marginStart="8dp" />
+                    app:layout_constraintTop_toTopOf="@+id/danger_image" />
 
                 <TextView
                     android:id="@+id/dangerInfo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="18sp"
-                    android:textColor="#212121"
-                    android:text="안전"
-                    android:textStyle="bold"
-                    app:layout_constraintTop_toBottomOf="@+id/danger_text"
+                    android:layout_marginStart="8dp"
                     android:layout_marginTop="1dp"
+                    android:text="안전"
+                    android:textColor="#212121"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
                     app:layout_constraintLeft_toRightOf="@+id/danger_image"
-                    android:layout_marginStart="8dp"/>
+                    app:layout_constraintTop_toBottomOf="@+id/danger_text" />
 
                 <Button
                     android:id="@+id/locationStartBtn"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_marginBottom="40dp"
                     android:layout_width="120dp"
                     android:layout_height="40dp"
+                    android:layout_marginBottom="40dp"
+                    android:background="@drawable/location_button_radius"
                     android:text="자동 주행"
                     android:textColor="#000000"
-                    android:background="@drawable/location_button_radius"/>
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

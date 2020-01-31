@@ -17,6 +17,8 @@
                 android:layout_height="wrap_content"
                 android:text="1"
                 android:textStyle="bold"
+                android:textColor="@color/black"
+
                 android:gravity="center"
                 android:textSize="20sp" />
 
@@ -42,6 +44,8 @@
                 app:layout_constraintTop_toTopOf="parent"
                 android:layout_marginTop="35dp"
                 android:text="Steven"
+                android:textColor="@color/black"
+
                 android:textSize="20sp"
                 android:textStyle="bold"
                 />
@@ -67,6 +71,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="485"
+                android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 />
