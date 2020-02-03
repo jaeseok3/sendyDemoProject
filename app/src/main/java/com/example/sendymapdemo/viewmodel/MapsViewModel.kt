@@ -1,67 +1,87 @@
 package com.example.sendymapdemo.viewmodel
 
-import android.graphics.Color
+import android.location.Location
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.sendymapdemo.R
-import com.example.sendymapdemo.dataclass.PathData
 import com.example.sendymapdemo.dataclass.RequestListData
 import com.example.sendymapdemo.dataclass.UserData
 import com.example.sendymapdemo.model.repository.*
 import com.naver.maps.geometry.LatLng
-import com.naver.maps.map.NaverMap
 import com.naver.maps.map.overlay.Marker
-import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.overlay.PathOverlay
-import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.Exception
 
 class MapsViewModel (private val dangerRepository: DangerRepository, private val historyRepository: HistoryRepository,
                      private val mapsRepository: MapsRepository, private val requestRepository: RequestRepository,
                      private val userRepository: UserRepository) : ViewModel() {
+
     var dangerGrade: MutableLiveData<String> ?= MutableLiveData()
-    var userData: MutableLiveData<UserData> ?= MutableLiveData()
+    var liveStartLatLng: MutableLiveData<LatLng> ?= MutableLiveData()
+    var liveWayLatLng: MutableLiveData<LatLng> ?= MutableLiveData()
+    var liveGoalLatLng: MutableLiveData<LatLng> ?= MutableLiveData()
+    var requests: MutableLiveData<ArrayList<RequestListData>> = MutableLiveData()
+    var requestListSize: MutableLiveData<Int> = MutableLiveData()
+    var latlngList = ArrayList<LatLng>()
+
+    private var startLatLng: LatLng ?= null
+    private var wayLatLng: LatLng ?= null
+    private var goalLatLng: LatLng ?= null
+    private var requestListData: RequestListData ?= null
+    private var requestList = ArrayList<RequestListData>()
+
+    fun setDistanceInfo(progressRate: Double): String {
+        val distanceStrArr = requestListData!!.distance.split(" Km")
+        val distanceDouble = distanceStrArr[0].toDouble() * (1 - progressRate)
+        return String.format("%.1f", distanceDouble) + " Km"
+    }
+
+    fun getPathOverlay(): PathOverlay {
+        return mapsRepository.pathOverlay
+    }
+
+    fun getStartMarker(): Marker {
+        return mapsRepository.markerStartPoint
+    }
+
+    fun getWayMarker(): Marker {
+        return mapsRepository.markerWayPoint
+    }
+
+    fun getGoalMarker(): Marker {
+        return mapsRepository.markerGoalPoint
+    }
 
     fun getMapsRepository(): MapsRepository {
         return mapsRepository
     }
 
-    fun setUIPath(listPosition: Int){
-        val pathArr = requestRepository.getList()[listPosition].responseData.route.traoptimal[0].path
-        val startLng = requestRepository.getList()[listPosition].responseData.route.traoptimal[0].summary.start.location[0]
-        val startLat = requestRepository.getList()[listPosition].responseData.route.traoptimal[0].summary.start.location[1]
-        val wayPointLng = requestRepository.getList()[listPosition].responseData.route.traoptimal[0].summary.waypoints[0].location[0]
-        val wayPointLat = requestRepository.getList()[listPosition].responseData.route.traoptimal[0].summary.waypoints[0].location[1]
-        val goalLng = requestRepository.getList()[listPosition].responseData.route.traoptimal[0].summary.goal.location[0]
-        val goalLat = requestRepository.getList()[listPosition].responseData.route.traoptimal[0].summary.goal.location[1]
+    fun setPathData(listPosition: Int){
+        val pathArr = requestList[listPosition].responseData.route.traoptimal[0].path
+        startLatLng = LatLng(requestList[listPosition].responseData.route.traoptimal[0].summary.start.location[1],
+                requestList[listPosition].responseData.route.traoptimal[0].summary.start.location[0])
+        wayLatLng = LatLng(requestList[listPosition].responseData.route.traoptimal[0].summary.waypoints[0].location[1],
+                requestList[listPosition].responseData.route.traoptimal[0].summary.waypoints[0].location[0])
+        goalLatLng = LatLng(requestList[listPosition].responseData.route.traoptimal[0].summary.goal.location[1],
+                requestList[listPosition].responseData.route.traoptimal[0].summary.goal.location[0])
+
+        liveStartLatLng!!.postValue(startLatLng)
+        liveWayLatLng!!.postValue(wayLatLng)
+        liveGoalLatLng!!.postValue(goalLatLng)
 
         for(i in pathArr.indices){
             val path = pathArr[i].toString()
             val pathLatLng = parsingPath(path)
             latlngList.add(pathLatLng)
-            setLatlng()
         }
-
-        mapsRepository.pathOverlay.coords = latlngList
-        mapsRepository.pathOverlay.width = 10
-        mapsRepository.pathOverlay.color = Color.parseColor("#2e58ec")
-        mapsRepository.pathOverlay.passedColor = Color.GRAY
-        mapsRepository.pathOverlay.map = mapsRepository.nMap!!
-        mapsRepository.markerStartPoint.position = LatLng(startLat, startLng)
-        mapsRepository.markerStartPoint.icon = OverlayImage.fromResource(R.drawable.ic_pin_ar_blue)
-        mapsRepository.markerStartPoint.map = mapsRepository.nMap!!
-        mapsRepository.markerWayPoint.position = LatLng(wayPointLat, wayPointLng)
-        mapsRepository.markerWayPoint.icon = OverlayImage.fromResource(R.drawable.ic_pin_wp_purple)
-        mapsRepository.markerWayPoint.map = mapsRepository.nMap!!
-        mapsRepository.markerGoalPoint.position = LatLng(goalLat, goalLng)
-        mapsRepository.markerGoalPoint.icon = OverlayImage.fromResource(R.drawable.ic_pin_dp_cyan)
-        mapsRepository.markerGoalPoint.map = mapsRepository.nMap!!
     }
 
-    fun checkError(location: LatLng, goalLatLng: LatLng): Boolean {
+    fun checkError(location: Location, goalLatLng: LatLng): Boolean {
         val currentLat = location.latitude
         val currentLng = location.longitude
         val goalLat = goalLatLng.latitude
@@ -78,28 +98,27 @@ class MapsViewModel (private val dangerRepository: DangerRepository, private val
         return LatLng(lat, lng)
     }
 
-    fun insertHistory(userID: String, time: String, source: String, destination: String, distance: String, reward: String, htime: String, hdate: String){
-        historyRepository.insertHistory(userID, time, source, destination, distance, reward, htime, hdate)
+    fun insertHistory(userID: String){
+        val time = requestListData!!.time
+        val source = requestListData!!.source
+        val destination = requestListData!!.destination
+        val distance = requestListData!!.distance
+        val reward = requestListData!!.reward.toString()
+        val hTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("h시 mm분 ss초"))
+        val hDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd"))
+        historyRepository.insertHistory(userID, time, source, destination, distance, reward, hTime, hDate)
     }
 
-    fun getLatLngList(): ArrayList<LatLng> {
-        return requestRepository.latlngList
+    fun setRequestData(position: Int){
+        requestListData = requestList[position]
     }
 
     fun updateCredit(userID: String, credit: Double) {
         userRepository.updateCredit(userID, credit)
     }
 
-    fun getUserDataFromServer(userID: String) {
-        userRepository.getData(userID)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        {userData!!.postValue(it)
-                        Log.e("userDATA", "$it")},
-                        {userData!!.postValue(null)},
-                        { Log.e("user data condition", "$userData")}
-                )
+    fun getUserDataFromRepository(): UserData {
+        return userRepository.userData
     }
 
     fun getDangerGrade(startLat:String, startLng:String, endLat:String, endLng:String){
@@ -126,19 +145,14 @@ class MapsViewModel (private val dangerRepository: DangerRepository, private val
         }).start()
     }
 
-    var requests:MutableLiveData<ArrayList<RequestListData>> = MutableLiveData()
-    var latlngList = requestRepository.latlngList
-
-    fun setLatlng(){
-        requestRepository.latlngList = latlngList
-    }
-
     fun startFindPath(startPosition: String){
+        requestList.clear()
         val findPathThread = Thread( Runnable {
             for(i in 0..4) {
                 try {
-                    val requestList = requestRepository.findPath(startPosition)
+                    requestList = requestRepository.findPath(startPosition)
                     requests.postValue(requestList)
+                    requestListSize.postValue(i)
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -147,7 +161,7 @@ class MapsViewModel (private val dangerRepository: DangerRepository, private val
         findPathThread.start()
     }
 
-    fun clear(){
-        requestRepository.clearList()
+    fun requestListClear(){
+        requestList.clear()
     }
 }

@@ -16,14 +16,16 @@
             app:enterAnim="@anim/fragment_fade_enter"
             app:exitAnim="@anim/fragment_fade_exit"
             app:popEnterAnim="@anim/fragment_fade_enter"
-            app:popExitAnim="@anim/fragment_fade_exit" />
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpToInclusive="false" />
         <action
             android:id="@+id/action_mapsActivity_to_rankingActivity"
             app:destination="@id/rankingActivity"
             app:enterAnim="@anim/fragment_fade_enter"
             app:exitAnim="@anim/fragment_fade_exit"
             app:popEnterAnim="@anim/fragment_fade_enter"
-            app:popExitAnim="@anim/fragment_fade_exit" />
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpToInclusive="false" />
         <action
             android:id="@+id/action_mapsActivity_to_loginActivity"
             app:destination="@id/loginActivity"
@@ -31,7 +33,7 @@
             app:exitAnim="@anim/fragment_close_exit"
             app:popEnterAnim="@anim/fragment_close_enter"
             app:popExitAnim="@anim/fragment_close_exit"
-            app:popUpTo="@+id/mapsActivity"
+            app:popUpTo="@id/mapsActivity"
             app:popUpToInclusive="true" />
     </fragment>
 
@@ -46,7 +48,7 @@
             app:exitAnim="@anim/fragment_fade_exit"
             app:popEnterAnim="@anim/fragment_fade_enter"
             app:popExitAnim="@anim/fragment_fade_exit"
-            app:popUpTo="@+id/rankingActivity"
+            app:popUpTo="@id/rankingActivity"
             app:popUpToInclusive="true" />
     </fragment>
 
@@ -62,7 +64,7 @@
             app:exitAnim="@anim/fragment_close_exit"
             app:popEnterAnim="@anim/fragment_close_enter"
             app:popExitAnim="@anim/fragment_close_exit"
-            app:popUpTo="@+id/loginActivity"
+            app:popUpTo="@id/loginActivity"
             app:popUpToInclusive="true" />
     </fragment>
 
@@ -77,7 +79,7 @@
             app:exitAnim="@anim/fragment_fade_exit"
             app:popEnterAnim="@anim/fragment_fade_enter"
             app:popExitAnim="@anim/fragment_fade_exit"
-            app:popUpTo="@+id/historyActivity"
+            app:popUpTo="@id/historyActivity"
             app:popUpToInclusive="true" />
     </fragment>
 </navigation>

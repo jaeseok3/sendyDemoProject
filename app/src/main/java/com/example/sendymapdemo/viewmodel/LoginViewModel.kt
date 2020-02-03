@@ -17,9 +17,10 @@ class LoginViewModel (private val userRepository: UserRepository): ViewModel() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         {userData!!.postValue(it)
-                            Log.e("userDATA", "$it")},
-                        {userData!!.postValue(null)},
-                        { Log.e("user data condition", "$userData")}
+                            Log.e("userDATA in LoginViewModel", "$it")},
+                        {userData!!.postValue(null)
+                            Log.e("failed", "failed to fetch")},
+                        { Log.e("user data condition", "${userData!!.value}")}
                 )
     }
 }
