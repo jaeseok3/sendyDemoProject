@@ -11,7 +11,7 @@ interface RetrofitServerInterface {
     @GET("httpUpdateCredit.php")
     fun updateCredit(
             @Query("user") userID: String,
-            @Query("reward") reward: Double
+            @Query("reward") reward: Int
     ): Call<Int>
 
     @GET("login2.php")

@@ -25,7 +25,7 @@ class UserRepository(application: Application, private val retrofitInterface: Re
         return userDao.getData(userID)
     }
 
-    fun updateCredit(userID: String, credit: Double){
+    fun updateCredit(userID: String, credit: Int){
         Thread(Runnable {
             Log.e("UpdateCredit", "$userID, $credit")
             retrofitInterface.updateCredit(userID, credit).execute()
