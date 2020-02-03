@@ -18,7 +18,6 @@ class RequestRepository(private val retrofitServerInterface: RetrofitServerInter
     private val NAVER_API_SECRET = "CS9kPn8fkidEzaDL3dv4tmQ6ymHVkXf2cy2doDZl"
     private var requestList = ArrayList<RequestListData>()
     lateinit var pathData:PathData
-    var latlngList = ArrayList<LatLng>()
 
     fun findPath(currentPoint: String): ArrayList<RequestListData> {
         val option = "traoptimal"
@@ -42,22 +41,14 @@ class RequestRepository(private val retrofitServerInterface: RetrofitServerInter
                         getGeoName(newGeoInfo.src), getGeoName(newGeoInfo.dst), timeStr, distanceStr, reward,
                         newGeoInfo.dst, newGeoInfo.src, requestResult)
                 requestList.add(requestListItem)
-                Log.e("리스트 사이즈", "${requestList.size},${requestListItem}")
             }catch (e: Exception){
                 e.printStackTrace()
             }
         return requestList
     }
+
     private fun getLocationFromDB(): LocationData {
         val requestLocationData = retrofitServerInterface.getLocationDB()
         return requestLocationData.execute().body()!!
-    }
-
-    fun getList(): ArrayList<RequestListData> {
-        return requestList
-    }
-
-    fun clearList(){
-        requestList.clear()
     }
 }

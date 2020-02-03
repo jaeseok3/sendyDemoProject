@@ -19,6 +19,7 @@ class UserRepository(application: Application, private val retrofitInterface: Re
     private val userDao = userDatabase.userDao()
     lateinit var allUserDataList: List<UserData>
     lateinit var userID: String
+    lateinit var userData: UserData
 
     fun getFromRoom(userID: String): Observable<UserData> {
         return userDao.getData(userID)
@@ -41,6 +42,7 @@ class UserRepository(application: Application, private val retrofitInterface: Re
         return retrofitInterface.getUserInfo(userID)
                 .doOnNext {
                     Log.e("유저", "$it")
+                    this.userData = it
                     this.userID = it.id
                 }
     }
