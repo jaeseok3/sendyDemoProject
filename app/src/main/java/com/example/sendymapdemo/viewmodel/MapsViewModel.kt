@@ -28,11 +28,11 @@ class MapsViewModel (private val dangerRepository: DangerRepository, private val
     var requests: MutableLiveData<ArrayList<RequestListData>> = MutableLiveData()
     var requestListSize: MutableLiveData<Int> = MutableLiveData()
     var latlngList = ArrayList<LatLng>()
+    var requestListData: RequestListData ?= null
 
     private var startLatLng: LatLng ?= null
     private var wayLatLng: LatLng ?= null
     private var goalLatLng: LatLng ?= null
-    private var requestListData: RequestListData ?= null
     private var requestList = ArrayList<RequestListData>()
 
     fun setDistanceInfo(progressRate: Double): String {
@@ -90,7 +90,7 @@ class MapsViewModel (private val dangerRepository: DangerRepository, private val
                 (currentLng <= goalLng + 0.0001 && currentLng >= goalLng - 0.0001))
     }
 
-    fun parsingPath(rawPathData: String): LatLng {
+    private fun parsingPath(rawPathData: String): LatLng {
         val arr = rawPathData.split(",")
         val lng: Double = arr[0].substring(1).toDouble()
         val lat: Double = arr[1].substring(0, arr[1].indexOf("]")).toDouble()
@@ -113,8 +113,8 @@ class MapsViewModel (private val dangerRepository: DangerRepository, private val
         requestListData = requestList[position]
     }
 
-    fun updateCredit(userID: String, credit: Double) {
-        userRepository.updateCredit(userID, credit)
+    fun updateCredit(userID: String) {
+        userRepository.updateCredit(userID, requestListData!!.reward)
     }
 
     fun getUserDataFromRepository(): UserData {

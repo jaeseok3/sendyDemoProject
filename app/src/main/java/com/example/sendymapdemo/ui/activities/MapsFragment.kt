@@ -54,7 +54,6 @@ class MapsFragment : Fragment() {
     private var arriveCheck: Boolean = false
 
     private var progressRate = 0.0
-    private var resultReward: Double = 0.0
     private var isRequested: Int = 0
 
     private var userData: UserData ?= null
@@ -103,6 +102,11 @@ class MapsFragment : Fragment() {
         }
 
         nMap.listener = {
+            if(isAccepted){
+                setTextInDrivingBox(mapsViewModel.requestListData!!)
+                subscribeLatLngData()
+                drawingPathUI()
+            }
             locationBtn.map = nMap.nMap
             nMap.nMap!!.locationSource = locationSource
             nMap.nMap!!.uiSettings.isZoomControlEnabled = false
@@ -127,7 +131,7 @@ class MapsFragment : Fragment() {
                 mapsViewModel.checkError(location, goalLatLng!!) && arriveCheck -> {
                     makeText(this.context, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
                     mapsViewModel.insertHistory(userData!!.id)
-                    mapsViewModel.updateCredit(userData!!.id, resultReward)
+                    mapsViewModel.updateCredit(userData!!.id)
                     mapsViewModel.getUserDataFromRepository()
                     nMap.markerWayPoint.map = null
                     nMap.markerGoalPoint.map = null
@@ -190,7 +194,7 @@ class MapsFragment : Fragment() {
                 mapsViewModel.checkError(mockLocation, goalLatLng!!) && arriveCheck -> {
                     makeText(this.context, "도착지에 도착하였습니다.", LENGTH_SHORT).show()
                     mapsViewModel.insertHistory(userData!!.id)
-                    mapsViewModel.updateCredit(userData!!.id, resultReward)
+                    mapsViewModel.updateCredit(userData!!.id)
                     mapsViewModel.getUserDataFromRepository()
                     nMap.markerGoalPoint.map = null
                     nMap.pathOverlay.map = null
@@ -206,7 +210,6 @@ class MapsFragment : Fragment() {
         if(isAccepted){
             bottomSheet_before.visibility = View.GONE
             bottomSheet_after.visibility = View.VISIBLE
-
         }
         else {
             bottomSheet_before.visibility = View.VISIBLE
@@ -266,7 +269,7 @@ class MapsFragment : Fragment() {
 
                     dialogView.request_accept_button.setOnClickListener {
                         mapsViewModel.setPathData(position)
-                        setTextInDrivingBox(requestList, position)
+                        setTextInDrivingBox(requestList[position])
                         subscribeLatLngData()
                         drawingPathUI()
 
@@ -288,10 +291,10 @@ class MapsFragment : Fragment() {
             }
         }
     }
-    private fun setTextInDrivingBox(requestList: ArrayList<RequestListData>, position: Int) {
-        topSrcBox.text = requestList[position].source
-        topDstBox.text = requestList[position].destination
-        top_remaining.text = requestList[position].distance
+    private fun setTextInDrivingBox(requestListData: RequestListData) {
+        topSrcBox.text = requestListData.source
+        topDstBox.text = requestListData.destination
+        top_remaining.text = requestListData.distance
     }
     private fun drawingPathUI() {
         Log.e("길그리기", "drawing")
