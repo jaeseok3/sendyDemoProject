@@ -78,6 +78,7 @@ class MapsFragment : Fragment() {
                             fragmentManager.beginTransaction().add(R.id.map, map).commit()
                         })
 
+
         mapFragment.getMapAsync(nMap)
         userData = mapsViewModel.getUserDataFromRepository()
         configureBottomNav()
