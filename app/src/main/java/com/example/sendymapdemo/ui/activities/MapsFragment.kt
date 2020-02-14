@@ -329,25 +329,17 @@ class MapsFragment : Fragment() {
         mapsViewModel.liveGoalLatLng?.observe(viewLifecycleOwner, goalLatLngObserver)
     }
     private fun subscribeRequestList() {
-        val requestListObserver = Observer<ArrayList<RequestListData>> {
-            recyclerViewSetup(it)
-        }
-        mapsViewModel.requests.observe(LifecycleOwner{lifecycle}, requestListObserver)
+        mapsViewModel.requests.observe(LifecycleOwner{lifecycle}, Observer { requestListObserver ->
+            recyclerViewSetup(requestListObserver)
+        })
     }
     private fun subscribeRequestListSize() {
-        val requestListSize = Observer<Int> {
-            isRequested = it
-            if(isRequested == 4) {
-                draw_up_and_refresh.setOnClickListener {
-                    mapsViewModel.startFindPath("${currentLocation.longitude},${currentLocation.latitude}")
-                }
-                Log.e("isRequested", "$isRequested")
-            }
-            else {
-                draw_up_and_refresh.setOnClickListener(null)
-            }
-        }
-        mapsViewModel.requestListSize.observe(this, requestListSize)
+        val startPosition = "${currentLocation.longitude},${currentLocation.latitude}"
+        mapsViewModel.requestListSize.observe(this, Observer { requestListSize ->
+            isRequested = requestListSize
+            if(isRequested == 4) draw_up_and_refresh.setOnClickListener { mapsViewModel.startFindPath(startPosition) }
+            else draw_up_and_refresh.setOnClickListener(null)
+        })
     }
     private fun setUserDataInNav() {
         Log.e("유저", "$userData")
